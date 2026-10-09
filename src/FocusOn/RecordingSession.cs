@@ -9,6 +9,7 @@ public sealed class RecordingSession : IDisposable
     private ForegroundObservation? currentObservation;
     private long currentMonotonicStart;
     private long nextId;
+    private RecordingConditions conditions = new(false, false, false, false);
 
     public RecordingSession(string databasePath)
     {
@@ -46,23 +47,40 @@ public sealed class RecordingSession : IDisposable
 
     public void Observe(ForegroundObservation? observation, RecordingTime at)
     {
-        if (current is not null && observation?.WindowId == currentObservation?.WindowId &&
-            observation?.WindowTitle == currentObservation?.WindowTitle)
+        var kind = !conditions.Available ? IntervalKind.Unrecorded :
+            conditions.ManualPaused ? IntervalKind.ManualPause :
+            conditions.Sleeping ? IntervalKind.Sleep :
+            conditions.Locked ? IntervalKind.Locked :
+            conditions.DisplayOff ? IntervalKind.DisplayOff :
+            observation is null ? IntervalKind.Unrecorded : IntervalKind.Usage;
+        if (current is not null && current.Kind == kind &&
+            (kind != IntervalKind.Usage || (observation?.WindowId == currentObservation?.WindowId &&
+            observation?.WindowTitle == currentObservation?.WindowTitle)))
+        {
+            currentObservation = observation;
             return;
+        }
 
         SaveCurrent(at);
         currentObservation = observation;
         currentMonotonicStart = at.MonotonicTicks;
+        var usage = kind == IntervalKind.Usage;
         var knownIdentity = !string.IsNullOrWhiteSpace(observation?.AppKey);
-        current = new RecordedInterval(nextId++, observation is null ? IntervalKind.Unrecorded : IntervalKind.Usage,
+        current = new RecordedInterval(nextId++, kind,
             at.Utc.ToUniversalTime(), at.Utc.ToUniversalTime(), TimeSpan.Zero,
-            observation is null ? null : knownIdentity ? observation.AppKey : "unknown",
-            observation is null ? null : knownIdentity && !string.IsNullOrWhiteSpace(observation.AppName) ? observation.AppName : "未知软件",
-            observation is null ? null : string.IsNullOrWhiteSpace(observation.WindowTitle) ? "标题不可用" : observation.WindowTitle,
+            !usage ? null : knownIdentity ? observation!.AppKey : "unknown",
+            !usage ? null : knownIdentity && !string.IsNullOrWhiteSpace(observation!.AppName) ? observation.AppName : "未知软件",
+            !usage ? null : string.IsNullOrWhiteSpace(observation!.WindowTitle) ? "标题不可用" : observation.WindowTitle,
             true);
     }
 
     public void Checkpoint(RecordingTime at) => SaveCurrent(at);
+
+    public void SetConditions(RecordingConditions conditions, ForegroundObservation? currentObservation, RecordingTime at)
+    {
+        this.conditions = conditions;
+        Observe(currentObservation, at);
+    }
 
     public void Finish(RecordingTime at)
     {
@@ -73,8 +91,7 @@ public sealed class RecordingSession : IDisposable
 
     public DayView GetDay(DateOnly day, TimeZoneInfo zone, RecordingTime? liveNow = null)
     {
-        var start = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(day.ToDateTime(TimeOnly.MinValue), zone));
-        var end = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(day.AddDays(1).ToDateTime(TimeOnly.MinValue), zone));
+        var (start, end) = DailyProjection.Bounds(day, zone);
         using var command = connection.CreateCommand();
         command.CommandText = """
             SELECT id, kind, start_utc, end_utc, duration_ticks, app_key, app_name, window_title
@@ -111,6 +128,8 @@ public sealed class RecordingSession : IDisposable
             }
         }
 
+        intervals = intervals.Select(interval => DailyProjection.Clip(interval, start, end))
+            .OfType<RecordedInterval>().ToList();
         var totals = intervals.Where(interval => interval.Kind == IntervalKind.Usage)
             .GroupBy(interval => interval.AppKey!)
             .Select(group => new AppTotal(group.Key, group.First().AppName!,
@@ -118,7 +137,15 @@ public sealed class RecordingSession : IDisposable
             .OrderByDescending(total => total.Duration).ThenBy(total => total.AppKey, StringComparer.Ordinal)
             .ToArray();
         return new DayView(day, start, end, intervals, totals,
-            current is null ? "已停止" : current.Kind == IntervalKind.Unrecorded ? "未记录" : "正在记录", null);
+            current is null ? "已停止" : current.Kind switch
+            {
+                IntervalKind.ManualPause => "手动暂停",
+                IntervalKind.Sleep => "睡眠",
+                IntervalKind.Locked => "锁屏",
+                IntervalKind.DisplayOff => "屏幕已关闭",
+                IntervalKind.Unrecorded => "未记录",
+                _ => "正在记录"
+            }, null);
     }
 
     private void SaveCurrent(RecordingTime at)

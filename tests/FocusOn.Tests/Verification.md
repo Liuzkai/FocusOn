@@ -12,3 +12,13 @@
 - 最终命令：`.tools/dotnet/dotnet.exe test tests/FocusOn.Tests/FocusOn.Tests.csproj --no-restore --verbosity minimal`，2026-10-09 实际结果 4 passed、0 failed、0 skipped，编译零警告。
 
 这些结果覆盖受控事实进入后的记录行为，不证明 Windows 原生事件、窗口标题读取、多显示器或电源行为已经实机通过。跨日投影、停止条件、异常恢复和删除在后续票补齐。
+
+## 02：停止条件
+
+- T04 手动暂停 red：`SetConditions` 尚未实现，实际 1 failed。green：解锁和暂停期间前台变化都不取消手动暂停，恢复用最新前台；原有四项加此项共 5 passed。
+- T04 睡眠/锁屏 red：预期“睡眠”，实际“正在记录”。green：唤醒后锁屏仍停止，解锁后从实际前台恢复；连同初始跨日检查共 7 passed。
+- T05 重叠原因 red：预期“屏幕已关闭”，实际“正在记录”。已补齐会话灭屏，首次 green 编译被并行 App 的未赋值字段 CS0649 阻止；等待主窗口控制接入后统一验证，不视为通过。
+- 合作接入 04 的 `Bounds`/`Clip`：跨日 T08 与四项基本记录及首条 T04 共 6 passed；04 的其余回归随后一起运行。
+- T05 green：主窗口控制接入后，全部公开记录会话测试 15 passed、0 failed、0 skipped，编译零警告。其中 02 有 3 个停止条件场景，04 有 8 个跨日保存、实时投影和停止类型场景，基本记录 4 个场景。
+
+Windows 状态源与手动按钮的真实交互由主代理另行验收；这些受控事实测试不能代替真实锁屏、睡眠、灭屏或 Modern Standby 检查。

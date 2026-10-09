@@ -16,13 +16,15 @@ public partial class MainWindow : Window
     private bool _started;
     private bool _stopped;
     private DateOnly? _shownDay;
+    private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
+    private bool _followToday = true;
 
     public MainWindow(Func<DateOnly, Task<DayView>> readDay)
     {
         _readDay = readDay ?? throw new ArgumentNullException(nameof(readDay));
         InitializeComponent();
         LogGrid.ItemsSource = _rows;
-        DateText.Text = DateTime.Today.ToString("yyyy年M月d日 dddd", CultureInfo.CurrentCulture);
+        UpdateDateControls();
         _refreshTimer = new DispatcherTimer(DispatcherPriority.Background)
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -36,6 +38,12 @@ public partial class MainWindow : Window
         _stopped = true;
         _refreshTimer.Stop();
     }
+
+    public event EventHandler? PauseRequested;
+
+    public void SetPauseState(bool paused) => PauseButton.Content = paused ? "继续" : "暂停";
+
+    private void PauseButton_Click(object sender, RoutedEventArgs e) => PauseRequested?.Invoke(this, EventArgs.Empty);
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
@@ -51,15 +59,20 @@ public partial class MainWindow : Window
     {
         if (_refreshing || _stopped) return;
         _refreshing = true;
+        var requestedDate = _selectedDate;
         try
         {
-            var view = await _readDay(DateOnly.FromDateTime(DateTime.Today));
-            if (_stopped) return;
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            if (_followToday && _selectedDate != today) SelectDate(today);
+            UpdateDateControls();
+            requestedDate = _selectedDate;
+            var view = await _readDay(requestedDate);
+            if (_stopped || requestedDate != _selectedDate) return;
             ShowDay(view);
         }
         catch (Exception ex)
         {
-            if (_stopped) return;
+            if (_stopped || requestedDate != _selectedDate) return;
             StatusText.Text = "回看更新失败";
             ShowWarning($"无法更新回看：{ex.Message}。已显示的记录可能不是最新。请检查存储是否可用。");
             if (_rows.Count == 0) LogEmptyText.Text = "目前无法读取记录。";
@@ -68,7 +81,59 @@ public partial class MainWindow : Window
         finally
         {
             _refreshing = false;
+            if (!_stopped && requestedDate != _selectedDate) _ = RefreshAsync();
         }
+    }
+
+    private void ViewDatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ViewDatePicker.SelectedDate is DateTime date) SelectDate(DateOnly.FromDateTime(date));
+    }
+
+    private void PreviousDay_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedDate.DayNumber > 0) SelectDate(_selectedDate.AddDays(-1));
+    }
+
+    private void NextDay_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedDate < DateOnly.FromDateTime(DateTime.Today)) SelectDate(_selectedDate.AddDays(1));
+    }
+
+    private void Today_Click(object sender, RoutedEventArgs e) => SelectDate(DateOnly.FromDateTime(DateTime.Today));
+
+    private void SelectDate(DateOnly day)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (day > today) day = today;
+        _followToday = day == today;
+        if (_selectedDate == day)
+        {
+            UpdateDateControls();
+            return;
+        }
+        _selectedDate = day;
+        UpdateDateControls();
+        _shownDay = null;
+        _rows.Clear();
+        TotalsList.ItemsSource = null;
+        LogEmptyText.Text = "正在读取所选日期…";
+        TotalsEmptyText.Text = "正在读取软件汇总…";
+        LogEmptyText.Visibility = Visibility.Visible;
+        TotalsEmptyText.Visibility = Visibility.Visible;
+        if (_started && !_stopped) _ = RefreshAsync();
+    }
+
+    private void UpdateDateControls()
+    {
+        var date = _selectedDate.ToDateTime(TimeOnly.MinValue);
+        ViewDatePicker.DisplayDateEnd = DateTime.Today;
+        if (ViewDatePicker.SelectedDate != date) ViewDatePicker.SelectedDate = date;
+        PreviousDayButton.IsEnabled = _selectedDate.DayNumber > 0;
+        NextDayButton.IsEnabled = _selectedDate < DateOnly.FromDateTime(DateTime.Today);
+        TodayButton.IsEnabled = _selectedDate != DateOnly.FromDateTime(DateTime.Today);
+        DateText.Text = date.ToString("yyyy年M月d日 dddd", CultureInfo.CurrentCulture);
+        Title = $"FocusOn · {date:yyyy-MM-dd}";
     }
 
     private void ShowDay(DayView view)
@@ -79,8 +144,8 @@ public partial class MainWindow : Window
             _shownDay = view.Date;
             _rows.Clear();
         }
-        DateText.Text = view.Date.ToDateTime(TimeOnly.MinValue).ToString("yyyy年M月d日 dddd", CultureInfo.CurrentCulture);
-        StatusText.Text = view.Status;
+        UpdateDateControls();
+        StatusText.Text = "当前记录状态：" + view.Status;
         ShowWarning(view.Warning);
 
         var intervals = view.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
@@ -105,9 +170,9 @@ public partial class MainWindow : Window
 
         TotalsList.ItemsSource = view.Totals.OrderByDescending(x => x.Duration).ThenBy(x => x.AppName)
             .Select(x => new { x.AppName, Duration = DisplayText.Duration(x.Duration) }).ToArray();
-        TotalsEmptyText.Text = "今天尚无软件使用片段。";
+        TotalsEmptyText.Text = $"{view.Date:yyyy-MM-dd} 尚无软件使用片段。";
         TotalsEmptyText.Visibility = view.Totals.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        LogEmptyText.Text = "今天没有可用记录。";
+        LogEmptyText.Text = $"{view.Date:yyyy-MM-dd} 没有可用记录。";
         LogEmptyText.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         if (newDay && _rows.Count > 0)

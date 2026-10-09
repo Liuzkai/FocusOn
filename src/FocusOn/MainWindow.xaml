@@ -30,12 +30,20 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel>
-                <TextBlock Text="今天的前台使用" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text="前台使用回看" FontSize="22" FontWeight="SemiBold" />
+                <WrapPanel Margin="0,10,0,0" VerticalAlignment="Center">
+                    <Button x:Name="PreviousDayButton" Content="上一天" Click="PreviousDay_Click" />
+                    <DatePicker x:Name="ViewDatePicker" Width="150" Margin="6,0" VerticalAlignment="Center"
+                                SelectedDateChanged="ViewDatePicker_SelectedDateChanged" AutomationProperties.Name="回看日期" />
+                    <Button x:Name="NextDayButton" Content="下一天" Click="NextDay_Click" />
+                    <Button x:Name="TodayButton" Content="今天" Click="Today_Click" />
+                </WrapPanel>
                 <TextBlock x:Name="DateText" Margin="0,5,0,0" />
             </StackPanel>
-            <TextBlock x:Name="StatusText" Grid.Column="1" Text="正在读取记录"
-                       Margin="20,0,0,0" VerticalAlignment="Center"
-                       FontWeight="SemiBold" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                <TextBlock x:Name="StatusText" Text="正在读取当前记录状态" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,12,0" />
+                <Button x:Name="PauseButton" Content="暂停" Click="PauseButton_Click" AutomationProperties.Name="暂停或继续记录" />
+            </StackPanel>
         </Grid>
         <Border x:Name="WarningPanel" Grid.Row="1" Visibility="Collapsed"
                 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"

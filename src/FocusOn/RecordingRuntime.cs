@@ -8,8 +8,8 @@ public sealed class RecordingRuntime : IDisposable
     private readonly RecordingClock clock;
     private readonly Thread worker;
     private readonly TaskCompletionSource initialized = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private string? failure;
-    private bool stopped;
+    private volatile string? failure;
+    private volatile bool stopped;
 
     public RecordingRuntime(string databasePath, RecordingClock clock)
     {
@@ -26,6 +26,16 @@ public sealed class RecordingRuntime : IDisposable
         {
             session.Observe(observation, at);
             session.Checkpoint(at);
+        });
+    }
+
+    public Task SetConditions(RecordingConditions conditions, ForegroundObservation? observation, RecordingTime at)
+    {
+        return Query(session =>
+        {
+            session.SetConditions(conditions, observation, at);
+            session.Checkpoint(at);
+            return true;
         });
     }
 

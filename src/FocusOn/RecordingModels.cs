@@ -4,6 +4,8 @@ public readonly record struct RecordingTime(DateTimeOffset Utc, long MonotonicTi
 
 public sealed record ForegroundObservation(long WindowId, string? AppKey, string? AppName, string? WindowTitle);
 
+public sealed record RecordingConditions(bool ManualPaused, bool Sleeping, bool Locked, bool DisplayOff, bool Available = true);
+
 public enum IntervalKind
 {
     Usage,
