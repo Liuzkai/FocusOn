@@ -1,0 +1,10 @@
+.tools/
+**/bin/
+**/obj/
+artifacts/
+.impeccable/review/
+TestResults/
+*.user
+*.db
+*.db-shm
+*.db-wal
