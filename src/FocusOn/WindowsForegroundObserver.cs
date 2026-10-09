@@ -68,20 +68,25 @@ public sealed class WindowsForegroundObserver : IDisposable
             if (titleHook == 0) throw new Win32Exception(Marshal.GetLastWin32Error());
             Publish(GetForegroundWindow(), clock.Now());
             started.Set();
-            int result;
-            while ((result = GetMessage(out var message, 0, 0, 0)) > 0)
+            while (!disposed)
             {
-                if (message.Message == PollMessage)
+                while (!disposed && PeekMessage(out var message, 0, 0, 0, 1))
                 {
-                    if (snapshots.TryDequeue(out var consumer)) Publish(GetForegroundWindow(), clock.Now(), consumer);
+                    if (message.Message == QuitMessage) return;
+                    if (message.Message == PollMessage)
+                    {
+                        if (snapshots.TryDequeue(out var consumer)) Publish(GetForegroundWindow(), clock.Now(), consumer);
+                    }
+                    else
+                    {
+                        TranslateMessage(ref message);
+                        DispatchMessage(ref message);
+                    }
                 }
-                else
-                {
-                    TranslateMessage(ref message);
-                    DispatchMessage(ref message);
-                }
+                // The timeout observes disposal even when posting WM_QUIT fails.
+                if (!disposed && MsgWaitForMultipleObjectsEx(0, 0, 250, 0x04ff, 0x0004) == uint.MaxValue)
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
             }
-            if (result == -1 && !disposed) onObservation(null, clock.Now());
         }
         catch (Exception error)
         {
@@ -155,7 +160,6 @@ public sealed class WindowsForegroundObserver : IDisposable
             {
                 using var target = Process.GetProcessById((int)processId);
                 name = target.ProcessName;
-                if (!string.IsNullOrWhiteSpace(name)) key = "process:" + name.ToUpperInvariant();
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or Win32Exception or NotSupportedException) { }
         }
@@ -204,7 +208,8 @@ public sealed class WindowsForegroundObserver : IDisposable
         {
             started.Wait();
             if (thread.IsAlive) PostThreadMessage(threadId, QuitMessage, 0, 0);
-            if (Thread.CurrentThread != thread) thread.Join();
+            if (Thread.CurrentThread == thread) return;
+            if (!thread.Join(TimeSpan.FromSeconds(5))) return;
         }
         started.Dispose();
     }
@@ -234,7 +239,7 @@ public sealed class WindowsForegroundObserver : IDisposable
     [DllImport("user32.dll", EntryPoint = "GetWindowTextW", CharSet = CharSet.Unicode)] private static extern int GetWindowText(nint window, StringBuilder text, int count);
     [DllImport("user32.dll", EntryPoint = "SendMessageTimeoutW", CharSet = CharSet.Unicode)] private static extern nint SendMessageTimeout(nint window, uint message, nuint wParam, nint lParam, uint flags, uint timeout, out nuint result);
     [DllImport("user32.dll", EntryPoint = "SendMessageTimeoutW", CharSet = CharSet.Unicode)] private static extern nint SendTextTimeout(nint window, uint message, nuint wParam, StringBuilder text, uint flags, uint timeout, out nuint result);
-    [DllImport("user32.dll", EntryPoint = "GetMessageW", SetLastError = true)] private static extern int GetMessage(out MessageData message, nint window, uint min, uint max);
+    [DllImport("user32.dll", SetLastError = true)] private static extern uint MsgWaitForMultipleObjectsEx(uint count, nint handles, uint timeout, uint wakeMask, uint flags);
     [DllImport("user32.dll", EntryPoint = "PeekMessageW")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool PeekMessage(out MessageData message, nint window, uint min, uint max, uint flags);
     [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool TranslateMessage(ref MessageData message);
     [DllImport("user32.dll", EntryPoint = "DispatchMessageW")] private static extern nint DispatchMessage(ref MessageData message);
