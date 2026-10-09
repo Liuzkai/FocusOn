@@ -13,7 +13,7 @@
 
 - T01、T02、T03、T06：逐条 red→green，4 passed、0 failed、0 skipped。详细过程见测试证据文档。
 - 整合 WPF 构建：0 warnings、0 errors。
-- Standards 审查：0 项明确违规；Spec 审查发现身份回退和实机记录缺失，正在修正及补记。
+- Standards 审查：0 项明确违规；Spec 身份回退和实机记录缺失两项已修复，复核无新增阻断。工程提交 c6722b7、修复提交 30e71b9。
 
 ## Windows 与界面
 

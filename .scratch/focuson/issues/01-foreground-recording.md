@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -28,4 +28,5 @@
 ## Comments
 
 - 2026-10-09：根据已确认产品设计与现有规格拆分；用户要求逐票实施并由主代理安排子代理协作，确认此拆分及测试边界，发布为独立任务。
+- 2026-10-09：工程完成，提交 c6722b7、审查修复 30e71b9。T01/T02/T03/T06 逐条红绿，4 passed；整合构建零警告/错误。Standards 无明确违规，Spec 两项已修复且复核无新增阻断。真实 FocusOn 界面及采集 smoke 已执行，W01–03 未测专项及限制逐项记录，按实施约定交由08继续人工验收；本票关闭不代表整体规格通过。
 
