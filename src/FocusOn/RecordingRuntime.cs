@@ -29,15 +29,22 @@ public sealed class RecordingRuntime : IDisposable
         });
     }
 
-    public Task SetConditions(RecordingConditions conditions, ForegroundObservation? observation, RecordingTime at)
+    public Task SetSystemConditions(RecordingConditions conditions, ForegroundObservation? observation, RecordingTime at)
     {
         return Query(session =>
         {
-            session.SetConditions(conditions, observation, at);
+            session.SetSystemConditions(conditions, observation, at);
             session.Checkpoint(at);
             return true;
         });
     }
+
+    public Task SetManualPaused(bool paused, ForegroundObservation? observation, RecordingTime at) => Query(session =>
+    {
+        session.SetManualPaused(paused, observation, at);
+        session.Checkpoint(at);
+        return true;
+    });
 
     public Task<DayView> ReadDayAsync(DateOnly day) => Query(session =>
     {

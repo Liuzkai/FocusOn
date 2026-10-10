@@ -8,7 +8,6 @@ public partial class App : Application
     private RecordingRuntime? runtime;
     private WindowsForegroundObserver? observer;
     private WindowsSessionObserver? sessionObserver;
-    private volatile WindowsSessionState systemState = new(false, false, false, false);
     private volatile bool manualPaused = false;
     private DispatcherTimer? checkpoint;
     private volatile bool exiting;
@@ -28,8 +27,7 @@ public partial class App : Application
             observer = new WindowsForegroundObserver(clock, runtime.Observe);
             sessionObserver = new WindowsSessionObserver(state =>
             {
-                systemState = state;
-                var saved = ApplyConditions();
+                var saved = ApplySystemConditions(state);
                 if (state.Sleeping)
                 {
                     // Windows allows a short suspend handling window; save before returning.
@@ -47,7 +45,7 @@ public partial class App : Application
             {
                 manualPaused = !manualPaused;
                 window.SetPauseState(manualPaused);
-                try { await ApplyConditions(); }
+                try { await ApplyManualPause(manualPaused); }
                 catch (Exception) { /* The runtime exposes saving faults in the next status refresh. */ }
             };
             MainWindow = window;
@@ -61,15 +59,21 @@ public partial class App : Application
         }
     }
 
-    private Task ApplyConditions()
+    private Task ApplySystemConditions(WindowsSessionState state)
+    {
+        var conditions = new RecordingConditions(false, state.Sleeping, state.Locked, state.DisplayOff, state.Available);
+        return WithForegroundSnapshot((observation, at) => runtime!.SetSystemConditions(conditions, observation, at));
+    }
+
+    private Task ApplyManualPause(bool paused) => WithForegroundSnapshot((observation, at) => runtime!.SetManualPaused(paused, observation, at));
+
+    private Task WithForegroundSnapshot(Func<ForegroundObservation?, RecordingTime, Task> save)
     {
         if (exiting || observer is null || runtime is null) return Task.CompletedTask;
-        var state = systemState;
-        var conditions = new RecordingConditions(manualPaused, state.Sleeping, state.Locked, state.DisplayOff, state.Available);
         var saved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         observer.RequestSnapshot(async (observation, at) =>
         {
-            try { await runtime.SetConditions(conditions, observation, at); saved.TrySetResult(); }
+            try { await save(observation, at); saved.TrySetResult(); }
             catch (Exception error) { saved.TrySetException(error); }
         });
         return saved.Task;

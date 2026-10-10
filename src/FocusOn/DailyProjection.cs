@@ -5,9 +5,26 @@ public static class DailyProjection
     public static (DateTimeOffset StartUtc, DateTimeOffset EndUtc) Bounds(DateOnly day, TimeZoneInfo zone)
     {
         ArgumentNullException.ThrowIfNull(zone);
-        var start = TimeZoneInfo.ConvertTimeToUtc(day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone);
-        var end = TimeZoneInfo.ConvertTimeToUtc(day.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone);
-        return (new DateTimeOffset(start), new DateTimeOffset(end));
+        return (DayStart(day, zone), DayStart(day.AddDays(1), zone));
+    }
+
+    private static DateTimeOffset DayStart(DateOnly day, TimeZoneInfo zone)
+    {
+        var local = day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
+        if (zone.IsInvalidTime(local))
+        {
+            var invalid = local;
+            do { local = local.AddHours(1); } while (zone.IsInvalidTime(local));
+            // 找到缺失午夜后的首个有效时刻，不能假定跳变恰好是一小时。
+            while (local.Ticks - invalid.Ticks > 1)
+            {
+                var middle = new DateTime(invalid.Ticks + (local.Ticks - invalid.Ticks) / 2, DateTimeKind.Unspecified);
+                if (zone.IsInvalidTime(middle)) invalid = middle;
+                else local = middle;
+            }
+        }
+        var offset = zone.IsAmbiguousTime(local) ? zone.GetAmbiguousTimeOffsets(local).Max() : zone.GetUtcOffset(local);
+        return new DateTimeOffset(local, offset).ToUniversalTime();
     }
 
     public static RecordedInterval? Clip(RecordedInterval interval, DateTimeOffset startUtc, DateTimeOffset endUtc)

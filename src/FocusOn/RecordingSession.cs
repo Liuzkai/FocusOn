@@ -82,6 +82,12 @@ public sealed class RecordingSession : IDisposable
         Observe(currentObservation, at);
     }
 
+    public void SetManualPaused(bool paused, ForegroundObservation? currentObservation, RecordingTime at) =>
+        SetConditions(conditions with { ManualPaused = paused }, currentObservation, at);
+
+    public void SetSystemConditions(RecordingConditions system, ForegroundObservation? currentObservation, RecordingTime at) =>
+        SetConditions(system with { ManualPaused = conditions.ManualPaused }, currentObservation, at);
+
     public void Finish(RecordingTime at)
     {
         SaveCurrent(at);

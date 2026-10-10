@@ -94,6 +94,32 @@ public sealed class StopConditionsTests : IDisposable
         Assert.Equal(TimeSpan.FromSeconds(10), total.Duration);
     }
 
+    [Fact]
+    public void Delayed_system_snapshot_cannot_replace_an_independent_manual_pause()
+    {
+        using var session = new RecordingSession(DatabasePath);
+        var editor = new ForegroundObservation(1, "editor", "编辑器", "文档 A");
+        session.Observe(editor, At(0));
+        session.SetManualPaused(true, editor, At(10));
+        session.SetSystemConditions(new(false, false, true, true), editor, At(20));
+        session.SetSystemConditions(new(false, false, false, true), new(2, "browser", "浏览器", "未亮屏"), At(30));
+        session.SetSystemConditions(new(false, false, false, false), new(2, "browser", "浏览器", "系统恢复"), At(40));
+        Assert.Equal("手动暂停", session.GetDay(Date, TimeZoneInfo.Utc, At(45)).Status);
+        session.SetManualPaused(false, new(3, "browser", "浏览器", "用户主动恢复"), At(50));
+        session.Finish(At(60));
+
+        var day = session.GetDay(Date, TimeZoneInfo.Utc);
+        Assert.Collection(day.Intervals,
+            interval => AssertInterval(interval, IntervalKind.Usage, 0, 10, "editor"),
+            interval => AssertInterval(interval, IntervalKind.ManualPause, 10, 50),
+            interval =>
+            {
+                AssertInterval(interval, IntervalKind.Usage, 50, 60, "browser");
+                Assert.Equal("用户主动恢复", interval.WindowTitle);
+            });
+        Assert.All(day.Totals, total => Assert.Equal(TimeSpan.FromSeconds(10), total.Duration));
+    }
+
     private static RecordingTime At(int seconds) => new(Start.AddSeconds(seconds), TimeSpan.FromSeconds(seconds).Ticks, "UTC");
 
     private static void AssertInterval(RecordedInterval interval, IntervalKind kind, int start, int end, string? appKey = null)

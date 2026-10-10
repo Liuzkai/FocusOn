@@ -102,6 +102,54 @@ public sealed class DailyProjectionTests : IDisposable
         }
     }
 
+    [Fact]
+    public void Skipped_local_midnight_uses_first_valid_instant_as_shared_daily_boundary()
+    {
+        var cuba = TimeZoneInfo.FindSystemTimeZoneById("Cuba Standard Time");
+        var start = new DateTimeOffset(2026, 3, 8, 4, 59, 0, TimeSpan.Zero);
+        using (var session = new RecordingSession(DatabasePath))
+        {
+            session.Observe(new(1, "reader", "阅读器", "正常夏令时跳变"), new(start, 0, cuba.Id));
+            session.Finish(new(start.AddMinutes(2), TimeSpan.FromMinutes(2).Ticks, cuba.Id));
+        }
+
+        using var reopened = new RecordingSession(DatabasePath);
+        var previous = reopened.GetDay(new DateOnly(2026, 3, 7), cuba);
+        var next = reopened.GetDay(new DateOnly(2026, 3, 8), cuba);
+        var boundary = new DateTimeOffset(2026, 3, 8, 5, 0, 0, TimeSpan.Zero);
+        Assert.Equal(boundary, previous.EndUtc);
+        Assert.Equal(previous.EndUtc, next.StartUtc);
+        Assert.Equal(TimeSpan.FromHours(23), next.EndUtc - next.StartUtc);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(previous.Intervals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(next.Intervals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(previous.Totals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(next.Totals).Duration);
+    }
+
+    [Fact]
+    public void Repeated_local_midnight_belongs_to_next_day_from_its_first_occurrence()
+    {
+        var cuba = TimeZoneInfo.FindSystemTimeZoneById("Cuba Standard Time");
+        var start = new DateTimeOffset(2026, 11, 1, 3, 59, 0, TimeSpan.Zero);
+        using (var session = new RecordingSession(DatabasePath))
+        {
+            session.Observe(new(1, "reader", "阅读器", "重复午夜"), new(start, 0, cuba.Id));
+            session.Finish(new(start.AddMinutes(62), TimeSpan.FromMinutes(62).Ticks, cuba.Id));
+        }
+
+        using var reopened = new RecordingSession(DatabasePath);
+        var previous = reopened.GetDay(new DateOnly(2026, 10, 31), cuba);
+        var next = reopened.GetDay(new DateOnly(2026, 11, 1), cuba);
+        var boundary = new DateTimeOffset(2026, 11, 1, 4, 0, 0, TimeSpan.Zero);
+        Assert.Equal(boundary, previous.EndUtc);
+        Assert.Equal(previous.EndUtc, next.StartUtc);
+        Assert.Equal(TimeSpan.FromHours(25), next.EndUtc - next.StartUtc);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(previous.Intervals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(61), Assert.Single(next.Intervals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(1), Assert.Single(previous.Totals).Duration);
+        Assert.Equal(TimeSpan.FromMinutes(61), Assert.Single(next.Totals).Duration);
+    }
+
     private static RecordingTime At(int seconds) => new(Start.AddSeconds(seconds).ToUniversalTime(), TimeSpan.FromSeconds(seconds).Ticks, Zone.Id);
 
     public void Dispose()
