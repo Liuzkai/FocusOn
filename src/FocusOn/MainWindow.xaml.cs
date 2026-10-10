@@ -10,19 +10,22 @@ namespace FocusOn;
 public partial class MainWindow : Window
 {
     private readonly Func<DateOnly, Task<DayView>> _readDay;
+    private readonly Func<DateOnly, Task> _deleteDay;
     private readonly ObservableCollection<IntervalRow> _rows = [];
     private readonly DispatcherTimer _refreshTimer;
     private bool _refreshing;
     private bool _started;
     private bool _stopped;
+    private bool _deleting;
     private DateOnly? _shownDay;
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private bool _followToday = true;
     private DayView? _dayView;
 
-    public MainWindow(Func<DateOnly, Task<DayView>> readDay)
+    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay)
     {
         _readDay = readDay ?? throw new ArgumentNullException(nameof(readDay));
+        _deleteDay = deleteDay ?? throw new ArgumentNullException(nameof(deleteDay));
         InitializeComponent();
         LogGrid.ItemsSource = _rows;
         TimelineView.IntervalSelected += Timeline_IntervalSelected;
@@ -64,7 +67,7 @@ public partial class MainWindow : Window
 
     private async Task RefreshAsync()
     {
-        if (_refreshing || _stopped) return;
+        if (_refreshing || _stopped || _deleting) return;
         _refreshing = true;
         var requestedDate = _selectedDate;
         try
@@ -74,12 +77,12 @@ public partial class MainWindow : Window
             UpdateDateControls();
             requestedDate = _selectedDate;
             var view = await _readDay(requestedDate);
-            if (_stopped || requestedDate != _selectedDate) return;
+            if (_stopped || _deleting || requestedDate != _selectedDate) return;
             ShowDay(view);
         }
         catch (Exception ex)
         {
-            if (_stopped || requestedDate != _selectedDate) return;
+            if (_stopped || _deleting || requestedDate != _selectedDate) return;
             StatusText.Text = "回看更新失败";
             ShowWarning($"无法更新回看：{ex.Message}。已显示的记录可能不是最新。请检查存储是否可用。");
             if (_rows.Count == 0) LogEmptyText.Text = "目前无法读取记录。";
@@ -108,6 +111,35 @@ public partial class MainWindow : Window
     }
 
     private void Today_Click(object sender, RoutedEventArgs e) => SelectDate(DateOnly.FromDateTime(DateTime.Today));
+
+    private async void DeleteDay_Click(object sender, RoutedEventArgs e)
+    {
+        if (_deleting || _stopped) return;
+        var day = _selectedDate;
+        var (start, end) = DailyProjection.Bounds(day, TimeZoneInfo.Local);
+        var answer = MessageBox.Show(this,
+            $"删除 {day:yyyy-MM-dd} 的所有记录？\n本地范围：{DisplayText.Time(start, full: true)} 至 {DisplayText.Time(end, full: true)}（不含结束时刻）。\n跨日记录保留其他日期部分。删除无法撤销，删除今天后继续记录未来活动。",
+            "确认删除日期", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+        if (answer != MessageBoxResult.Yes) return;
+        _deleting = true;
+        DeleteDayButton.IsEnabled = false;
+        try
+        {
+            await _deleteDay(day);
+            TimelineView.ClearRange();
+            LogGrid.SelectedItem = null;
+        }
+        catch (Exception error)
+        {
+            MessageBox.Show(this, $"删除操作出现异常：{error.Message}", "FocusOn", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            _deleting = false;
+            DeleteDayButton.IsEnabled = !_stopped;
+            await RefreshAsync();
+        }
+    }
 
     private void SelectDate(DateOnly day)
     {

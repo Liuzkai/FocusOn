@@ -39,6 +39,7 @@
                                 SelectedDateChanged="ViewDatePicker_SelectedDateChanged" AutomationProperties.Name="回看日期" />
                     <Button x:Name="NextDayButton" Content="下一天" Click="NextDay_Click" />
                     <Button x:Name="TodayButton" Content="今天" Click="Today_Click" />
+                    <Button x:Name="DeleteDayButton" Content="删除该日…" Click="DeleteDay_Click" AutomationProperties.Name="确认删除所选日期的记录" />
                 </WrapPanel>
                 <TextBlock x:Name="DateText" Margin="0,5,0,0" />
             </StackPanel>

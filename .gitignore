@@ -6,5 +6,6 @@ artifacts/
 TestResults/
 *.user
 *.db
+!tests/FocusOn.Tests/Fixtures/recording-v1.db
 *.db-shm
 *.db-wal

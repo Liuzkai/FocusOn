@@ -16,6 +16,9 @@ public sealed class RecordingSession : IDisposable
     private RecordingTime? lastAccepted;
     private string? timeWarning;
     private long? unreliableThrough;
+    private bool awaitingDeleteResume;
+    private long? deleteFence;
+    private (DateTimeOffset Start, DateTimeOffset End)? pendingDeleteDay;
 
     public RecordingSession(string databasePath)
     {
@@ -41,6 +44,17 @@ public sealed class RecordingSession : IDisposable
                 app_name TEXT,
                 window_title TEXT
             );
+            CREATE TABLE IF NOT EXISTS deleted_ranges (
+                start_utc INTEGER NOT NULL,
+                end_utc INTEGER NOT NULL,
+                PRIMARY KEY (start_utc, end_utc)
+            );
+            CREATE TABLE IF NOT EXISTS interval_allocations (
+                id INTEGER PRIMARY KEY,
+                start_utc INTEGER NOT NULL,
+                end_utc INTEGER NOT NULL,
+                duration_ticks INTEGER NOT NULL
+            );
             SELECT COALESCE(MAX(id), 0) + 1 FROM intervals;
             """;
         using var reader = command.ExecuteReader();
@@ -51,14 +65,21 @@ public sealed class RecordingSession : IDisposable
                 nextId = reader.GetInt64(0);
         } while (reader.NextResult());
         using var lastInterval = connection.CreateCommand();
-        lastInterval.CommandText = "SELECT end_utc FROM intervals ORDER BY id DESC LIMIT 1;";
+        lastInterval.CommandText = "SELECT MAX(end_utc) FROM intervals;";
         if (lastInterval.ExecuteScalar() is long endUtc)
             committedEnd = gapStart = new DateTimeOffset(endUtc, TimeSpan.Zero);
+        else
+        {
+            lastInterval.CommandText = "SELECT MAX(end_utc) FROM deleted_ranges;";
+            if (lastInterval.ExecuteScalar() is long deletedEnd)
+                committedEnd = gapStart = new DateTimeOffset(deletedEnd, TimeSpan.Zero);
+        }
     }
 
     public void Observe(ForegroundObservation? observation, RecordingTime at)
     {
         if (!AcceptTime(at)) return;
+        if (awaitingDeleteResume) return;
         if (saveFailure is not null && (observation is null ||
             (unreliableThrough is long cutoff && at.MonotonicTicks <= cutoff)))
             return;
@@ -98,6 +119,7 @@ public sealed class RecordingSession : IDisposable
 
     public void Checkpoint(RecordingTime at)
     {
+        if (awaitingDeleteResume) return;
         if (AcceptTime(at)) SaveCurrent(at);
     }
 
@@ -140,15 +162,105 @@ public sealed class RecordingSession : IDisposable
         currentObservation = null;
     }
 
+    public void DeleteDay(DateOnly day, TimeZoneInfo zone, RecordingTime stopAt)
+    {
+        if ((lastAccepted is RecordingTime previous && stopAt.MonotonicTicks < previous.MonotonicTicks) ||
+            (deleteFence is long cutoff && stopAt.MonotonicTicks <= cutoff))
+            throw new ArgumentException("删除边界不能早于最新记录控制事实。", nameof(stopAt));
+        var (start, end) = DailyProjection.Bounds(day, zone);
+        var stopsCurrent = current is not null && current.StartUtc < end && stopAt.Utc > start;
+        if (stopsCurrent) Finish(stopAt);
+        try
+        {
+            using var transaction = connection.BeginTransaction();
+            var intervals = ReadIntervals(start, end, transaction);
+            using var delete = connection.CreateCommand();
+            delete.Transaction = transaction;
+            delete.CommandText = """
+                DELETE FROM interval_allocations WHERE id IN
+                    (SELECT id FROM intervals WHERE end_utc > $start AND start_utc < $end);
+                DELETE FROM intervals WHERE end_utc > $start AND start_utc < $end;
+                """;
+            delete.Parameters.AddWithValue("$start", start.UtcTicks);
+            delete.Parameters.AddWithValue("$end", end.UtcTicks);
+            delete.ExecuteNonQuery();
+            var allocatedIds = 0;
+            foreach (var stored in intervals)
+            {
+                var before = ClipStored(stored, stored.Interval.StartUtc, start);
+                var after = ClipStored(stored, end, stored.Interval.EndUtc);
+                if (before is not null) WriteInterval(before, transaction, stored);
+                if (after is not null)
+                    WriteInterval(before is null ? after : after with { Id = nextId + allocatedIds++ }, transaction, stored);
+            }
+            WriteDeletedRange(start, end < stopAt.Utc ? end : stopAt.Utc, transaction);
+            transaction.Commit();
+            nextId += allocatedIds;
+            if (stopsCurrent)
+            {
+                current = null;
+                currentObservation = null;
+                gapStart = null;
+                awaitingDeleteResume = true;
+                pendingDeleteDay = (start, end);
+            }
+        }
+        catch (SqliteException error)
+        {
+            MarkUnreliable(stopAt, $"无法删除记录：{error.Message}");
+            throw;
+        }
+    }
+
+    public bool ResumeAfterDelete(ForegroundObservation? currentObservation, RecordingTime completedAt)
+    {
+        if (!awaitingDeleteResume) return true;
+        if (!AcceptTime(completedAt)) return false;
+        try
+        {
+            if (pendingDeleteDay is { } range)
+            {
+                using var transaction = connection.BeginTransaction();
+                WriteDeletedRange(range.Start, range.End < completedAt.Utc ? range.End : completedAt.Utc, transaction);
+                transaction.Commit();
+            }
+        }
+        catch (SqliteException error)
+        {
+            awaitingDeleteResume = false;
+            pendingDeleteDay = null;
+            MarkUnreliable(completedAt, $"无法保存删除后的记录边界：{error.Message}");
+            deleteFence = completedAt.MonotonicTicks;
+            throw;
+        }
+        awaitingDeleteResume = false;
+        pendingDeleteDay = null;
+        Observe(currentObservation, completedAt);
+        deleteFence = completedAt.MonotonicTicks;
+        return true;
+    }
+
     private void SaveGap(RecordingTime at)
     {
         if (gapStart is DateTimeOffset missingFrom && at.Utc > missingFrom)
         {
-            current = new RecordedInterval(nextId, IntervalKind.Unrecorded, missingFrom,
-                missingFrom, TimeSpan.Zero, null, null, null, true);
-            currentMonotonicStart = at.MonotonicTicks - (at.Utc - missingFrom).Ticks;
-            SaveCurrent(at);
-            nextId++;
+            try
+            {
+                using var transaction = connection.BeginTransaction();
+                var gap = new RecordedInterval(nextId, IntervalKind.Unrecorded, missingFrom,
+                    at.Utc.ToUniversalTime(), at.Utc - missingFrom, null, null, null);
+                var parts = SubtractDeletedRanges(gap, transaction);
+                for (var index = 0; index < parts.Count; index++)
+                    WriteInterval(parts[index] with { Id = nextId + index }, transaction);
+                transaction.Commit();
+                nextId += parts.Count;
+                committedEnd = at.Utc.ToUniversalTime();
+            }
+            catch (SqliteException error)
+            {
+                MarkUnreliable(at, $"无法保存记录：{error.Message}");
+                throw;
+            }
         }
         gapStart = null;
         current = null;
@@ -161,29 +273,8 @@ public sealed class RecordingSession : IDisposable
         if (previewWarning is not null) timeWarning = previewWarning;
         var showLive = previewWarning is null && (liveNow is not RecordingTime suppliedNow ||
             lastAccepted is not RecordingTime accepted || suppliedNow.MonotonicTicks >= accepted.MonotonicTicks);
-        using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT id, kind, start_utc, end_utc, duration_ticks, app_key, app_name, window_title
-            FROM intervals
-            WHERE end_utc > $start AND start_utc < $end AND duration_ticks > 0
-            ORDER BY id;
-            """;
-        command.Parameters.AddWithValue("$start", start.UtcTicks);
-        command.Parameters.AddWithValue("$end", end.UtcTicks);
-        var intervals = new List<RecordedInterval>();
-        using (var reader = command.ExecuteReader())
-        {
-            while (reader.Read())
-            {
-                intervals.Add(new RecordedInterval(reader.GetInt64(0), (IntervalKind)reader.GetInt32(1),
-                    new DateTimeOffset(reader.GetInt64(2), TimeSpan.Zero),
-                    new DateTimeOffset(reader.GetInt64(3), TimeSpan.Zero),
-                    TimeSpan.FromTicks(reader.GetInt64(4)),
-                    reader.IsDBNull(5) ? null : reader.GetString(5),
-                    reader.IsDBNull(6) ? null : reader.GetString(6),
-                    reader.IsDBNull(7) ? null : reader.GetString(7)));
-            }
-        }
+        var intervals = ReadIntervals(start, end).Select(stored => ClipStored(stored, start, end))
+            .OfType<RecordedInterval>().ToList();
 
         if (showLive && current is not null && liveNow is RecordingTime at)
         {
@@ -198,8 +289,9 @@ public sealed class RecordingSession : IDisposable
         }
         else if (showLive && gapStart is DateTimeOffset missingFrom && liveNow is RecordingTime missingTo && missingTo.Utc > missingFrom)
         {
-            intervals.Add(new RecordedInterval(nextId, IntervalKind.Unrecorded, missingFrom,
-                missingTo.Utc.ToUniversalTime(), missingTo.Utc - missingFrom, null, null, null, true));
+            var gap = new RecordedInterval(nextId, IntervalKind.Unrecorded, missingFrom,
+                missingTo.Utc.ToUniversalTime(), missingTo.Utc - missingFrom, null, null, null, true);
+            intervals.AddRange(SubtractDeletedRanges(gap).Select((part, index) => part with { Id = nextId + index }));
         }
 
         intervals = intervals.Select(interval => DailyProjection.Clip(interval, start, end))
@@ -222,6 +314,86 @@ public sealed class RecordingSession : IDisposable
             }, saveFailure ?? timeWarning);
     }
 
+    private List<StoredInterval> ReadIntervals(DateTimeOffset start, DateTimeOffset end, SqliteTransaction? transaction = null)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            SELECT i.id, i.kind, i.start_utc, i.end_utc, i.duration_ticks, i.app_key, i.app_name, i.window_title,
+                   a.start_utc, a.end_utc, a.duration_ticks
+            FROM intervals i LEFT JOIN interval_allocations a ON a.id = i.id
+            WHERE i.end_utc > $start AND i.start_utc < $end AND i.duration_ticks > 0
+            ORDER BY i.start_utc, i.id;
+            """;
+        command.Parameters.AddWithValue("$start", start.UtcTicks);
+        command.Parameters.AddWithValue("$end", end.UtcTicks);
+        var intervals = new List<StoredInterval>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var interval = new RecordedInterval(reader.GetInt64(0), (IntervalKind)reader.GetInt32(1),
+                new DateTimeOffset(reader.GetInt64(2), TimeSpan.Zero),
+                new DateTimeOffset(reader.GetInt64(3), TimeSpan.Zero),
+                TimeSpan.FromTicks(reader.GetInt64(4)),
+                reader.IsDBNull(5) ? null : reader.GetString(5),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.IsDBNull(7) ? null : reader.GetString(7));
+            intervals.Add(reader.IsDBNull(8)
+                ? new(interval, interval.StartUtc, interval.EndUtc, interval.Duration.Ticks)
+                : new(interval, new(reader.GetInt64(8), TimeSpan.Zero), new(reader.GetInt64(9), TimeSpan.Zero), reader.GetInt64(10)));
+        }
+        return intervals;
+    }
+
+    private static RecordedInterval? ClipStored(StoredInterval stored, DateTimeOffset start, DateTimeOffset end)
+    {
+        var clipped = DailyProjection.Clip(stored.Interval, start, end);
+        if (clipped is null) return null;
+        var wallTicks = (stored.AllocationEnd - stored.AllocationStart).Ticks;
+        var from = (long)((Int128)stored.AllocationTicks * (clipped.StartUtc - stored.AllocationStart).Ticks / wallTicks);
+        var to = (long)((Int128)stored.AllocationTicks * (clipped.EndUtc - stored.AllocationStart).Ticks / wallTicks);
+        return clipped with { Duration = TimeSpan.FromTicks(to - from) };
+    }
+
+    private List<RecordedInterval> SubtractDeletedRanges(RecordedInterval interval, SqliteTransaction? transaction = null)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            SELECT start_utc, end_utc FROM deleted_ranges
+            WHERE end_utc > $start AND start_utc < $end
+            ORDER BY start_utc, end_utc;
+            """;
+        command.Parameters.AddWithValue("$start", interval.StartUtc.UtcTicks);
+        command.Parameters.AddWithValue("$end", interval.EndUtc.UtcTicks);
+        var parts = new List<RecordedInterval>();
+        var cursor = interval.StartUtc;
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var deletedStart = new DateTimeOffset(reader.GetInt64(0), TimeSpan.Zero);
+            var deletedEnd = new DateTimeOffset(reader.GetInt64(1), TimeSpan.Zero);
+            var before = DailyProjection.Clip(interval, cursor, deletedStart);
+            if (before is not null) parts.Add(before);
+            if (deletedEnd > cursor) cursor = deletedEnd;
+            if (cursor >= interval.EndUtc) break;
+        }
+        var after = DailyProjection.Clip(interval, cursor, interval.EndUtc);
+        if (after is not null) parts.Add(after with { IsCurrent = interval.IsCurrent });
+        return parts;
+    }
+
+    private void WriteDeletedRange(DateTimeOffset start, DateTimeOffset end, SqliteTransaction transaction)
+    {
+        if (end <= start) return;
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = "INSERT OR IGNORE INTO deleted_ranges (start_utc, end_utc) VALUES ($start, $end);";
+        command.Parameters.AddWithValue("$start", start.UtcTicks);
+        command.Parameters.AddWithValue("$end", end.UtcTicks);
+        command.ExecuteNonQuery();
+    }
+
     private void SaveCurrent(RecordingTime at)
     {
         if (current is null)
@@ -235,22 +407,7 @@ public sealed class RecordingSession : IDisposable
         try
         {
             using var transaction = connection.BeginTransaction();
-            using var command = connection.CreateCommand();
-            command.Transaction = transaction;
-            command.CommandText = """
-            INSERT INTO intervals (id, kind, start_utc, end_utc, duration_ticks, app_key, app_name, window_title)
-            VALUES ($id, $kind, $start, $end, $duration, $key, $name, $title)
-            ON CONFLICT(id) DO UPDATE SET end_utc = excluded.end_utc, duration_ticks = excluded.duration_ticks;
-            """;
-            command.Parameters.AddWithValue("$id", current.Id);
-            command.Parameters.AddWithValue("$kind", (int)current.Kind);
-            command.Parameters.AddWithValue("$start", current.StartUtc.UtcTicks);
-            command.Parameters.AddWithValue("$end", at.Utc.UtcTicks);
-            command.Parameters.AddWithValue("$duration", durationTicks);
-            command.Parameters.AddWithValue("$key", (object?)current.AppKey ?? DBNull.Value);
-            command.Parameters.AddWithValue("$name", (object?)current.AppName ?? DBNull.Value);
-            command.Parameters.AddWithValue("$title", (object?)current.WindowTitle ?? DBNull.Value);
-            command.ExecuteNonQuery();
+            WriteInterval(current with { EndUtc = at.Utc.ToUniversalTime(), Duration = TimeSpan.FromTicks(durationTicks) }, transaction);
             transaction.Commit();
             committedEnd = at.Utc.ToUniversalTime();
         }
@@ -261,8 +418,51 @@ public sealed class RecordingSession : IDisposable
         }
     }
 
+    private void WriteInterval(RecordedInterval interval, SqliteTransaction transaction, StoredInterval? allocation = null)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            INSERT INTO intervals (id, kind, start_utc, end_utc, duration_ticks, app_key, app_name, window_title)
+            VALUES ($id, $kind, $start, $end, $duration, $key, $name, $title)
+            ON CONFLICT(id) DO UPDATE SET end_utc = excluded.end_utc, duration_ticks = excluded.duration_ticks;
+            """;
+        command.Parameters.AddWithValue("$id", interval.Id);
+        command.Parameters.AddWithValue("$kind", (int)interval.Kind);
+        command.Parameters.AddWithValue("$start", interval.StartUtc.UtcTicks);
+        command.Parameters.AddWithValue("$end", interval.EndUtc.UtcTicks);
+        command.Parameters.AddWithValue("$duration", interval.Duration.Ticks);
+        command.Parameters.AddWithValue("$key", (object?)interval.AppKey ?? DBNull.Value);
+        command.Parameters.AddWithValue("$name", (object?)interval.AppName ?? DBNull.Value);
+        command.Parameters.AddWithValue("$title", (object?)interval.WindowTitle ?? DBNull.Value);
+        command.ExecuteNonQuery();
+        using var basis = connection.CreateCommand();
+        basis.Transaction = transaction;
+        basis.Parameters.AddWithValue("$id", interval.Id);
+        if (allocation is null)
+            basis.CommandText = "DELETE FROM interval_allocations WHERE id = $id;";
+        else
+        {
+            basis.CommandText = """
+                INSERT INTO interval_allocations (id, start_utc, end_utc, duration_ticks)
+                VALUES ($id, $start, $end, $duration)
+                ON CONFLICT(id) DO UPDATE SET start_utc = excluded.start_utc,
+                    end_utc = excluded.end_utc, duration_ticks = excluded.duration_ticks;
+                """;
+            basis.Parameters.AddWithValue("$start", allocation.AllocationStart.UtcTicks);
+            basis.Parameters.AddWithValue("$end", allocation.AllocationEnd.UtcTicks);
+            basis.Parameters.AddWithValue("$duration", allocation.AllocationTicks);
+        }
+        basis.ExecuteNonQuery();
+    }
+
+    private sealed record StoredInterval(RecordedInterval Interval, DateTimeOffset AllocationStart,
+        DateTimeOffset AllocationEnd, long AllocationTicks);
+
     private bool AcceptTime(RecordingTime at)
     {
+        if (deleteFence is long cutoff && at.MonotonicTicks <= cutoff)
+            return false;
         if (lastAccepted is RecordingTime previous && at.MonotonicTicks < previous.MonotonicTicks)
             return false;
         var warning = TimeChangeWarning(at);

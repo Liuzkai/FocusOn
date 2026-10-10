@@ -66,10 +66,24 @@ public sealed class RecordingRuntime : IDisposable
         return warning is null ? view : view with { Status = "记录异常", Warning = warning };
     });
 
-    public Task FinishAsync() => Query(session =>
+    public Task DeleteDayAsync(DateOnly day) => Query(session =>
     {
-        session.Finish(clock.Now());
+        session.DeleteDay(day, TimeZoneInfo.Local, clock.Now());
         return true;
+    });
+
+    public Task<bool> ResumeAfterDeleteAsync(ForegroundObservation? observation, RecordingConditions system, RecordingTime at) => Query(session =>
+    {
+        session.SetSystemConditions(system, observation, at);
+        var resumed = session.ResumeAfterDelete(observation, at);
+        if (resumed) failure = null;
+        return resumed;
+    });
+
+    public Task<string?> FinishAsync(RecordingTime at) => Query(session =>
+    {
+        session.Finish(at);
+        return failure ?? observationFailure ?? session.GetDay(DateOnly.FromDateTime(at.Utc.LocalDateTime), TimeZoneInfo.Local).Warning;
     });
 
     private void Run(string databasePath)

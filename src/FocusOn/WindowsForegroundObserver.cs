@@ -203,6 +203,8 @@ public sealed class WindowsForegroundObserver : IDisposable
         return null;
     }
 
+    public bool IsStopped => thread is null || !thread.IsAlive;
+
     public void Dispose()
     {
         if (disposed) return;

@@ -195,6 +195,8 @@ public sealed class WindowsSessionObserver : IDisposable
         if (!disposed) onState(next);
     }
 
+    public bool IsStopped => thread is null || !thread.IsAlive;
+
     public void Dispose()
     {
         if (disposed) return;
