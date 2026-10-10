@@ -131,8 +131,8 @@ public sealed class RecordingSession : IDisposable
     {
         if (!AcceptTime(at)) return;
         this.conditions = conditions;
-        if (conditions.Sleeping) titleTimer.Pause(at);
-        Observe(currentObservation, at);
+        try { Observe(currentObservation, at); }
+        finally { if (conditions.Sleeping) titleTimer.Pause(at); }
     }
 
     public void SetManualPaused(bool paused, ForegroundObservation? currentObservation, RecordingTime at) =>
@@ -158,8 +158,13 @@ public sealed class RecordingSession : IDisposable
 
     public void Finish(RecordingTime at)
     {
-        titleTimer.Pause(at);
         if (!AcceptTime(at)) return;
+        titleTimer.Pause(at);
+        FinishForeground(at);
+    }
+
+    private void FinishForeground(RecordingTime at)
+    {
         if (current is null && gapStart is not null)
             SaveGap(at);
         else
@@ -176,7 +181,7 @@ public sealed class RecordingSession : IDisposable
         var (start, end) = DailyProjection.Bounds(day, zone);
         var stopsCurrent = current is not null && current.StartUtc < end && stopAt.Utc > start;
         titleTimer.PrepareDelete(start, end, stopAt);
-        if (stopsCurrent) Finish(stopAt);
+        if (stopsCurrent && AcceptTime(stopAt)) FinishForeground(stopAt);
         try
         {
             using var transaction = connection.BeginTransaction();

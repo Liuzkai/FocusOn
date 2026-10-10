@@ -111,15 +111,25 @@ internal sealed class TitleTimerStore
         save.Parameters.AddWithValue("$end", at.Utc.UtcTicks);
         save.Parameters.AddWithValue("$duration", duration);
         save.Parameters.AddWithValue("$id", (object?)segmentId ?? DBNull.Value);
-        save.ExecuteNonQuery();
+        try { save.ExecuteNonQuery(); }
+        catch (SqliteException error)
+        {
+            segmentStart = trustedEnd = null;
+            segmentId = null;
+            Warning = $"标题计时保存失败，已暂停并保留成功保存的时间：{error.Message}";
+            throw;
+        }
         trustedEnd = at;
     }
 
     public void Pause(RecordingTime at)
     {
-        Checkpoint(at);
-        segmentStart = trustedEnd = null;
-        segmentId = null;
+        try { Checkpoint(at); }
+        finally
+        {
+            segmentStart = trustedEnd = null;
+            segmentId = null;
+        }
     }
 
     private RecordedInterval? Live(RecordingTime? now)

@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace FocusOn.Tests;
@@ -131,6 +132,89 @@ public sealed class TitleTimerTests : IDisposable
         session.Finish(At(3));
         Assert.False(Read(session, 9).Timer!.IsRunning);
         Assert.Equal(TimeSpan.FromSeconds(3), Read(session, 9).Timer!.Duration);
+    }
+
+    [Fact]
+    public void Deleting_yesterday_does_not_pause_today_timer_when_foreground_spans_midnight()
+    {
+        using var session = new RecordingSession(Database);
+        session.Observe(new(1, "editor", "编辑器", "跨日窗口"), At(0));
+        session.ChangeTimer(TimerAction.Start, "今天的任务", At(20));
+        session.Checkpoint(At(25));
+        session.DeleteDay(new(2026, 10, 9), TimeZoneInfo.Utc, At(30));
+        Assert.True(Read(session, 10, 30).Timer!.IsRunning);
+        Assert.Equal(TimeSpan.FromSeconds(10), Read(session, 10, 30).Timer!.Duration);
+        session.Checkpoint(At(35));
+        Assert.True(Read(session, 10, 40).Timer!.IsRunning);
+        Assert.Equal(TimeSpan.FromSeconds(20), Read(session, 10, 40).Timer!.Duration);
+    }
+
+    [Fact]
+    public void Repeated_day_deletion_keeps_original_tick_allocation_on_other_days_after_reopen()
+    {
+        var finish = At(172820) with { MonotonicTicks = TimeSpan.FromSeconds(172820).Ticks + 116207 };
+        RecordedInterval preserved;
+        using (var session = new RecordingSession(Database))
+        {
+            session.ChangeTimer(TimerAction.Start, "多日计时", At(0));
+            session.ChangeTimer(TimerAction.Stop, null, finish);
+            preserved = Assert.Single(Read(session, 12).Intervals);
+            session.DeleteDay(new(2026, 10, 10), TimeZoneInfo.Utc, finish);
+            Assert.Equal(preserved.Duration, Assert.Single(Read(session, 12).Intervals).Duration);
+            session.DeleteDay(new(2026, 10, 11), TimeZoneInfo.Utc, finish);
+            Assert.Equal(preserved.Duration, Assert.Single(Read(session, 12).Intervals).Duration);
+        }
+        using var reopened = new RecordingSession(Database);
+        Assert.Equal(preserved.Duration, Assert.Single(Read(reopened, 12).Intervals).Duration);
+        Assert.Empty(Read(reopened, 10).Intervals);
+        Assert.Empty(Read(reopened, 11).Intervals);
+    }
+
+    [Fact]
+    public void Failed_day_delete_preserves_both_timer_and_foreground_history()
+    {
+        using var session = new RecordingSession(Database);
+        session.Observe(new(1, "editor", "编辑器", "窗口"), At(0));
+        session.ChangeTimer(TimerAction.Start, "任务", At(0));
+        session.ChangeTimer(TimerAction.Stop, null, At(5));
+        session.Finish(At(5));
+        var saved = Read(session, 9);
+        using (var writer = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = Database, Pooling = false }.ToString()))
+        {
+            writer.Open();
+            using var writeLock = writer.BeginTransaction(deferred: false);
+            Assert.Throws<SqliteException>(() => session.DeleteDay(new(2026, 10, 9), TimeZoneInfo.Utc, At(6)));
+            Assert.Equal(saved.Intervals, Read(session, 9).Intervals);
+        }
+        session.DeleteDay(new(2026, 10, 9), TimeZoneInfo.Utc, At(7));
+        Assert.Empty(Read(session, 9).Intervals);
+        using var reopened = new RecordingSession(Database);
+        Assert.Empty(Read(reopened, 9).Intervals);
+    }
+
+    [Fact]
+    public void Sleep_save_failure_pauses_timer_at_checkpoint_and_wake_never_counts_sleep()
+    {
+        using var session = new RecordingSession(Database);
+        session.ChangeTimer(TimerAction.Start, "任务", At(0));
+        session.Checkpoint(At(3));
+        using (var writer = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = Database, Pooling = false }.ToString()))
+        {
+            writer.Open();
+            using var writeLock = writer.BeginTransaction(deferred: false);
+            Assert.Throws<SqliteException>(() => session.SetSystemConditions(new(false, true, false, false), null, At(5)));
+            var failed = Read(session, 9, 6);
+            Assert.False(failed.Timer!.IsRunning);
+            Assert.Equal(TimeSpan.FromSeconds(3), failed.Timer.Duration);
+            Assert.Contains("标题计时保存失败", failed.Warning);
+        }
+        session.SetSystemConditions(new(false, false, false, false), new(1, "editor", "编辑器", "唤醒"), At(20));
+        session.Checkpoint(At(25));
+        Assert.False(Read(session, 10, 30).Timer!.IsRunning);
+        Assert.Equal(TimeSpan.FromSeconds(3), Read(session, 10, 30).Timer!.Duration);
+        session.ChangeTimer(TimerAction.Resume, null, At(30));
+        session.ChangeTimer(TimerAction.Stop, null, At(32));
+        Assert.Equal(TimeSpan.FromSeconds(2), Assert.Single(Read(session, 10).Intervals, x => x.Kind == IntervalKind.TaskTimer).Duration);
     }
 
     public void Dispose() { if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true); }
