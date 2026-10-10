@@ -32,7 +32,7 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 
 完成待验收分项并记录真实结果后，再判断08与整体规格是否可关闭。上述发布阶段没有向GitHub推送提交或上传发布产物；后续推送历史见 Agent.md。
 
-## 当前工作副本重新构建与交付（2026-10-10）
+## 当前工作副本首次重新构建与交付（2026-10-10，历史源 1629462）
 
 - 目录：`H:\CodebuddyWork\FocusOn`；环境：Windows 11 专业版 x64，版本 `10.0.26200`，时区 `China Standard Time`。
 - 构建与发布源：`16294624d55d12485eac85e6c32ff72ba78bb698`。发布时工作树干净；本节和本轮验收记录在发布后追加，程序源码没有修改。
@@ -45,3 +45,12 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - `powercfg /a`：当前机器支持 S3，不支持 S0 低电量待机（Modern Standby）；Modern Standby 子项不适用，实际 S3 睡眠/恢复仍未执行。
 - Windows 界面工具初始化成功，但 `sky.list_windows()` 首次、重试、重置后重试均失败：`Computer Use native pipe is unavailable: failed to connect native pipe: 系统找不到指定的文件。 (os error 2)`。本轮没有启动 FocusOn GUI，没有操作正式数据库、自启项或物理电源，也没有进行断网/无 SDK 环境运行。
 - 08 保持 `ready-for-human`，整体规格保持开放。下一步恢复 Windows 界面工具连接或按 `docs/manual-acceptance.md` 在隔离数据目录执行 W01–W10；文件完整性通过不能视为 W10 实机通过。
+
+## 当前发布：Harness 截图版 UI（2026-10-10）
+
+- 发布源 `18d499f176ff99dae5ec57adf603b885414181a3`，包含 09 UI 实现、筛选/高对比度审查修复、深色滚动条及最新使用说明；干净工作树执行发布。此前相同本地路径的源 1629462 包已由本包替换，旧哈希仅为历史证据。
+- 当前完整文件夹：`artifacts/FocusOn-win-x64/`，运行入口 `FocusOn.exe`；ZIP：`artifacts/FocusOn-win-x64.zip`，77,380,219 字节。
+- ZIP SHA256：`33D153BB226BB960F470397F9EEF5A5C7FF8A0203F5DA4E12F6E0094D9DC7135`。旁置 `.sha256`、479 个清单文件的哈希/大小/实际集合、ZIP CRC/文件集合/逐文件内容与 manifest 本体均独立核验通过；三个关键 PE 仍为 AMD64，包含 Core/Desktop 10.0.12。
+- 本轮最终 Release 构建 0 警告/错误，测试 66 passed、0 failed/skipped。日志：`artifacts/ui-harness/build.log`、`test.log`、`preview.log`、`publish.log`；文件核验结果 `artifacts/delivery-verification.json`。
+- UI 预览为真实 WPF 控件的合成数据离屏渲染，见 `artifacts/ui-harness/overview-start.png`、`details.png`、`narrow-details.png`、`search.png`、`no-match.png` 和 `overview-200.png`；最后一项只表示 2 倍像素输出，不代表真实 Windows DPI 验收。
+- 09 工程票关闭。桌面工具仍报 native pipe 缺失（os error 2）；没有操作正式用户活动库、自启、电源或网络，也没有在发布 GUI 上执行 W01–W10。08 和整体规格保持开放。此次新增提交仅在本地，没有推送或上传包。

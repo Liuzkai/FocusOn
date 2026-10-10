@@ -76,3 +76,8 @@ Windows 状态源与手动按钮的真实交互由主代理另行验收；这些
 - RecordingRuntimeTests 用真实临时 SQLite 验证 actor 正常退出保存传入的固定截止点，不采用执行命令时的较晚时刻。
 - 2026-10-10 最终 Release 完整集成：66 passed、0 failed、0 skipped，编译零警告；Standards／Spec 最终复核均无遗留问题。
 - 原生 Windows 通知、托盘/登录、物理电源、完整 WPF 交互和交付程序离线启动仍由 08 人工验收；这些未记为通过。
+
+## 09 UI 更新回归（2026-10-10）
+
+- Harness 截图版最终 UI 源 `18d499f`：Release 完整测试 66 passed、0 failed、0 skipped，生产构建 0 警告/错误。记录会话、真实 SQLite、每日投影与删除测试未改变。
+- 当前日期搜索、空结果及清空恢复另由真实 WPF 控件的合成 DayView 离屏预览检查；该工具和 PNG 属于本地产物，未运行原生采集或真实桌面输入。跨筛选修复与高对比度配对经两轴复核，实际 W07/W08 仍待实机验收。
