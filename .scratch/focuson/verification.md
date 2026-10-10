@@ -91,3 +91,13 @@ Windows原生通知与WPF交互不在上述程序逻辑通过结果内。最终�
 - 发布源7f2ec0e3f738492f37c0bbd037346426f7d3e24b，以干净工作树生成Windows x64自包含文件夹和ZIP，包含.NET 10.0.12桌面/Core运行时与原生SQLite。
 - 479个文件的大小/哈希与manifest一致；ZIP内逐文件内容及manifest本体均独立校验通过。FocusOn、CoreCLR与SQLite三个PE文件均AMD64。ZIP 77,371,844字节，SHA256见delivery.md。
 - 本轮未运行发布GUI或修改实际Run项；W10断网/无SDK机器运行仍待人工。08设ready-for-human，所有剩余Windows分项按manual-acceptance.md处理，整体规格保持开放。
+
+## 当前副本接续验证（2026-10-10，源 1629462）
+
+- Windows 11 专业版 x64 `10.0.26200`，`China Standard Time`；仓库 `H:\CodebuddyWork\FocusOn`。
+- SDK 10.0.401 已下载并按官方 SHA512 校验后解压到 `.tools/dotnet/`；桌面/Core 运行时为 10.0.12。
+- `./build.ps1 build`：Release 通过，0 警告、0 错误。`./build.ps1 test`：66 passed、0 failed、0 skipped。本次为实际重跑，覆盖前述 T01–T13 与补充生命周期测试。
+- 干净工作树执行 `./build.ps1 publish`，源 `16294624d55d12485eac85e6c32ff72ba78bb698`。479 个清单文件、ZIP CRC/清单/逐文件内容、SHA256 和三个关键 PE 的 AMD64 架构均独立校验通过；最新大小和哈希见 delivery.md 的当前副本章节。
+- 本地日志在 `artifacts/qa-20261010/`，独立文件校验结果在 `artifacts/delivery-verification.json`；这些是忽略的本地产物。
+- 界面工具 native pipe 不存在，首次、重试、重置后重试均报 os error 2；本轮未启动 GUI 或执行 W01–W10 交互。未操作正式数据、自启、电源或网络设置。
+- 当前 `powercfg /a` 支持 S3、不支持 Modern Standby：后者子项不适用；锁屏、S3 睡眠、灭屏等实际行为仍未执行。08 与整体规格继续开放。

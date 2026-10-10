@@ -28,3 +28,6 @@
 - 2026-10-10：依赖票均closed，发布源7f2ec0e；66项自动化通过、编译零警告，最终两轴复核无遗留问题。自包含发布成功，独立逐文件/ZIP哈希及原生AMD64检查通过。完整版本、文件和校验值见delivery.md。
 - W10及此前移交的实机分项尚未执行；用户物理Escape停止computer-use后本轮未恢复GUI操作。按照tracker保持ready-for-human，非closed；人工步骤见docs/manual-acceptance.md，父规格保持开放。未执行不是通过。
 
+- 2026-10-10：在当前工作副本 `H:\CodebuddyWork\FocusOn` 接续，安装并校验仓库本地 SDK 10.0.401；源 `1629462` 的 Release 构建 0 警告/错误，完整测试 66 passed、0 failed/skipped。干净工作树重新发布 x64 自包含目录及 ZIP，479 个文件、ZIP 内容/校验和关键 AMD64 架构独立验证通过。最新校验值和日志位置见 delivery.md 的当前副本章节。
+- 本轮 Windows 界面工具 native pipe 缺失，首次、重试及重置后重试均报 os error 2；没有启动 GUI 或执行断网、登录、电源及删除交互。当前机器支持 S3、不支持 Modern Standby，后者子项不适用；其余实机分项仍待验收。保持 ready-for-human，不关闭本票或父规格。
+
