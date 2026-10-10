@@ -14,6 +14,7 @@ public sealed class WindowsForegroundObserver : IDisposable
     private const uint QuitMessage = 0x0012;
     private readonly RecordingClock clock;
     private readonly Action<ForegroundObservation?, RecordingTime> onObservation;
+    private readonly Action<RecordingTime, string> onFailure;
     private readonly WinEventCallback callback;
     private readonly Queue<(nint Window, RecordingTime Time, Action<ForegroundObservation?, RecordingTime> Consumer)> pending = new();
     private readonly ConcurrentQueue<Action<ForegroundObservation?, RecordingTime>> snapshots = new();
@@ -24,10 +25,12 @@ public sealed class WindowsForegroundObserver : IDisposable
     private bool publishing;
     private volatile bool disposed;
 
-    public WindowsForegroundObserver(RecordingClock clock, Action<ForegroundObservation?, RecordingTime> onObservation)
+    public WindowsForegroundObserver(RecordingClock clock, Action<ForegroundObservation?, RecordingTime> onObservation,
+        Action<RecordingTime, string> onFailure)
     {
         this.clock = clock;
         this.onObservation = onObservation;
+        this.onFailure = onFailure;
         callback = HandleEvent;
     }
 
@@ -91,7 +94,7 @@ public sealed class WindowsForegroundObserver : IDisposable
         catch (Exception error)
         {
             if (!started.IsSet) startupError = error;
-            else if (!disposed) onObservation(null, clock.Now());
+            else if (!disposed) onFailure(clock.Now(), $"前台观测已中断：{error.Message}");
         }
         finally
         {
@@ -109,10 +112,10 @@ public sealed class WindowsForegroundObserver : IDisposable
         var time = clock.Now();
         if (eventType == NameChangeEvent && (objectId != 0 || childId != 0 || window != GetForegroundWindow())) return;
         try { Publish(window, time); }
-        catch
+        catch (Exception error)
         {
             // Managed exceptions must never escape a native callback.
-            try { onObservation(null, time); }
+            try { onFailure(time, $"前台观测失败：{error.Message}"); }
             catch { }
         }
     }
@@ -170,7 +173,7 @@ public sealed class WindowsForegroundObserver : IDisposable
         string? title = ReadTitle(window, processId == (uint)Environment.ProcessId);
         GetWindowThreadProcessId(window, out uint stillProcessId);
         if (!IsWindow(window) || stillProcessId != processId) return null;
-        return new ForegroundObservation(window.ToInt64(), key, name, title);
+        return new ForegroundObservation(window.ToInt64(), key, name, title, processId);
     }
 
     private static string? ReadTitle(nint window, bool ownProcess)

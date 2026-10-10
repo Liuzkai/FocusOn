@@ -2,7 +2,7 @@ namespace FocusOn;
 
 public readonly record struct RecordingTime(DateTimeOffset Utc, long MonotonicTicks, string TimeZoneId);
 
-public sealed record ForegroundObservation(long WindowId, string? AppKey, string? AppName, string? WindowTitle);
+public sealed record ForegroundObservation(long WindowId, string? AppKey, string? AppName, string? WindowTitle, uint ProcessId = 0);
 
 public sealed record RecordingConditions(bool ManualPaused, bool Sleeping, bool Locked, bool DisplayOff, bool Available = true);
 

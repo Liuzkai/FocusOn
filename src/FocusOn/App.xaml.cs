@@ -8,23 +8,27 @@ public partial class App : Application
     private RecordingRuntime? runtime;
     private WindowsForegroundObserver? observer;
     private WindowsSessionObserver? sessionObserver;
+    private RecordingClock? recordingClock;
     private volatile bool manualPaused = false;
     private DispatcherTimer? checkpoint;
     private volatile bool exiting;
+    private readonly object controlGate = new();
+    private long systemVersion;
+    private long manualVersion;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
         try
         {
-            var clock = new RecordingClock();
+            var clock = recordingClock = new RecordingClock();
             var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FocusOn");
             // Keep development smoke runs out of the user's activity database.
             if (e.Args.Length == 2 && e.Args[0] == "--data-dir") dataDirectory = Path.GetFullPath(e.Args[1]);
             Directory.CreateDirectory(dataDirectory);
             runtime = new RecordingRuntime(Path.Combine(dataDirectory, "focuson.db"), clock);
             await runtime.Initialized;
-            observer = new WindowsForegroundObserver(clock, runtime.Observe);
+            observer = new WindowsForegroundObserver(clock, runtime.Observe, runtime.MarkUnreliable);
             sessionObserver = new WindowsSessionObserver(state =>
             {
                 var saved = ApplySystemConditions(state);
@@ -62,10 +66,40 @@ public partial class App : Application
     private Task ApplySystemConditions(WindowsSessionState state)
     {
         var conditions = new RecordingConditions(false, state.Sleeping, state.Locked, state.DisplayOff, state.Available);
-        return WithForegroundSnapshot((observation, at) => runtime!.SetSystemConditions(conditions, observation, at));
+        long version;
+        lock (controlGate)
+        {
+            version = ++systemVersion;
+            // A stop boundary needs no title lookup, which can be delayed until after wake.
+            if (!state.Available || state.Sleeping || state.Locked || state.DisplayOff)
+                return runtime is null || recordingClock is null || exiting ? Task.CompletedTask :
+                    runtime.SetSystemConditions(conditions, null, recordingClock.Now());
+        }
+        return WithForegroundSnapshot((observation, at) =>
+        {
+            lock (controlGate)
+                return version != systemVersion || exiting ? Task.CompletedTask :
+                    runtime!.SetSystemConditions(conditions, observation, at);
+        });
     }
 
-    private Task ApplyManualPause(bool paused) => WithForegroundSnapshot((observation, at) => runtime!.SetManualPaused(paused, observation, at));
+    private Task ApplyManualPause(bool paused)
+    {
+        long version;
+        lock (controlGate)
+        {
+            version = ++manualVersion;
+            if (paused)
+                return runtime is null || recordingClock is null || exiting ? Task.CompletedTask :
+                    runtime.SetManualPaused(true, null, recordingClock.Now());
+        }
+        return WithForegroundSnapshot((observation, at) =>
+        {
+            lock (controlGate)
+                return version != manualVersion || exiting ? Task.CompletedTask :
+                    runtime!.SetManualPaused(false, observation, at);
+        });
+    }
 
     private Task WithForegroundSnapshot(Func<ForegroundObservation?, RecordingTime, Task> save)
     {

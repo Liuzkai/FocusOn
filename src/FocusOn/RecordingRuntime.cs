@@ -9,6 +9,8 @@ public sealed class RecordingRuntime : IDisposable
     private readonly Thread worker;
     private readonly TaskCompletionSource initialized = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private volatile string? failure;
+    private volatile string? observationFailure;
+    private long observationFailureAt;
     private volatile bool stopped;
 
     public RecordingRuntime(string databasePath, RecordingClock clock)
@@ -20,12 +22,21 @@ public sealed class RecordingRuntime : IDisposable
 
     public Task Initialized => initialized.Task;
 
+    public void MarkUnreliable(RecordingTime at, string reason) => Submit(session =>
+    {
+        session.MarkUnreliable(at, reason);
+        observationFailure = reason;
+        observationFailureAt = at.MonotonicTicks;
+    });
+
     public void Observe(ForegroundObservation? observation, RecordingTime at)
     {
         Submit(session =>
         {
             session.Observe(observation, at);
             session.Checkpoint(at);
+            failure = null;
+            if (observation is not null && at.MonotonicTicks >= observationFailureAt) observationFailure = null;
         });
     }
 
@@ -35,6 +46,7 @@ public sealed class RecordingRuntime : IDisposable
         {
             session.SetSystemConditions(conditions, observation, at);
             session.Checkpoint(at);
+            failure = null;
             return true;
         });
     }
@@ -43,13 +55,15 @@ public sealed class RecordingRuntime : IDisposable
     {
         session.SetManualPaused(paused, observation, at);
         session.Checkpoint(at);
+        failure = null;
         return true;
     });
 
     public Task<DayView> ReadDayAsync(DateOnly day) => Query(session =>
     {
         var view = session.GetDay(day, TimeZoneInfo.Local, clock.Now());
-        return failure is null ? view : view with { Status = "记录异常", Warning = failure };
+        var warning = failure ?? observationFailure;
+        return warning is null ? view : view with { Status = "记录异常", Warning = warning };
     });
 
     public Task FinishAsync() => Query(session =>

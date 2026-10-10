@@ -51,6 +51,26 @@ public sealed class RecordingSessionTests : IDisposable
     }
 
     [Fact]
+    public void Reused_window_handle_with_a_new_process_splits_usage_without_changing_the_app_identity()
+    {
+        const string appKey = @"c:\apps\editor.exe";
+        using var session = new RecordingSession(DatabasePath);
+        session.Observe(new(100, appKey, "编辑器", "同名窗口", ProcessId: 100), At(0));
+        session.Observe(new(100, appKey, "编辑器", "同名窗口", ProcessId: 100), At(2));
+        session.Observe(new(100, appKey, "编辑器", "同名窗口", ProcessId: 200), At(5));
+        session.Observe(new(100, appKey, "编辑器", "同名窗口", ProcessId: 200), At(7));
+        session.Finish(At(10));
+
+        var day = session.GetDay(DateOnly.FromDateTime(Start.Date), TimeZoneInfo.Utc);
+        Assert.Collection(day.Intervals,
+            interval => AssertUsage(interval, appKey, 0, 5),
+            interval => AssertUsage(interval, appKey, 5, 10));
+        var total = Assert.Single(day.Totals);
+        Assert.Equal(appKey, total.AppKey);
+        Assert.Equal(TimeSpan.FromSeconds(10), total.Duration);
+    }
+
+    [Fact]
     public void Reading_without_input_keeps_one_twenty_minute_segment_and_live_tail_is_not_a_save()
     {
         using var session = new RecordingSession(DatabasePath);
