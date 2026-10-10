@@ -31,4 +31,5 @@
 - 2026-10-10：在当前工作副本 `H:\CodebuddyWork\FocusOn` 接续，安装并校验仓库本地 SDK 10.0.401；源 `1629462` 的 Release 构建 0 警告/错误，完整测试 66 passed、0 failed/skipped。干净工作树重新发布 x64 自包含目录及 ZIP，479 个文件、ZIP 内容/校验和关键 AMD64 架构独立验证通过。最新校验值和日志位置见 delivery.md 的当前副本章节。
 - 本轮 Windows 界面工具 native pipe 缺失，首次、重试及重置后重试均报 os error 2；没有启动 GUI 或执行断网、登录、电源及删除交互。当前机器支持 S3、不支持 Modern Standby，后者子项不适用；其余实机分项仍待验收。保持 ready-for-human，不关闭本票或父规格。
 - 后续用户要求 Harness 截图版 UI，09 工程票已完成；当前发布源更新为 `18d499f`，66 项回归通过，WPF 合成离屏预览通过，479 文件和 ZIP 独立校验通过。新增搜索/时段/详情/缩放平移/深色滚动条的实机步骤已加入 manual-acceptance.md 的 W07，W08 仍需实际高对比度和 DPI 检查。本票继续 ready-for-human，不能沿用旧包哈希；最新校验见 delivery.md 当前发布章节。
+- 10 标题计时/记录范围票完成，最新发布源 c8cbd8a，79项回归、离屏WPF和479文件/ZIP独立核验通过。新路径 artifacts/FocusOn-win-x64-timer，旧版仍运行未替换；新功能真实锁屏/睡眠、重开、删除、输入/DPI/高对比度已加入W07/W09，继续待验收。本票及整体规格保持开放。
 

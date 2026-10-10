@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-10。原始整理基线：`main` / `f02d28e`；最新 Harness 截图版 UI 构建与发布源：`18d499f`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-10。原始整理基线：`main` / `f02d28e`；最新记录范围/标题计时构建与发布源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -124,6 +124,12 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
+**最新 10 票：**用户要求记录范围/24h 双模式、首行标题计时与使用/停止/计时三行；实现 `7d7dc34`、审查修复/发布源 `c8cbd8a`。Release 零警告/错误，79 项真实 SQLite 等回归通过，两轴复核无遗留；离屏 WPF 两种模式、增长、缩放保持、按钮状态、搜索和窄窗口检查通过。10 工程票关闭，真实输入、DPI、高对比度及睡眠/锁屏规则交 08，整体规格保持开放。
+
+新包位于 `artifacts/FocusOn-win-x64-timer/` 和对应 ZIP，479 文件、哈希、ZIP 内容及关键 AMD64 架构核验通过。旧路径 `artifacts/FocusOn-win-x64/` 的源 18d499f 程序仍以 PID 11676 运行，本轮没有退出或覆盖它；新包尚未替换正在运行的实例。升级时先托盘退出旧版，再从新目录启动。
+
+09 后续用户已要求启动并 commit/push：旧版正常启动，标题 FocusOn · 2026-10-10、Responding True；原 5 个提交已推送至 origin/main 的 `5e1876e`。这些基础启动/推送事实不等于 W01–W10 通过，下文此前“未启动/未推送”是相应历史阶段记录。
+
 截至最新交接，01 前台记录、02 停止恢复、03 可信保存、04 每日历史、05 时间线、06 托盘自启单实例、07 按天删除及 09 Harness 截图版 UI 均为 `closed`；[08 离线交付与整体验收](.scratch/focuson/issues/08-offline-x64-delivery.md) 为 `ready-for-human`；整体规格仍为 `ready-for-agent`，未关闭。
 
 **历史证据，非本次重跑：**2026-10-10 Release 共 66 项通过，0 失败/跳过、编译零警告；发布源 `7f2ec0e` 的 x64 自包含目录、479 个文件及 ZIP 哈希已核验。旧机器为 Windows 11 Pro x64、双屏、支持 S3、不支持 Modern Standby；这不是对当前机器或其他硬件的结论。历史对话后续另有一次成功启动记录和推送记录，补充了交付文档“本轮未启动/未推送”的阶段说明，但没有补齐 W01–W10。
@@ -145,6 +151,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 原始整理仅涉及文档和本地环境检查，随后文档已提交推送。本轮接续已完成 SDK 准备、构建、测试和发布，但 Windows 界面工具首次、重试及重置后重试均提示 native pipe 不存在（os error 2），因此未启动 GUI，也未操作正式数据、自启、物理电源或网络设置。后续先恢复界面工具连接，或由用户按隔离清单人工验收，再按实际结果判断是否满足 08 和整体完成条件。
 
 ## 8. 后续记录维护
+
+10 新入口：TitleTimerStore 保存独立标题与片段，RecordingSession 的 ChangeTimer/GetDay/DeleteDay 统一公开边界，RecordingRuntime 串行执行；TimelineBounds 给出记录范围或真实本地日，TimelineControl 默认自动随记录增长。新表 title_timers/timer_segments 与原库并存；软件汇总只包含 Usage。锁屏继续、睡眠/退出/异常暂停及重开手动继续为暂未收到偏好回复时采用的默认规则，见 ADR 0002。
 
 本文件保留可复用的决策、入口、风险和最新交接状态；详细测试过程写入对应票 Comments、`verification.md` 或人工清单。新增产品取舍更新设计/规格，术语更新 `GLOSSARY.md`，重大计时决策补 ADR；避免在多处复制完整规格。
 

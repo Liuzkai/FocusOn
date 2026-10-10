@@ -4,6 +4,8 @@ Windows 11 个人前台软件使用记录。以激活窗口为时间归属，保
 
 ## 使用
 
+2026-10-10 最新标题计时版本：`artifacts/FocusOn-win-x64-timer/FocusOn.exe`，完整 ZIP 为 `artifacts/FocusOn-win-x64-timer.zip`。旧版正在运行，因此使用独立交付路径；从旧托盘退出后，再启动新版。
+
 自包含交付目录为 `artifacts/FocusOn-win-x64`，压缩包为 `artifacts/FocusOn-win-x64.zip`。完整解压到固定位置，再运行 `FocusOn.exe`；首次普通启动会配置当前用户登录自启。关闭窗口后仍在托盘记录，停止程序请从托盘明确退出。
 
 详细操作和本地数据位置见[使用说明](docs/usage.md)。[人工验收清单](docs/manual-acceptance.md)记录发布程序的 Windows 操作步骤；本轮未执行的硬件／界面检查仍是待验收。

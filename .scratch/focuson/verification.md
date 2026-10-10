@@ -110,3 +110,10 @@ Windows原生通知与WPF交互不在上述程序逻辑通过结果内。最终�
 - Standards 初审 1 项 P2（高对比度前景/背景不配对）；Spec 初审 2 项 P2（相同配色问题，以及点击仅被范围排除记录时误清搜索）。`8ebd151` 修复，后续两轴复核均 0 遗留问题；深色滚动条追加复核无问题。
 - `./build.ps1 publish`：源 `18d499f176ff99dae5ec57adf603b885414181a3`，479 文件与 ZIP/manifest/AMD64 独立核验通过；新大小及 SHA256 见 delivery.md 当前发布章节。
 - 本轮再次检查桌面工具仍为 native pipe 不存在 os error 2；真实 W07/W08 输入、系统 DPI、高对比度、滚动条拖动及 W01–W10 硬件/离线行为仍交 08。合成图和代码复核不能代替这些实机检查。
+
+## 10 记录范围与标题计时（2026-10-10）
+
+- 实现7d7dc34，修复/发布源c8cbd8a。`./build.ps1 build` 0 警告/错误，`./build.ps1 test` 79 passed、0 failed/skipped。新增 TitleTimerTests（11）/TimelineBoundsTests（2），沿用公开 RecordingSession、受控时间与真实临时 SQLite 边界，验证状态控制、独立汇总、检查点/重开、跨日、删除不复活/无关日不停、重复裁切 tick、真实写锁与睡眠失败恢复。
+- Standards 首审1项P2，Spec首审2项P2；跨日删除误暂停及保存失败未暂停已修复并回归，两轴最终均0遗留。
+- WPF 离屏合成 DayView 检查记录范围/24h切换、记录增长、刷新保持缩放、开始/暂停/停止按钮、搜索5条/无匹配0条/清空恢复32条及窄窗口，检查通过，预览 artifacts/ui-timer/。没有真实桌面输入或用户库写入。
+- 独立新版自包含包479文件、ZIP内容/哈希/AMD64核验通过，见delivery.md当前发布。旧版进程未退出，新包未替换当前运行实例；新功能物理睡眠/锁屏、输入、DPI/高对比度及W10继续移交08。

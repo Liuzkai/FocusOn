@@ -46,7 +46,7 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - Windows 界面工具初始化成功，但 `sky.list_windows()` 首次、重试、重置后重试均失败：`Computer Use native pipe is unavailable: failed to connect native pipe: 系统找不到指定的文件。 (os error 2)`。本轮没有启动 FocusOn GUI，没有操作正式数据库、自启项或物理电源，也没有进行断网/无 SDK 环境运行。
 - 08 保持 `ready-for-human`，整体规格保持开放。下一步恢复 Windows 界面工具连接或按 `docs/manual-acceptance.md` 在隔离数据目录执行 W01–W10；文件完整性通过不能视为 W10 实机通过。
 
-## 当前发布：Harness 截图版 UI（2026-10-10）
+## 历史发布：Harness 截图版 UI（2026-10-10）
 
 - 发布源 `18d499f176ff99dae5ec57adf603b885414181a3`，包含 09 UI 实现、筛选/高对比度审查修复、深色滚动条及最新使用说明；干净工作树执行发布。此前相同本地路径的源 1629462 包已由本包替换，旧哈希仅为历史证据。
 - 当前完整文件夹：`artifacts/FocusOn-win-x64/`，运行入口 `FocusOn.exe`；ZIP：`artifacts/FocusOn-win-x64.zip`，77,380,219 字节。
@@ -54,3 +54,11 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - 本轮最终 Release 构建 0 警告/错误，测试 66 passed、0 failed/skipped。日志：`artifacts/ui-harness/build.log`、`test.log`、`preview.log`、`publish.log`；文件核验结果 `artifacts/delivery-verification.json`。
 - UI 预览为真实 WPF 控件的合成数据离屏渲染，见 `artifacts/ui-harness/overview-start.png`、`details.png`、`narrow-details.png`、`search.png`、`no-match.png` 和 `overview-200.png`；最后一项只表示 2 倍像素输出，不代表真实 Windows DPI 验收。
 - 09 工程票关闭。桌面工具仍报 native pipe 缺失（os error 2）；没有操作正式用户活动库、自启、电源或网络，也没有在发布 GUI 上执行 W01–W10。08 和整体规格保持开放。此次新增提交仅在本地，没有推送或上传包。
+
+## 当前发布：记录范围与标题计时（2026-10-10）
+
+- 源 `c8cbd8a80e0254e9f0dc36bc3cb9c2e8dd8b552d`，干净工作树执行 `./build.ps1 publish -PackageName FocusOn-win-x64-timer`。实现 7d7dc34，修复 c8cbd8a；最终 Release 构建 0 警告/错误，79 项测试通过、0 失败/跳过，两轴复核无遗留。
+- 最新完整目录 `artifacts/FocusOn-win-x64-timer/`，入口 FocusOn.exe；ZIP `artifacts/FocusOn-win-x64-timer.zip`，77,395,469 字节，SHA256 `CE39DEE04936B3AC1680EB2EE9FB4134067B95CCA229F26468695A126DF41CDB`。
+- `python .tools/verify_delivery.py FocusOn-win-x64-timer`：479 清单文件大小/哈希/实际集合、manifest 源提交、ZIP CRC/集合/逐文件内容与旁置 SHA256 全部通过；FocusOn.exe/coreclr.dll/e_sqlite3.dll 均 AMD64，包含 Core/Desktop 10.0.12。结果 `artifacts/FocusOn-win-x64-timer-verification.json`。
+- 合成 WPF 预览在 artifacts/ui-timer/，检查两模式、增长、缩放保持、计时控制状态及搜索；没有运行真实采集或操作用户库。旧目录的源18d499f仍以 PID11676 运行，保持旧目录不覆盖；新版尚未替换旧实例，升级先从旧托盘退出。
+- 10 工程票关闭，真实鼠标/键盘、DPI、高对比度、锁屏/睡眠及离线无 SDK 运行仍交08，未执行不记通过。上节未推送/未启动为当时阶段事实；09后已按用户要求正常启动旧包，并推送 main 至5e1876e。

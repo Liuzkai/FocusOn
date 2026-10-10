@@ -4,7 +4,7 @@
 
 **Blocked by:** 09（closed）
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -18,3 +18,7 @@
 ## Comments
 
 - 2026-10-10：实现基线 `5e1876e`。向用户询问锁屏规则，同时推进不依赖回复的工作。
+- 实现 `7d7dc34`，修复/发布源 `c8cbd8a80e0254e9f0dc36bc3cb9c2e8dd8b552d`。79 项 Release 测试通过、0 失败/跳过，构建 0 警告/错误；新增公开会话/真实 SQLite 验证标题控制、独立汇总、跨日、重开、删除、原始 tick 分配和实际写锁失败恢复。
+- Standards 初审 1 项 P2，Spec 初审 2 项 P2：跨日软件片段删除误暂停无关标题、睡眠边界保存失败未暂停。c8cbd8a 修复并加入回归，最终两轴复核无遗留问题。
+- WPF 合成 DayView 离屏检查记录范围/24h 切换、视窗增长、刷新不复位缩放、开始/暂停/停止按钮、搜索、无匹配、窄窗口；图在 artifacts/ui-timer/。未操作真实桌面输入，未测物理睡眠/锁屏或系统 DPI/高对比度，转交 08（manual-acceptance.md 已补步骤）。
+- 使用新包名 FocusOn-win-x64-timer，避免覆盖仍运行的旧版。479 个清单文件、ZIP 内容/CRC/哈希、桌面/Core 运行时及三个 AMD64 PE 独立核验通过，具体校验见 delivery.md。按 tracker 关闭工程票，08 和整体规格仍开放。锁屏偏好未回复，使用已说明的默认规则。
