@@ -85,3 +85,9 @@ Windows原生通知与WPF交互不在上述程序逻辑通过结果内。最终�
 - 2026-10-10：完整 Release 测试 66 passed、0 failed、0 skipped，编译零警告；真实旧 v1 SQLite 库兼容、私有原始分配基准及重复删除均通过。
 - 首次完整运行仅含引号自启路径一项失败；加入显式路径引号校验后全套通过。Standards／Spec 最终复核无遗留问题。
 - 发布脚本 dirty 工作树防护已实际触发并在编译前拒绝发布；不会把未提交源代码标成 HEAD 对应的产物。
+
+## 08 发布结果
+
+- 发布源7f2ec0e3f738492f37c0bbd037346426f7d3e24b，以干净工作树生成Windows x64自包含文件夹和ZIP，包含.NET 10.0.12桌面/Core运行时与原生SQLite。
+- 479个文件的大小/哈希与manifest一致；ZIP内逐文件内容及manifest本体均独立校验通过。FocusOn、CoreCLR与SQLite三个PE文件均AMD64。ZIP 77,371,844字节，SHA256见delivery.md。
+- 本轮未运行发布GUI或修改实际Run项；W10断网/无SDK机器运行仍待人工。08设ready-for-human，所有剩余Windows分项按manual-acceptance.md处理，整体规格保持开放。
