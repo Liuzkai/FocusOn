@@ -129,14 +129,56 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Border BorderBrush="{DynamicResource ReviewBorder}" BorderThickness="0,0,0,1" Padding="10,8">
+            <StackPanel>
+                <Grid Margin="0,0,0,7">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="FocusOn" FontWeight="SemiBold" Margin="2,0,16,0" VerticalAlignment="Center" />
+                    <Border Grid.Column="1" Background="{DynamicResource ReviewSurface}" BorderBrush="{DynamicResource ReviewBorder}" BorderThickness="1" CornerRadius="4" Margin="0,0,12,0" Padding="8,5">
+                        <Grid>
+                            <TextBox x:Name="TimerTitleBox" MaxLength="200" Background="Transparent" BorderThickness="0" Padding="0" AutomationProperties.Name="计时标题" />
+                            <TextBlock Text="写一个标题，开始计时…" IsHitTestVisible="False" Foreground="{DynamicResource ReviewMuted}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=TimerTitleBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock x:Name="TimerElapsedText" FontFamily="Consolas" FontSize="16" Foreground="{DynamicResource ReviewAccent}" VerticalAlignment="Center" Margin="0,0,10,0" AutomationProperties.Name="标题计时累计时长" />
+                        <Button x:Name="StartTimerButton" Content="开始计时" Click="StartTimer_Click" Background="{DynamicResource ReviewHover}" Foreground="{DynamicResource ReviewText}" />
+                        <Button x:Name="PauseTimerButton" Content="暂停" Click="PauseTimer_Click" Visibility="Collapsed" AutomationProperties.Name="暂停或继续标题计时" />
+                        <Button x:Name="StopTimerButton" Content="停止" Click="StopTimer_Click" Visibility="Collapsed" AutomationProperties.Name="停止并保存标题计时" />
+                    </StackPanel>
+                </Grid>
+                <TextBlock x:Name="TimerErrorText" Foreground="{DynamicResource ReviewAccent}" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             <DockPanel LastChildFill="False">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="StatusText" Text="正在读取" Foreground="{DynamicResource ReviewMuted}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <Button x:Name="PauseButton" Content="暂停" Click="PauseButton_Click" AutomationProperties.Name="暂停或继续记录" />
+                    <Button x:Name="PauseButton" Content="暂停记录" Click="PauseButton_Click" AutomationProperties.Name="暂停或继续记录" />
                     <Button x:Name="DeleteDayButton" Content="删除当天…" Click="DeleteDay_Click" AutomationProperties.Name="确认删除所选日期的记录" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="FocusOn" FontWeight="SemiBold" Margin="2,0,12,0" VerticalAlignment="Center" />
                     <Button x:Name="PreviousDayButton" Content="‹" Click="PreviousDay_Click" AutomationProperties.Name="上一天" />
                     <DatePicker x:Name="ViewDatePicker" Width="128" FontSize="12" VerticalAlignment="Center" SelectedDateChanged="ViewDatePicker_SelectedDateChanged" AutomationProperties.Name="回看日期" />
                     <Button x:Name="NextDayButton" Content="›" Click="NextDay_Click" AutomationProperties.Name="下一天" />
@@ -144,6 +186,7 @@
                     <TextBlock x:Name="DateText" Visibility="Collapsed" />
                 </StackPanel>
             </DockPanel>
+            </StackPanel>
         </Border>
         <Border x:Name="WarningPanel" Grid.Row="1" Visibility="Collapsed" Background="{DynamicResource ReviewSurface}" BorderBrush="{DynamicResource ReviewAccent}" BorderThickness="0,0,0,1" Padding="12,8">
             <TextBlock x:Name="WarningText" TextWrapping="Wrap" />
@@ -159,6 +202,8 @@
                     <Button x:Name="DurationButton" Content="◷  时长" Background="{DynamicResource ReviewHover}" Foreground="{DynamicResource ReviewText}" Click="Duration_Click" AutomationProperties.Name="显示或隐藏时长时间线" />
                     <Button x:Name="GroupsButton" Content="时段  ⊟" Click="Groups_Click" AutomationProperties.Name="显示或隐藏时段分隔" />
                     <Button x:Name="DetailsButton" Content="详情  ⊞" Click="Details_Click" AutomationProperties.Name="显示或隐藏记录详情" />
+                    <Button x:Name="RecordedModeButton" Content="记录范围" Click="RecordedMode_Click" AutomationProperties.Name="时间轴显示当天记录范围并自动增长" />
+                    <Button x:Name="FullDayModeButton" Content="24h" Click="FullDayMode_Click" AutomationProperties.Name="时间轴显示本地全天" />
                 </StackPanel>
                 <Border Grid.Column="2" CornerRadius="5" BorderBrush="{DynamicResource ReviewMuted}" BorderThickness="0.5" Background="{DynamicResource ReviewSurface}" Padding="8,4">
                     <Grid>
@@ -190,7 +235,7 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button x:Name="ZoomInButton" Content="＋" Click="ZoomIn_Click" Padding="6,1" AutomationProperties.Name="放大时间线" />
                     <Button x:Name="ZoomOutButton" Content="−" Click="ZoomOut_Click" Padding="6,1" AutomationProperties.Name="缩小时间线" />
-                    <Button x:Name="ResetDayButton" Content="全天" Click="ResetDay_Click" Padding="6,1" />
+                    <Button x:Name="ResetDayButton" Content="重置视图" Click="ResetDay_Click" Padding="6,1" />
                     <Button x:Name="ClearRangeButton" Content="取消范围" Click="ClearRange_Click" Padding="6,1" />
                 </StackPanel>
                 <TextBlock x:Name="ViewRangeText" FontSize="11" Foreground="{DynamicResource ReviewMuted}" VerticalAlignment="Center" />
@@ -294,7 +339,7 @@
             </Border>
         </Grid>
         <Border Grid.Row="6" Padding="12,6" BorderBrush="{DynamicResource ReviewBorder}" BorderThickness="0,1,0,0">
-            <TextBlock FontSize="11" Foreground="{DynamicResource ReviewMuted}" Text="仅记录激活窗口 · 灰色表示停止计时，斜纹表示未记录，空白表示无可用记录 · 实时尾段可能尚未保存" TextWrapping="Wrap" />
+            <TextBlock FontSize="11" Foreground="{DynamicResource ReviewMuted}" Text="使用仅记录激活窗口 · 停止为灰色，未记录为使用行斜纹，计时为蓝色 · 实时尾段可能尚未保存" TextWrapping="Wrap" />
         </Border>
     </Grid>
 </Window>

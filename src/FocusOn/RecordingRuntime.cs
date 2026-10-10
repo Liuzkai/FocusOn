@@ -66,6 +66,12 @@ public sealed class RecordingRuntime : IDisposable
         return warning is null ? view : view with { Status = "记录异常", Warning = warning };
     });
 
+    public Task ChangeTimerAsync(TimerAction action, string? title = null) => Query(session =>
+    {
+        session.ChangeTimer(action, title, clock.Now());
+        return true;
+    });
+
     public Task DeleteDayAsync(DateOnly day) => Query(session =>
     {
         session.DeleteDay(day, TimeZoneInfo.Local, clock.Now());

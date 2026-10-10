@@ -13,7 +13,8 @@ public enum IntervalKind
     Sleep,
     Locked,
     DisplayOff,
-    Unrecorded
+    Unrecorded,
+    TaskTimer
 }
 
 public sealed record RecordedInterval(
@@ -29,6 +30,10 @@ public sealed record RecordedInterval(
 
 public sealed record AppTotal(string AppKey, string AppName, TimeSpan Duration);
 
+public sealed record TitleTimerState(string Title, TimeSpan Duration, bool IsRunning);
+
+public enum TimerAction { Start, Pause, Resume, Stop }
+
 public sealed record DayView(
     DateOnly Date,
     DateTimeOffset StartUtc,
@@ -36,7 +41,8 @@ public sealed record DayView(
     IReadOnlyList<RecordedInterval> Intervals,
     IReadOnlyList<AppTotal> Totals,
     string Status,
-    string? Warning)
+    string? Warning,
+    TitleTimerState? Timer = null)
 {
     public IReadOnlyList<RecordedInterval> FilterRange(DateTimeOffset startUtc, DateTimeOffset endUtc) => endUtc <= startUtc
         ? []

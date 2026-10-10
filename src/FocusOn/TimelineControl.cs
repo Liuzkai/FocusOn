@@ -38,6 +38,10 @@ public sealed class TimelineControl : FrameworkElement
     private double? panStartX;
     private DateTimeOffset panStartUtc;
     private DateTimeOffset panEndUtc;
+    private bool autoViewport = true;
+    private DateTimeOffset boundsStart;
+    private DateTimeOffset boundsEnd;
+    public bool FullDay { get; private set; }
 
     public TimelineControl()
     {
@@ -58,7 +62,7 @@ public sealed class TimelineControl : FrameworkElement
     public DateTimeOffset VisibleStart => visibleStart;
     public DateTimeOffset VisibleEnd => visibleEnd;
     public bool CanZoomIn => day is not null && visibleEnd - visibleStart > TimeSpan.FromSeconds(2);
-    public bool CanZoomOut => day is not null && visibleEnd - visibleStart < day.EndUtc - day.StartUtc;
+    public bool CanZoomOut => day is not null && visibleEnd - visibleStart < boundsEnd - boundsStart;
 
     public void SetSearch(string query)
     {
@@ -71,10 +75,17 @@ public sealed class TimelineControl : FrameworkElement
         var changedDay = day is null || day.Date != value.Date || day.StartUtc != value.StartUtc || day.EndUtc != value.EndUtc;
         day = value;
         intervals = value.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+        (boundsStart, boundsEnd) = TimelineBounds.For(value, FullDay);
+        if (changedDay || autoViewport)
+        {
+            visibleStart = boundsStart;
+            visibleEnd = boundsEnd;
+            autoViewport = true;
+        }
+        else if (visibleStart < boundsStart || visibleEnd > boundsEnd)
+            SetViewport(Middle(visibleStart, visibleEnd), (visibleEnd - visibleStart).Ticks);
         if (changedDay)
         {
-            visibleStart = value.StartUtc;
-            visibleEnd = value.EndUtc;
             Range = null;
             selectedId = null;
             keyboardAnchor = null;
@@ -107,6 +118,7 @@ public sealed class TimelineControl : FrameworkElement
         if (interval is null) return;
         if (!IsKeyboardFocused) keyboardAnchor = null;
         selectedId = id;
+        if (reveal && (interval.EndUtc <= boundsStart || interval.StartUtc >= boundsEnd)) SetFullDay(true);
         if (reveal && (interval.EndUtc <= visibleStart || interval.StartUtc >= visibleEnd))
             SetViewport(Middle(interval.StartUtc, interval.EndUtc), (visibleEnd - visibleStart).Ticks);
         AutomationProperties.SetName(this, $"已选：{TipText(interval)}。方向键选择记录，Shift加方向键选择范围，加减键缩放。");
@@ -146,11 +158,19 @@ public sealed class TimelineControl : FrameworkElement
     public void ResetDay()
     {
         if (day is null) return;
-        visibleStart = day.StartUtc;
-        visibleEnd = day.EndUtc;
+        autoViewport = true;
+        (boundsStart, boundsEnd) = TimelineBounds.For(day, FullDay);
+        visibleStart = boundsStart;
+        visibleEnd = boundsEnd;
         ClearRange();
         InvalidateVisual();
         ViewChanged?.Invoke();
+    }
+
+    public void SetFullDay(bool fullDay)
+    {
+        FullDay = fullDay;
+        ResetDay();
     }
 
     public void ClearRange()
@@ -182,9 +202,10 @@ public sealed class TimelineControl : FrameworkElement
     private void SetViewport(DateTimeOffset center, long requestedTicks)
     {
         if (day is null) return;
-        var width = Math.Clamp(requestedTicks, Math.Min(TimeSpan.FromSeconds(2).Ticks, (day.EndUtc - day.StartUtc).Ticks),
-            (day.EndUtc - day.StartUtc).Ticks);
-        var first = Math.Clamp(center.UtcTicks - width / 2, day.StartUtc.UtcTicks, day.EndUtc.UtcTicks - width);
+        var width = Math.Clamp(requestedTicks, Math.Min(TimeSpan.FromSeconds(2).Ticks, (boundsEnd - boundsStart).Ticks),
+            (boundsEnd - boundsStart).Ticks);
+        var first = Math.Clamp(center.UtcTicks - width / 2, boundsStart.UtcTicks, boundsEnd.UtcTicks - width);
+        autoViewport = width == (boundsEnd - boundsStart).Ticks;
         visibleStart = new DateTimeOffset(first, TimeSpan.Zero);
         visibleEnd = visibleStart.AddTicks(width);
         InvalidateVisual();
@@ -195,7 +216,8 @@ public sealed class TimelineControl : FrameworkElement
     private double PlotWidth => Math.Max(1, ActualWidth - LabelWidth);
     private double X(DateTimeOffset time) => LabelWidth + (time - visibleStart).Ticks / (double)(visibleEnd - visibleStart).Ticks * PlotWidth;
     private DateTimeOffset TimeAt(double x) => visibleStart.AddTicks((long)(Math.Clamp((x - LabelWidth) / PlotWidth, 0, 1) * (visibleEnd - visibleStart).Ticks));
-    private static int Lane(RecordedInterval interval) => interval.Kind == IntervalKind.Usage ? 0 : interval.Kind == IntervalKind.Unrecorded ? 2 : 1;
+    private static int Lane(RecordedInterval interval) => interval.Kind == IntervalKind.TaskTimer ? 2
+        : interval.Kind is IntervalKind.Usage or IntervalKind.Unrecorded ? 0 : 1;
     private RecordedInterval? Hit(DateTimeOffset time, double y) => intervals.FirstOrDefault(x => x.StartUtc <= time && x.EndUtc > time
         && y >= BarTop + Lane(x) * LaneSpacing && y <= BarTop + Lane(x) * LaneSpacing + BarHeight);
 
@@ -205,7 +227,7 @@ public sealed class TimelineControl : FrameworkElement
         if (ActualWidth <= LabelWidth) return;
         context.DrawRectangle(ReviewTheme.Surface, null, new Rect(0, 0, ActualWidth, PlotHeight));
         context.DrawLine(new Pen(ReviewTheme.Border, 0.5), new Point(LabelWidth, 0), new Point(LabelWidth, PlotHeight));
-        var laneLabels = new[] { "使用", "停止", "未记录" };
+        var laneLabels = new[] { "使用", "停止", "计时" };
         for (var lane = 0; lane < laneLabels.Length; lane++)
         {
             var label = Text(laneLabels[lane], ReviewTheme.Muted);
@@ -228,6 +250,7 @@ public sealed class TimelineControl : FrameworkElement
             hasVisibleRecord = true;
             var rectangle = new Rect(left, BarTop + Lane(interval) * LaneSpacing, right - left, BarHeight);
             var brush = interval.Kind == IntervalKind.Usage ? ApplicationBrush(interval.AppKey)
+                : interval.Kind == IntervalKind.TaskTimer ? ReviewTheme.Accent
                 : interval.Kind == IntervalKind.Unrecorded ? hatch : ReviewTheme.Muted;
             var matches = DisplayText.MatchesSearch(interval, searchText);
             context.PushOpacity(matches ? 0.85 : 0.16);

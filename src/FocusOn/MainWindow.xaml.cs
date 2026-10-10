@@ -11,6 +11,10 @@ public partial class MainWindow : Window
 {
     private readonly Func<DateOnly, Task<DayView>> _readDay;
     private readonly Func<DateOnly, Task> _deleteDay;
+    private readonly Func<TimerAction, string?, Task>? _changeTimer;
+    private bool _changingTimer;
+    private TitleTimerState? _timerState;
+    private long _timerVersion;
     private readonly ObservableCollection<IntervalRow> _rows = [];
     private readonly DispatcherTimer _refreshTimer;
     private bool _refreshing;
@@ -24,10 +28,12 @@ public partial class MainWindow : Window
     private string _searchText = string.Empty;
     private bool _showGroups = true;
 
-    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay)
+    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay,
+        Func<TimerAction, string?, Task>? changeTimer = null)
     {
         _readDay = readDay ?? throw new ArgumentNullException(nameof(readDay));
         _deleteDay = deleteDay ?? throw new ArgumentNullException(nameof(deleteDay));
+        _changeTimer = changeTimer;
         InitializeComponent();
         ReviewTheme.Apply(Resources);
         SystemParameters.StaticPropertyChanged += SystemThemeChanged;
@@ -54,7 +60,7 @@ public partial class MainWindow : Window
 
     public event EventHandler? PauseRequested;
 
-    public void SetPauseState(bool paused) => PauseButton.Content = paused ? "继续" : "暂停";
+    public void SetPauseState(bool paused) => PauseButton.Content = paused ? "继续记录" : "暂停记录";
 
     private void PauseButton_Click(object sender, RoutedEventArgs e) => PauseRequested?.Invoke(this, EventArgs.Empty);
 
@@ -75,6 +81,7 @@ public partial class MainWindow : Window
         if (_refreshing || _stopped || _deleting) return;
         _refreshing = true;
         var requestedDate = _selectedDate;
+        var requestedTimerVersion = _timerVersion;
         try
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
@@ -82,7 +89,7 @@ public partial class MainWindow : Window
             UpdateDateControls();
             requestedDate = _selectedDate;
             var view = await _readDay(requestedDate);
-            if (_stopped || _deleting || requestedDate != _selectedDate) return;
+            if (_stopped || _deleting || requestedDate != _selectedDate || requestedTimerVersion != _timerVersion) return;
             ShowDay(view);
         }
         catch (Exception ex)
@@ -96,7 +103,7 @@ public partial class MainWindow : Window
         finally
         {
             _refreshing = false;
-            if (!_stopped && requestedDate != _selectedDate) _ = RefreshAsync();
+            if (!_stopped && (requestedDate != _selectedDate || requestedTimerVersion != _timerVersion)) _ = RefreshAsync();
         }
     }
 
@@ -119,7 +126,7 @@ public partial class MainWindow : Window
 
     private async void DeleteDay_Click(object sender, RoutedEventArgs e)
     {
-        if (_deleting || _stopped) return;
+        if (_deleting || _changingTimer || _stopped) return;
         var day = _selectedDate;
         var (start, end) = DailyProjection.Bounds(day, TimeZoneInfo.Local);
         var answer = MessageBox.Show(this,
@@ -191,6 +198,7 @@ public partial class MainWindow : Window
             _rows.Clear();
         }
         _dayView = view;
+        ShowTimer(view.Timer);
         TimelineView.SetDay(view);
         TimelineView.SetSearch(_searchText);
         UpdateDateControls();
@@ -266,6 +274,8 @@ public partial class MainWindow : Window
     private void ZoomIn_Click(object sender, RoutedEventArgs e) => TimelineView.ZoomIn();
     private void ZoomOut_Click(object sender, RoutedEventArgs e) => TimelineView.ZoomOut();
     private void ResetDay_Click(object sender, RoutedEventArgs e) => TimelineView.ResetDay();
+    private void RecordedMode_Click(object sender, RoutedEventArgs e) => TimelineView.SetFullDay(false);
+    private void FullDayMode_Click(object sender, RoutedEventArgs e) => TimelineView.SetFullDay(true);
     private void ClearRange_Click(object sender, RoutedEventArgs e) => TimelineView.ClearRange();
 
     private void Search_TextChanged(object sender, TextChangedEventArgs e)
@@ -317,6 +327,8 @@ public partial class MainWindow : Window
         ZoomInButton.IsEnabled = TimelineView.CanZoomIn;
         ZoomOutButton.IsEnabled = TimelineView.CanZoomOut;
         ResetDayButton.IsEnabled = _dayView is not null;
+        RecordedModeButton.SetResourceReference(BackgroundProperty, TimelineView.FullDay ? "ReviewBackground" : "ReviewHover");
+        FullDayModeButton.SetResourceReference(BackgroundProperty, TimelineView.FullDay ? "ReviewHover" : "ReviewBackground");
         ClearRangeButton.IsEnabled = TimelineView.Range is not null;
         RangeText.Text = TimelineView.Range is { } range
             ? $"日志范围：{DisplayText.Time(range.StartUtc, true)} — {DisplayText.Time(range.EndUtc, true)}（仅筛选日志）"
@@ -324,7 +336,50 @@ public partial class MainWindow : Window
             : "全天记录 · 拖选筛选，滚轮缩放，右键取消范围";
         ViewRangeText.Text = _dayView is null ? string.Empty : TimelineView.CanZoomOut
             ? $"显示：{DisplayText.Time(TimelineView.VisibleStart)} — {DisplayText.Time(TimelineView.VisibleEnd)}"
-            : "显示：全天";
+            : TimelineView.FullDay ? "显示：24h · 本地全天" : $"记录：{DisplayText.Time(TimelineView.VisibleStart)} — {DisplayText.Time(TimelineView.VisibleEnd)}";
+    }
+
+    private void ShowTimer(TitleTimerState? state)
+    {
+        _timerState = state;
+        TimerTitleBox.IsReadOnly = state is not null;
+        if (state is not null) TimerTitleBox.Text = state.Title;
+        StartTimerButton.Visibility = state is null ? Visibility.Visible : Visibility.Collapsed;
+        PauseTimerButton.Visibility = StopTimerButton.Visibility = state is null ? Visibility.Collapsed : Visibility.Visible;
+        PauseTimerButton.Content = state?.IsRunning == true ? "暂停" : "继续";
+        TimerElapsedText.Text = state is null ? string.Empty : $"{(int)state.Duration.TotalHours:00}:{state.Duration.Minutes:00}:{state.Duration.Seconds:00}";
+        TimerElapsedText.ToolTip = state is null ? null : state.IsRunning ? "正在计时" : "已暂停";
+    }
+
+    private async void StartTimer_Click(object sender, RoutedEventArgs e) => await ChangeTimerAsync(TimerAction.Start);
+    private async void PauseTimer_Click(object sender, RoutedEventArgs e) => await ChangeTimerAsync(_timerState?.IsRunning == true ? TimerAction.Pause : TimerAction.Resume);
+    private async void StopTimer_Click(object sender, RoutedEventArgs e) => await ChangeTimerAsync(TimerAction.Stop);
+
+    private async Task ChangeTimerAsync(TimerAction action)
+    {
+        if (_changingTimer || _deleting || _stopped || _changeTimer is null) return;
+        if (action == TimerAction.Start && string.IsNullOrWhiteSpace(TimerTitleBox.Text))
+        {
+            TimerTitleBox.Focus();
+            TimerErrorText.Text = "请先填写计时标题";
+            return;
+        }
+        _changingTimer = true;
+        StartTimerButton.IsEnabled = PauseTimerButton.IsEnabled = StopTimerButton.IsEnabled = false;
+        TimerErrorText.Text = string.Empty;
+        try
+        {
+            await _changeTimer(action, TimerTitleBox.Text);
+            _timerVersion++;
+            if (action == TimerAction.Stop) TimerTitleBox.Text = string.Empty;
+            await RefreshAsync();
+        }
+        catch (Exception error) { TimerErrorText.Text = $"计时操作失败：{error.Message}"; }
+        finally
+        {
+            _changingTimer = false;
+            StartTimerButton.IsEnabled = PauseTimerButton.IsEnabled = StopTimerButton.IsEnabled = true;
+        }
     }
 
     private void ShowWarning(string? warning)
@@ -358,7 +413,7 @@ public sealed class IntervalRow(RecordedInterval interval) : INotifyPropertyChan
     public string BadgeLabel => DisplayText.AppName(_interval) + (_interval.IsCurrent ? " ·" : string.Empty);
     public string StartTime => DisplayText.Time(_interval.StartUtc);
     public string GroupLabel => _groupLabel;
-    public System.Windows.Media.Brush Color => _interval.Kind == IntervalKind.Usage
+    public System.Windows.Media.Brush Color => _interval.Kind == IntervalKind.TaskTimer ? ReviewTheme.Accent : _interval.Kind == IntervalKind.Usage
         ? TimelineControl.ApplicationBrush(_interval.AppKey) : ReviewTheme.Muted;
     public System.Windows.Media.Brush BadgeBackground => ReviewTheme.BadgeBackground(Color);
     public string Kind => DisplayText.Kind(_interval.Kind);

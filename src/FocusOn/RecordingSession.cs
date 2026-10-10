@@ -5,6 +5,7 @@ namespace FocusOn;
 public sealed class RecordingSession : IDisposable
 {
     private readonly SqliteConnection connection;
+    private readonly TitleTimerStore titleTimer;
     private RecordedInterval? current;
     private ForegroundObservation? currentObservation;
     private long currentMonotonicStart;
@@ -64,6 +65,8 @@ public sealed class RecordingSession : IDisposable
             if (reader.FieldCount == 1 && reader.GetName(0) != "journal_mode" && reader.Read())
                 nextId = reader.GetInt64(0);
         } while (reader.NextResult());
+        reader.Close();
+        titleTimer = new TitleTimerStore(connection);
         using var lastInterval = connection.CreateCommand();
         lastInterval.CommandText = "SELECT MAX(end_utc) FROM intervals;";
         if (lastInterval.ExecuteScalar() is long endUtc)
@@ -119,6 +122,7 @@ public sealed class RecordingSession : IDisposable
 
     public void Checkpoint(RecordingTime at)
     {
+        titleTimer.Checkpoint(at);
         if (awaitingDeleteResume) return;
         if (AcceptTime(at)) SaveCurrent(at);
     }
@@ -127,6 +131,7 @@ public sealed class RecordingSession : IDisposable
     {
         if (!AcceptTime(at)) return;
         this.conditions = conditions;
+        if (conditions.Sleeping) titleTimer.Pause(at);
         Observe(currentObservation, at);
     }
 
@@ -153,6 +158,7 @@ public sealed class RecordingSession : IDisposable
 
     public void Finish(RecordingTime at)
     {
+        titleTimer.Pause(at);
         if (!AcceptTime(at)) return;
         if (current is null && gapStart is not null)
             SaveGap(at);
@@ -169,11 +175,13 @@ public sealed class RecordingSession : IDisposable
             throw new ArgumentException("删除边界不能早于最新记录控制事实。", nameof(stopAt));
         var (start, end) = DailyProjection.Bounds(day, zone);
         var stopsCurrent = current is not null && current.StartUtc < end && stopAt.Utc > start;
+        titleTimer.PrepareDelete(start, end, stopAt);
         if (stopsCurrent) Finish(stopAt);
         try
         {
             using var transaction = connection.BeginTransaction();
             var intervals = ReadIntervals(start, end, transaction);
+            titleTimer.Delete(start, end, transaction);
             using var delete = connection.CreateCommand();
             delete.Transaction = transaction;
             delete.CommandText = """
@@ -302,6 +310,9 @@ public sealed class RecordingSession : IDisposable
                 TimeSpan.FromTicks(group.Sum(interval => interval.Duration.Ticks))))
             .OrderByDescending(total => total.Duration).ThenBy(total => total.AppKey, StringComparer.Ordinal)
             .ToArray();
+        intervals.AddRange(titleTimer.Read(start, end, showLive ? liveNow : null)
+            .Select(interval => DailyProjection.Clip(interval, start, end)).OfType<RecordedInterval>());
+        intervals = intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToList();
         return new DayView(day, start, end, intervals, totals,
             previewWarning is not null || saveFailure is not null ? "记录异常" : current is null ? "已停止" : current.Kind switch
             {
@@ -311,8 +322,10 @@ public sealed class RecordingSession : IDisposable
                 IntervalKind.DisplayOff => "屏幕已关闭",
                 IntervalKind.Unrecorded => "未记录",
                 _ => "正在记录"
-            }, saveFailure ?? timeWarning);
+            }, saveFailure ?? timeWarning ?? titleTimer.Warning, titleTimer.State(showLive ? liveNow : null));
     }
+
+    public void ChangeTimer(TimerAction action, string? title, RecordingTime at) => titleTimer.Change(action, title, at);
 
     private List<StoredInterval> ReadIntervals(DateTimeOffset start, DateTimeOffset end, SqliteTransaction? transaction = null)
     {

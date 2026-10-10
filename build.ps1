@@ -1,4 +1,7 @@
-param([ValidateSet('build', 'test', 'publish')][string]$Action = 'build')
+param(
+    [ValidateSet('build', 'test', 'publish')][string]$Action = 'build',
+    [ValidatePattern('^FocusOn-win-x64(?:-[A-Za-z0-9]+)*$')][string]$PackageName = 'FocusOn-win-x64'
+)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 $sdkExecutable = Join-Path $PSScriptRoot '.tools\dotnet\dotnet.exe'
@@ -14,9 +17,9 @@ switch ($Action) {
         $uncommitted = & git status --porcelain
         if ($LASTEXITCODE -ne 0) { throw '无法读取发布源版本。' }
         if ($uncommitted) { throw '请先提交或处理工作区修改再发布；发布清单必须对应已提交的源版本。' }
-        & $sdkExecutable publish 'src\FocusOn\FocusOn.csproj' -c Release -r win-x64 --self-contained true -o 'artifacts\FocusOn-win-x64'
+        $publishDirectory = Join-Path $PSScriptRoot "artifacts\$PackageName"
+        & $sdkExecutable publish 'src\FocusOn\FocusOn.csproj' -c Release -r win-x64 --self-contained true -o $publishDirectory
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        $publishDirectory = Join-Path $PSScriptRoot 'artifacts\FocusOn-win-x64'
         $requiredFiles = @('FocusOn.exe', 'FocusOn.dll', 'FocusOn.deps.json', 'FocusOn.runtimeconfig.json',
             'coreclr.dll', 'hostfxr.dll', 'hostpolicy.dll', 'System.Private.CoreLib.dll',
             'PresentationFramework.dll', 'PresentationNative_cor3.dll', 'wpfgfx_cor3.dll',
@@ -46,10 +49,10 @@ switch ($Action) {
             })
         [ordered]@{ sourceCommit = $sourceCommit; runtime = 'win-x64'; selfContained = $true; files = $fileRecords } |
             ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $publishDirectory 'manifest.json') -Encoding utf8
-        $zipPath = Join-Path $PSScriptRoot 'artifacts\FocusOn-win-x64.zip'
+        $zipPath = Join-Path $PSScriptRoot "artifacts\$PackageName.zip"
         Compress-Archive -LiteralPath $publishDirectory -DestinationPath $zipPath -Force
         $zipHash = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash
-        "$zipHash  FocusOn-win-x64.zip" | Set-Content -LiteralPath ($zipPath + '.sha256') -Encoding ascii
+        "$zipHash  $PackageName.zip" | Set-Content -LiteralPath ($zipPath + '.sha256') -Encoding ascii
         Write-Output "已检查自包含文件并打包：$zipPath"
         Write-Output "SHA256：$zipHash"
     }

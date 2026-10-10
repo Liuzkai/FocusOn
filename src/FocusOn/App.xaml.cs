@@ -75,7 +75,7 @@ public partial class App : Application
             checkpoint = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
             checkpoint.Tick += (_, _) => observer.Poll();
             checkpoint.Start();
-            var window = new MainWindow(ReadDayAsync, DeleteDayAsync);
+            var window = new MainWindow(ReadDayAsync, DeleteDayAsync, (action, title) => runtime.ChangeTimerAsync(action, title));
             window.PauseRequested += async (_, _) => await ChangeManualPauseAsync(!manualPaused);
             window.Closing += (_, args) =>
             {

@@ -28,6 +28,7 @@ public static class DisplayText
         IntervalKind.Sleep => "睡眠",
         IntervalKind.Locked => "锁屏",
         IntervalKind.DisplayOff => "灭屏",
+        IntervalKind.TaskTimer => "标题计时",
         _ => "未记录"
     };
 
@@ -35,7 +36,7 @@ public static class DisplayText
         ? string.IsNullOrWhiteSpace(interval.AppName) ? "未知软件" : interval.AppName
         : Kind(interval.Kind);
 
-    public static string Title(RecordedInterval interval) => interval.Kind == IntervalKind.Usage
+    public static string Title(RecordedInterval interval) => interval.Kind is IntervalKind.Usage or IntervalKind.TaskTimer
         ? string.IsNullOrWhiteSpace(interval.WindowTitle) ? "标题不可用" : interval.WindowTitle
         : "此区间不累计软件使用时长。";
 
