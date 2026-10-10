@@ -4,6 +4,10 @@ namespace FocusOn;
 
 public static class DisplayText
 {
+    public static bool MatchesSearch(RecordedInterval interval, string query) => query.Length == 0
+        || AppName(interval).Contains(query, StringComparison.CurrentCultureIgnoreCase)
+        || Title(interval).Contains(query, StringComparison.CurrentCultureIgnoreCase);
+
     public static string Duration(TimeSpan value, bool precise = false)
     {
         value = value < TimeSpan.Zero ? TimeSpan.Zero : value;

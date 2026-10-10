@@ -21,12 +21,17 @@ public partial class MainWindow : Window
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private bool _followToday = true;
     private DayView? _dayView;
+    private string _searchText = string.Empty;
+    private bool _showGroups = true;
 
     public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay)
     {
         _readDay = readDay ?? throw new ArgumentNullException(nameof(readDay));
         _deleteDay = deleteDay ?? throw new ArgumentNullException(nameof(deleteDay));
         InitializeComponent();
+        ReviewTheme.Apply(Resources);
+        SystemParameters.StaticPropertyChanged += SystemThemeChanged;
+        Closed += (_, _) => { SystemParameters.StaticPropertyChanged -= SystemThemeChanged; StopRefresh(); };
         LogGrid.ItemsSource = _rows;
         TimelineView.IntervalSelected += Timeline_IntervalSelected;
         TimelineView.RangeChanged += Timeline_RangeChanged;
@@ -187,8 +192,9 @@ public partial class MainWindow : Window
         }
         _dayView = view;
         TimelineView.SetDay(view);
+        TimelineView.SetSearch(_searchText);
         UpdateDateControls();
-        StatusText.Text = "当前记录状态：" + view.Status;
+        StatusText.Text = view.Status;
         ShowWarning(view.Warning);
 
         ApplyRows();
@@ -199,8 +205,7 @@ public partial class MainWindow : Window
 
         if (newDay && _rows.Count > 0)
         {
-            LogGrid.SelectedItem = _rows[^1];
-            LogGrid.ScrollIntoView(LogGrid.SelectedItem);
+            LogGrid.ScrollIntoView(_rows[^1]);
         }
     }
 
@@ -208,7 +213,7 @@ public partial class MainWindow : Window
     {
         if (_dayView is null) return;
         var filtered = TimelineView.Range is { } range ? _dayView.FilterRange(range.StartUtc, range.EndUtc) : _dayView.Intervals;
-        var intervals = filtered.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+        var intervals = filtered.Where(x => DisplayText.MatchesSearch(x, _searchText)).OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
         var incomingIds = intervals.Select(x => x.Id).ToHashSet();
         for (var i = _rows.Count - 1; i >= 0; i--)
             if (!incomingIds.Contains(_rows[i].Id)) _rows.RemoveAt(i);
@@ -226,9 +231,14 @@ public partial class MainWindow : Window
             {
                 _rows.Insert(i, new IntervalRow(interval));
             }
+            var local = interval.StartUtc.ToLocalTime();
+            var previous = i > 0 ? intervals[i - 1].StartUtc.ToLocalTime() : (DateTimeOffset?)null;
+            var startsGroup = previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour;
+            _rows[i].SetGroupLabel(_showGroups && startsGroup ? $"{local:HH}:00 时段" : string.Empty);
         }
 
-        LogEmptyText.Text = TimelineView.Range is not null ? "所选范围没有可用记录。" : $"{_dayView.Date:yyyy-MM-dd} 没有可用记录。";
+        LogEmptyText.Text = _searchText.Length > 0 ? "没有匹配的软件或窗口标题。"
+            : TimelineView.Range is not null ? "所选范围没有可用记录。" : $"{_dayView.Date:yyyy-MM-dd} 没有可用记录。";
         LogEmptyText.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         UpdateTimelineControls();
     }
@@ -236,6 +246,11 @@ public partial class MainWindow : Window
     private void Timeline_IntervalSelected(long id)
     {
         var row = _rows.FirstOrDefault(x => x.Id == id);
+        if (row is null && _searchText.Length > 0)
+        {
+            SearchBox.Text = string.Empty;
+            row = _rows.FirstOrDefault(x => x.Id == id);
+        }
         if (row is null && TimelineView.Range is not null)
         {
             TimelineView.ClearRange();
@@ -252,6 +267,50 @@ public partial class MainWindow : Window
     private void ResetDay_Click(object sender, RoutedEventArgs e) => TimelineView.ResetDay();
     private void ClearRange_Click(object sender, RoutedEventArgs e) => TimelineView.ClearRange();
 
+    private void Search_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _searchText = SearchBox.Text.Trim();
+        if (_dayView is null) return;
+        TimelineView.SetSearch(_searchText);
+        ApplyRows();
+    }
+
+    private void Duration_Click(object sender, RoutedEventArgs e)
+    {
+        var show = TimelinePanel.Visibility != Visibility.Visible;
+        TimelinePanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        DurationButton.SetResourceReference(BackgroundProperty, show ? "ReviewHover" : "ReviewBackground");
+        DurationButton.SetResourceReference(ForegroundProperty, show ? "ReviewText" : "ReviewMuted");
+    }
+
+    private void Groups_Click(object sender, RoutedEventArgs e)
+    {
+        _showGroups = !_showGroups;
+        GroupsButton.Content = _showGroups ? "时段  ⊟" : "时段  ⊞";
+        ApplyRows();
+    }
+
+    private void Details_Click(object sender, RoutedEventArgs e) => SetInspector(InspectorPane.Visibility != Visibility.Visible);
+
+    private void SetInspector(bool show)
+    {
+        InspectorPane.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        InspectorColumn.Width = new GridLength(show ? 280 : 0);
+        DetailsButton.Content = show ? "详情  ⊟" : "详情  ⊞";
+    }
+
+    private void SystemThemeChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SystemParameters.HighContrast)) return;
+        Dispatcher.InvokeAsync(() =>
+        {
+            ReviewTheme.Apply(Resources);
+            if (_dayView is not null) ShowDay(_dayView);
+            foreach (var row in _rows) row.RefreshAppearance();
+            TimelineView.InvalidateVisual();
+        });
+    }
+
     private void UpdateTimelineControls()
     {
         ZoomInButton.IsEnabled = TimelineView.CanZoomIn;
@@ -260,7 +319,8 @@ public partial class MainWindow : Window
         ClearRangeButton.IsEnabled = TimelineView.Range is not null;
         RangeText.Text = TimelineView.Range is { } range
             ? $"日志范围：{DisplayText.Time(range.StartUtc, true)} — {DisplayText.Time(range.EndUtc, true)}（仅筛选日志）"
-            : "日志范围：全天。拖选或 Shift＋方向键可筛选；全天软件汇总保持不变。";
+            : _searchText.Length > 0 ? $"搜索：{_searchText} · {_rows.Count} 条匹配 · 全天汇总不变"
+            : "全天记录 · 拖选筛选，滚轮缩放，右键取消范围";
         ViewRangeText.Text = _dayView is null ? string.Empty : TimelineView.CanZoomOut
             ? $"显示：{DisplayText.Time(TimelineView.VisibleStart)} — {DisplayText.Time(TimelineView.VisibleEnd)}"
             : "显示：全天";
@@ -279,16 +339,27 @@ public partial class MainWindow : Window
         DetailsPanel.Visibility = row is null ? Visibility.Collapsed : Visibility.Visible;
         DetailsEmptyText.Visibility = row is null ? Visibility.Visible : Visibility.Collapsed;
         if (row is null) TimelineView.ClearSelection();
-        else TimelineView.SelectInterval(row.Id);
+        else
+        {
+            TimelineView.SelectInterval(row.Id);
+            SetInspector(true);
+        }
     }
 }
 
 public sealed class IntervalRow(RecordedInterval interval) : INotifyPropertyChanged
 {
     private RecordedInterval _interval = interval;
+    private string _groupLabel = string.Empty;
     public long Id => _interval.Id;
     public string TimeRange => $"{DisplayText.Time(_interval.StartUtc)} – {DisplayText.Time(_interval.EndUtc)}";
     public string Application => DisplayText.AppName(_interval) + (_interval.IsCurrent ? " · 进行中" : string.Empty);
+    public string BadgeLabel => DisplayText.AppName(_interval) + (_interval.IsCurrent ? " ·" : string.Empty);
+    public string StartTime => DisplayText.Time(_interval.StartUtc);
+    public string GroupLabel => _groupLabel;
+    public System.Windows.Media.Brush Color => _interval.Kind == IntervalKind.Usage
+        ? TimelineControl.ApplicationBrush(_interval.AppKey) : ReviewTheme.Muted;
+    public System.Windows.Media.Brush BadgeBackground => ReviewTheme.BadgeBackground(Color);
     public string Kind => DisplayText.Kind(_interval.Kind);
     public string Title => DisplayText.Title(_interval);
     public string Duration => DisplayText.Duration(_interval.Duration);
@@ -297,6 +368,15 @@ public sealed class IntervalRow(RecordedInterval interval) : INotifyPropertyChan
     public string EndFull => DisplayText.Time(_interval.EndUtc, full: true);
     public string CurrentNote => _interval.IsCurrent ? "进行中；尾段可能尚未保存。" : string.Empty;
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void SetGroupLabel(string label)
+    {
+        if (_groupLabel == label) return;
+        _groupLabel = label;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GroupLabel)));
+    }
+
+    public void RefreshAppearance() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
 
     public void Update(RecordedInterval value)
     {

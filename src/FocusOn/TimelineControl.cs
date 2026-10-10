@@ -11,14 +11,17 @@ namespace FocusOn;
 
 public sealed class TimelineControl : FrameworkElement
 {
-    private const double BarTop = 19;
-    private const double BarHeight = 34;
+    private const double LabelWidth = 54;
+    private const double BarTop = 7;
+    private const double BarHeight = 8;
+    private const double LaneSpacing = 14;
+    private const double PlotHeight = 50;
     private static readonly Brush[] AppPalette =
     [
-        FrozenBrush(0x15, 0x5F, 0xA0), FrozenBrush(0x00, 0x6B, 0x5E),
-        FrozenBrush(0x78, 0x45, 0x9B), FrozenBrush(0x9A, 0x4E, 0x00),
-        FrozenBrush(0xA3, 0x33, 0x56), FrozenBrush(0x3D, 0x6C, 0x13),
-        FrozenBrush(0x4D, 0x56, 0xA1), FrozenBrush(0x7B, 0x5B, 0x39)
+        FrozenBrush(0x82, 0xA6, 0xE3), FrozenBrush(0x68, 0xC0, 0x91),
+        FrozenBrush(0xAC, 0x88, 0xC4), FrozenBrush(0xD4, 0x9A, 0x48),
+        FrozenBrush(0xD8, 0x8B, 0xAB), FrozenBrush(0x96, 0xBB, 0x77),
+        FrozenBrush(0x95, 0xA0, 0xDA), FrozenBrush(0xC4, 0xA2, 0x80)
     ];
     private readonly ToolTip tip;
     private DayView? day;
@@ -31,15 +34,20 @@ public sealed class TimelineControl : FrameworkElement
     private DateTimeOffset? dragEnd;
     private RecordedInterval? keyboardAnchor;
     private long? hoveredId;
+    private string searchText = string.Empty;
+    private double? panStartX;
+    private DateTimeOffset panStartUtc;
+    private DateTimeOffset panEndUtc;
 
     public TimelineControl()
     {
         Focusable = true;
         ClipToBounds = true;
         Cursor = Cursors.Cross;
-        Height = 88;
+        Height = 74;
         tip = new ToolTip { Placement = PlacementMode.Mouse, PlacementTarget = this, MaxWidth = 420 };
         ToolTip = tip;
+        ToolTipService.SetInitialShowDelay(this, 500);
         AutomationProperties.SetName(this, "使用时间线。方向键选择记录，Shift加方向键选择范围，加减键缩放，Escape取消范围。日志提供相同记录与详情。");
     }
 
@@ -51,6 +59,12 @@ public sealed class TimelineControl : FrameworkElement
     public DateTimeOffset VisibleEnd => visibleEnd;
     public bool CanZoomIn => day is not null && visibleEnd - visibleStart > TimeSpan.FromSeconds(2);
     public bool CanZoomOut => day is not null && visibleEnd - visibleStart < day.EndUtc - day.StartUtc;
+
+    public void SetSearch(string query)
+    {
+        searchText = query;
+        InvalidateVisual();
+    }
 
     public void SetDay(DayView value)
     {
@@ -178,19 +192,28 @@ public sealed class TimelineControl : FrameworkElement
     }
 
     private static DateTimeOffset Middle(DateTimeOffset start, DateTimeOffset end) => start.AddTicks((end - start).Ticks / 2);
-    private double X(DateTimeOffset time) => (time - visibleStart).Ticks / (double)(visibleEnd - visibleStart).Ticks * ActualWidth;
-    private DateTimeOffset TimeAt(double x) => visibleStart.AddTicks((long)(Math.Clamp(x / Math.Max(ActualWidth, 1), 0, 1) * (visibleEnd - visibleStart).Ticks));
-    private RecordedInterval? Hit(DateTimeOffset time) => intervals.FirstOrDefault(x => x.StartUtc <= time && x.EndUtc > time);
+    private double PlotWidth => Math.Max(1, ActualWidth - LabelWidth);
+    private double X(DateTimeOffset time) => LabelWidth + (time - visibleStart).Ticks / (double)(visibleEnd - visibleStart).Ticks * PlotWidth;
+    private DateTimeOffset TimeAt(double x) => visibleStart.AddTicks((long)(Math.Clamp((x - LabelWidth) / PlotWidth, 0, 1) * (visibleEnd - visibleStart).Ticks));
+    private static int Lane(RecordedInterval interval) => interval.Kind == IntervalKind.Usage ? 0 : interval.Kind == IntervalKind.Unrecorded ? 2 : 1;
+    private RecordedInterval? Hit(DateTimeOffset time, double y) => intervals.FirstOrDefault(x => x.StartUtc <= time && x.EndUtc > time
+        && y >= BarTop + Lane(x) * LaneSpacing && y <= BarTop + Lane(x) * LaneSpacing + BarHeight);
 
     protected override void OnRender(DrawingContext context)
     {
         base.OnRender(context);
-        if (ActualWidth <= 0) return;
-        var bar = new Rect(0, BarTop, ActualWidth, BarHeight);
-        context.DrawRectangle(SystemColors.WindowBrush, new Pen(SystemColors.ControlDarkBrush, 1), bar);
+        if (ActualWidth <= LabelWidth) return;
+        context.DrawRectangle(ReviewTheme.Surface, null, new Rect(0, 0, ActualWidth, PlotHeight));
+        context.DrawLine(new Pen(ReviewTheme.Border, 0.5), new Point(LabelWidth, 0), new Point(LabelWidth, PlotHeight));
+        var laneLabels = new[] { "使用", "停止", "未记录" };
+        for (var lane = 0; lane < laneLabels.Length; lane++)
+        {
+            var label = Text(laneLabels[lane], ReviewTheme.Muted);
+            context.DrawText(label, new Point(LabelWidth - label.Width - 5, BarTop + lane * LaneSpacing - 3));
+        }
         if (day is null || visibleEnd <= visibleStart)
         {
-            DrawText(context, day is null ? "正在读取时间线…" : "没有可用记录", new Point(8, BarTop + 8), SystemColors.WindowTextBrush);
+            DrawText(context, day is null ? "正在读取时间线…" : "没有可用记录", new Point(LabelWidth + 10, 18), ReviewTheme.Muted);
             return;
         }
 
@@ -199,28 +222,26 @@ public sealed class TimelineControl : FrameworkElement
         foreach (var interval in intervals)
         {
             if (interval.EndUtc <= visibleStart || interval.StartUtc >= visibleEnd) continue;
-            var left = Math.Max(0, X(interval.StartUtc));
+            var left = Math.Max(LabelWidth, X(interval.StartUtc));
             var right = Math.Min(ActualWidth, X(interval.EndUtc));
             if (right <= left) continue;
             hasVisibleRecord = true;
-            var rectangle = new Rect(left, BarTop, right - left, BarHeight);
+            var rectangle = new Rect(left, BarTop + Lane(interval) * LaneSpacing, right - left, BarHeight);
             var brush = interval.Kind == IntervalKind.Usage ? ApplicationBrush(interval.AppKey)
-                : interval.Kind == IntervalKind.Unrecorded ? hatch : SystemColors.ControlBrush;
-            context.DrawRectangle(brush, null, rectangle);
-            var label = Text(DisplayText.AppName(interval), interval.Kind == IntervalKind.Usage
-                ? SystemParameters.HighContrast ? SystemColors.WindowBrush : Brushes.White : SystemColors.ControlTextBrush);
-            if (label.Width + 10 <= rectangle.Width)
-                context.DrawText(label, new Point(rectangle.Left + 5, rectangle.Top + (rectangle.Height - label.Height) / 2));
+                : interval.Kind == IntervalKind.Unrecorded ? hatch : ReviewTheme.Muted;
+            var matches = DisplayText.MatchesSearch(interval, searchText);
+            context.PushOpacity(matches ? 0.85 : 0.16);
+            context.DrawRoundedRectangle(brush, null, rectangle, Math.Min(1, rectangle.Width / 2), 1);
+            context.Pop();
             if (interval.Id == selectedId)
             {
                 context.PushClip(new RectangleGeometry(rectangle));
-                context.DrawRectangle(null, new Pen(SystemColors.HighlightBrush, 3), rectangle);
+                context.DrawRectangle(null, new Pen(ReviewTheme.Accent, 2), rectangle);
                 context.Pop();
             }
             if (interval.IsCurrent)
             {
-                var current = Text("进行中", SystemColors.WindowTextBrush);
-                context.DrawText(current, new Point(Math.Clamp(right - current.Width, 0, Math.Max(0, ActualWidth - current.Width)), 0));
+                context.DrawLine(new Pen(ReviewTheme.Accent, 1), new Point(right, rectangle.Top - 2), new Point(right, rectangle.Bottom + 2));
             }
         }
 
@@ -229,33 +250,33 @@ public sealed class TimelineControl : FrameworkElement
             : Range;
         if (range is { } selectedRange)
         {
-            var left = Math.Clamp(X(selectedRange.StartUtc), 0, ActualWidth);
-            var right = Math.Clamp(X(selectedRange.EndUtc), 0, ActualWidth);
+            var left = Math.Clamp(X(selectedRange.StartUtc), LabelWidth, ActualWidth);
+            var right = Math.Clamp(X(selectedRange.EndUtc), LabelWidth, ActualWidth);
             if (right > left)
             {
-                context.PushOpacity(0.2);
-                context.DrawRectangle(SystemColors.HighlightBrush, null, new Rect(left, BarTop, right - left, BarHeight));
+                context.PushOpacity(0.15);
+                context.DrawRectangle(ReviewTheme.Accent, null, new Rect(left, 0, right - left, PlotHeight));
                 context.Pop();
-                context.DrawLine(new Pen(SystemColors.HighlightBrush, 1), new Point(left, BarTop - 3), new Point(left, BarTop + BarHeight + 3));
-                context.DrawLine(new Pen(SystemColors.HighlightBrush, 1), new Point(right, BarTop - 3), new Point(right, BarTop + BarHeight + 3));
+                context.DrawLine(new Pen(ReviewTheme.Accent, 1), new Point(left, 0), new Point(left, PlotHeight));
+                context.DrawLine(new Pen(ReviewTheme.Accent, 1), new Point(right, 0), new Point(right, PlotHeight));
             }
         }
         if (!hasVisibleRecord)
-            DrawText(context, "没有可用记录", new Point(8, BarTop + 8), SystemColors.WindowTextBrush);
+            DrawText(context, "没有可用记录", new Point(LabelWidth + 10, 18), ReviewTheme.Muted);
         DrawAxis(context);
-        if (IsKeyboardFocused) context.DrawRectangle(null, new Pen(SystemColors.HighlightBrush, 1), new Rect(0, 1, ActualWidth, ActualHeight - 2));
+        if (IsKeyboardFocused) context.DrawRectangle(null, new Pen(ReviewTheme.Accent, 1), new Rect(0, 1, ActualWidth, ActualHeight - 2));
     }
 
     private void DrawAxis(DrawingContext context)
     {
         var span = visibleEnd - visibleStart;
         var format = span < TimeSpan.FromSeconds(10) ? "HH:mm:ss.fff" : span < TimeSpan.FromHours(1) ? "HH:mm:ss" : "HH:mm";
-        var first = Text(visibleStart.ToLocalTime().ToString(format, CultureInfo.CurrentCulture), SystemColors.WindowTextBrush);
+        var first = Text(visibleStart.ToLocalTime().ToString(format, CultureInfo.CurrentCulture), ReviewTheme.Muted);
         var endLocal = visibleEnd.ToLocalTime();
         var endLabel = (endLocal.Date > visibleStart.ToLocalTime().Date ? "次日 " : string.Empty) + endLocal.ToString(format, CultureInfo.CurrentCulture);
-        var last = Text(endLabel, SystemColors.WindowTextBrush);
-        context.DrawText(first, new Point(0, 61));
-        context.DrawText(last, new Point(Math.Max(0, ActualWidth - last.Width), 61));
+        var last = Text(endLabel, ReviewTheme.Muted);
+        context.DrawText(first, new Point(LabelWidth, 55));
+        context.DrawText(last, new Point(Math.Max(LabelWidth, ActualWidth - last.Width), 55));
         var steps = new[] { 1, 5, 15, 60, 300, 900, 3600, 7200, 14400 };
         var step = TimeSpan.FromSeconds(steps.FirstOrDefault(x => x >= span.TotalSeconds / 7, steps[^1])).Ticks;
         var tick = visibleStart.UtcTicks - visibleStart.UtcTicks % step + step;
@@ -263,10 +284,10 @@ public sealed class TimelineControl : FrameworkElement
         {
             var time = new DateTimeOffset(tick, TimeSpan.Zero);
             var x = X(time);
-            var text = Text(time.ToLocalTime().ToString(format, CultureInfo.CurrentCulture), SystemColors.WindowTextBrush);
-            if (x - text.Width / 2 <= first.Width + 12 || x + text.Width / 2 >= ActualWidth - last.Width - 12) continue;
-            context.DrawLine(new Pen(SystemColors.ControlDarkBrush, 1), new Point(x, 55), new Point(x, 59));
-            context.DrawText(text, new Point(x - text.Width / 2, 61));
+            var text = Text(time.ToLocalTime().ToString(format, CultureInfo.CurrentCulture), ReviewTheme.Muted);
+            if (x - text.Width / 2 <= LabelWidth + first.Width + 12 || x + text.Width / 2 >= ActualWidth - last.Width - 12) continue;
+            context.DrawLine(new Pen(ReviewTheme.Border, 0.5), new Point(x, 0), new Point(x, PlotHeight));
+            context.DrawText(text, new Point(x - text.Width / 2, 55));
         }
     }
 
@@ -275,8 +296,8 @@ public sealed class TimelineControl : FrameworkElement
         var drawing = new DrawingGroup();
         using (var context = drawing.Open())
         {
-            context.DrawRectangle(SystemColors.WindowBrush, null, new Rect(0, 0, 8, 8));
-            context.DrawLine(new Pen(SystemColors.GrayTextBrush, 1), new Point(0, 8), new Point(8, 0));
+            context.DrawRectangle(ReviewTheme.Surface, null, new Rect(0, 0, 8, 8));
+            context.DrawLine(new Pen(ReviewTheme.Muted, 1), new Point(0, 8), new Point(8, 0));
         }
         return new DrawingBrush(drawing)
         {
@@ -285,7 +306,7 @@ public sealed class TimelineControl : FrameworkElement
     }
 
     private FormattedText Text(string value, Brush brush) => new(value, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-        new Typeface("Segoe UI"), 12, brush, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+        new Typeface("Segoe UI"), 11, brush, VisualTreeHelper.GetDpi(this).PixelsPerDip);
     private void DrawText(DrawingContext context, string value, Point position, Brush brush) => context.DrawText(Text(value, brush), position);
     private static string TipText(RecordedInterval interval) => $"{DisplayText.AppName(interval)}{(interval.IsCurrent ? " · 进行中" : string.Empty)}\n开始：{DisplayText.Time(interval.StartUtc, true)}\n结束：{DisplayText.Time(interval.EndUtc, true)}\n时长：{DisplayText.Duration(interval.Duration, true)}";
 
@@ -298,7 +319,7 @@ public sealed class TimelineControl : FrameworkElement
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);
-        if (day is null || visibleEnd <= visibleStart) return;
+        if (day is null || visibleEnd <= visibleStart || e.GetPosition(this).X < LabelWidth || e.GetPosition(this).Y > PlotHeight) return;
         Focus();
         dragStartX = e.GetPosition(this).X;
         dragStart = TimeAt(dragStartX);
@@ -314,16 +335,22 @@ public sealed class TimelineControl : FrameworkElement
         base.OnMouseMove(e);
         if (day is null || visibleEnd <= visibleStart) return;
         var point = e.GetPosition(this);
-        if (dragStart is not null)
+        if (panStartX is { } pan)
+        {
+            var span = (panEndUtc - panStartUtc).Ticks;
+            var shift = (long)((pan - point.X) / PlotWidth * span);
+            SetViewport(Middle(panStartUtc, panEndUtc).AddTicks(shift), span);
+        }
+        else if (dragStart is not null)
         {
             dragEnd = TimeAt(point.X);
             InvalidateVisual();
         }
         else
         {
-            var overBar = point.Y >= BarTop && point.Y <= BarTop + BarHeight;
+            var overBar = point.X >= LabelWidth && point.Y >= 0 && point.Y <= PlotHeight;
             ToolTipService.SetIsEnabled(this, overBar);
-            if (overBar) UpdateTip(Hit(TimeAt(point.X)));
+            if (overBar) UpdateTip(Hit(TimeAt(point.X), point.Y));
             else tip.IsOpen = false;
         }
     }
@@ -339,7 +366,7 @@ public sealed class TimelineControl : FrameworkElement
         ReleaseMouseCapture();
         if (Math.Abs(point.X - dragStartX) >= SystemParameters.MinimumHorizontalDragDistance && start != end)
             SetRange(start < end ? start : end, start < end ? end : start);
-        else if (Hit(end) is { } interval)
+        else if (Hit(end, point.Y) is { } interval)
         {
             SelectInterval(interval.Id);
             IntervalSelected?.Invoke(interval.Id);
@@ -353,7 +380,44 @@ public sealed class TimelineControl : FrameworkElement
         base.OnLostMouseCapture(e);
         dragStart = null;
         dragEnd = null;
+        panStartX = null;
+        Cursor = Cursors.Cross;
         InvalidateVisual();
+    }
+
+    protected override void OnMouseWheel(MouseWheelEventArgs e)
+    {
+        base.OnMouseWheel(e);
+        if (day is null || e.GetPosition(this).X < LabelWidth) return;
+        var center = TimeAt(e.GetPosition(this).X);
+        var span = (visibleEnd - visibleStart).Ticks;
+        SetViewport(center, e.Delta > 0 ? span / 2 : span * 2);
+        e.Handled = true;
+    }
+
+    protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseRightButtonDown(e);
+        if (day is null || e.GetPosition(this).X < LabelWidth) return;
+        panStartX = e.GetPosition(this).X;
+        panStartUtc = visibleStart;
+        panEndUtc = visibleEnd;
+        tip.IsOpen = false;
+        Cursor = Cursors.ScrollWE;
+        CaptureMouse();
+        e.Handled = true;
+    }
+
+    protected override void OnMouseRightButtonUp(MouseButtonEventArgs e)
+    {
+        base.OnMouseRightButtonUp(e);
+        if (panStartX is not { } start) return;
+        var clear = Math.Abs(e.GetPosition(this).X - start) < SystemParameters.MinimumHorizontalDragDistance;
+        panStartX = null;
+        ReleaseMouseCapture();
+        Cursor = Cursors.Cross;
+        if (clear) ClearRange();
+        e.Handled = true;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
