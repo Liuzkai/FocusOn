@@ -1,6 +1,7 @@
 <Window x:Class="FocusOn.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FocusOn"
         Title="FocusOn" Width="1120" Height="760" MinWidth="860" MinHeight="580"
         FontFamily="Segoe UI" FontSize="14"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
@@ -18,6 +19,7 @@
     </Window.Resources>
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -53,7 +55,7 @@
         </Border>
         <StackPanel Grid.Row="2" Margin="0,0,0,18">
             <TextBlock Text="当天软件时长" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
-            <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto"
+            <ScrollViewer MaxHeight="70" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled" Focusable="False">
                 <ItemsControl x:Name="TotalsList" AutomationProperties.Name="全天软件时长汇总">
                     <ItemsControl.ItemsPanel>
@@ -62,6 +64,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,0,24,8">
+                                <Rectangle Width="9" Height="9" Fill="{Binding Color}" Margin="0,0,6,0" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding AppName}" FontWeight="SemiBold" Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding Duration}" />
                             </StackPanel>
@@ -71,7 +74,24 @@
             </ScrollViewer>
             <TextBlock x:Name="TotalsEmptyText" Text="正在读取…" />
         </StackPanel>
-        <Grid Grid.Row="3">
+        <StackPanel Grid.Row="3" Margin="0,0,0,12">
+            <DockPanel Margin="0,0,0,6">
+                <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
+                    <Button x:Name="ZoomInButton" Content="放大" Click="ZoomIn_Click" />
+                    <Button x:Name="ZoomOutButton" Content="缩小" Click="ZoomOut_Click" />
+                    <Button x:Name="ResetDayButton" Content="恢复全天" Click="ResetDay_Click" />
+                    <Button x:Name="ClearRangeButton" Content="取消范围" Click="ClearRange_Click" />
+                </WrapPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="使用时间线" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock x:Name="ViewRangeText" FontSize="12" />
+                </StackPanel>
+            </DockPanel>
+            <local:TimelineControl x:Name="TimelineView" />
+            <TextBlock Text="灰色：停止计时（原因见区段/日志） · 斜纹：未记录 · 空白：没有可用记录" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock x:Name="RangeText" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="16" />
@@ -119,7 +139,7 @@
                                      AutomationProperties.LabeledBy="{Binding ElementName=WindowTitleLabel}" />
                             <TextBlock Text="开始" Style="{StaticResource DetailLabel}" />
                             <TextBlock Text="{Binding StartFull}" TextWrapping="Wrap" />
-                            <TextBlock Text="结束 / 最近确认时刻" Style="{StaticResource DetailLabel}" />
+                            <TextBlock Text="结束 / 实时显示终点" Style="{StaticResource DetailLabel}" />
                             <TextBlock Text="{Binding EndFull}" TextWrapping="Wrap" />
                             <TextBlock Text="持续时长" Style="{StaticResource DetailLabel}" />
                             <TextBlock Text="{Binding PreciseDuration}" TextWrapping="Wrap" />
@@ -129,7 +149,7 @@
                 </ScrollViewer>
             </Border>
         </Grid>
-        <TextBlock Grid.Row="4" Margin="0,14,0,0" TextWrapping="Wrap"
+        <TextBlock Grid.Row="5" Margin="0,14,0,0" TextWrapping="Wrap"
                    Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
                    Text="前台使用时长不代表实际注意力。进行中的尾段可能尚未保存。" />
     </Grid>

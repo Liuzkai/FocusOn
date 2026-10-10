@@ -18,13 +18,18 @@ public partial class MainWindow : Window
     private DateOnly? _shownDay;
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private bool _followToday = true;
+    private DayView? _dayView;
 
     public MainWindow(Func<DateOnly, Task<DayView>> readDay)
     {
         _readDay = readDay ?? throw new ArgumentNullException(nameof(readDay));
         InitializeComponent();
         LogGrid.ItemsSource = _rows;
+        TimelineView.IntervalSelected += Timeline_IntervalSelected;
+        TimelineView.RangeChanged += Timeline_RangeChanged;
+        TimelineView.ViewChanged += UpdateTimelineControls;
         UpdateDateControls();
+        UpdateTimelineControls();
         _refreshTimer = new DispatcherTimer(DispatcherPriority.Background)
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -45,13 +50,15 @@ public partial class MainWindow : Window
 
     private void PauseButton_Click(object sender, RoutedEventArgs e) => PauseRequested?.Invoke(this, EventArgs.Empty);
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    public async Task StartRefreshAsync()
     {
         if (_started || _stopped) return;
         _started = true;
         await RefreshAsync();
         if (!_stopped) _refreshTimer.Start();
     }
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e) => await StartRefreshAsync();
 
     private async void RefreshTimer_Tick(object? sender, EventArgs e) => await RefreshAsync();
 
@@ -115,6 +122,8 @@ public partial class MainWindow : Window
         _selectedDate = day;
         UpdateDateControls();
         _shownDay = null;
+        _dayView = null;
+        TimelineView.Clear();
         _rows.Clear();
         TotalsList.ItemsSource = null;
         LogEmptyText.Text = "正在读取所选日期…";
@@ -144,11 +153,30 @@ public partial class MainWindow : Window
             _shownDay = view.Date;
             _rows.Clear();
         }
+        _dayView = view;
+        TimelineView.SetDay(view);
         UpdateDateControls();
         StatusText.Text = "当前记录状态：" + view.Status;
         ShowWarning(view.Warning);
 
-        var intervals = view.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+        ApplyRows();
+        TotalsList.ItemsSource = view.Totals.OrderByDescending(x => x.Duration).ThenBy(x => x.AppName)
+            .Select(x => new { x.AppName, Duration = DisplayText.Duration(x.Duration), Color = TimelineControl.ApplicationBrush(x.AppKey) }).ToArray();
+        TotalsEmptyText.Text = $"{view.Date:yyyy-MM-dd} 尚无软件使用片段。";
+        TotalsEmptyText.Visibility = view.Totals.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (newDay && _rows.Count > 0)
+        {
+            LogGrid.SelectedItem = _rows[^1];
+            LogGrid.ScrollIntoView(LogGrid.SelectedItem);
+        }
+    }
+
+    private void ApplyRows()
+    {
+        if (_dayView is null) return;
+        var filtered = TimelineView.Range is { } range ? _dayView.FilterRange(range.StartUtc, range.EndUtc) : _dayView.Intervals;
+        var intervals = filtered.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
         var incomingIds = intervals.Select(x => x.Id).ToHashSet();
         for (var i = _rows.Count - 1; i >= 0; i--)
             if (!incomingIds.Contains(_rows[i].Id)) _rows.RemoveAt(i);
@@ -168,18 +196,42 @@ public partial class MainWindow : Window
             }
         }
 
-        TotalsList.ItemsSource = view.Totals.OrderByDescending(x => x.Duration).ThenBy(x => x.AppName)
-            .Select(x => new { x.AppName, Duration = DisplayText.Duration(x.Duration) }).ToArray();
-        TotalsEmptyText.Text = $"{view.Date:yyyy-MM-dd} 尚无软件使用片段。";
-        TotalsEmptyText.Visibility = view.Totals.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        LogEmptyText.Text = $"{view.Date:yyyy-MM-dd} 没有可用记录。";
+        LogEmptyText.Text = TimelineView.Range is not null ? "所选范围没有可用记录。" : $"{_dayView.Date:yyyy-MM-dd} 没有可用记录。";
         LogEmptyText.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        UpdateTimelineControls();
+    }
 
-        if (newDay && _rows.Count > 0)
+    private void Timeline_IntervalSelected(long id)
+    {
+        var row = _rows.FirstOrDefault(x => x.Id == id);
+        if (row is null && TimelineView.Range is not null)
         {
-            LogGrid.SelectedItem = _rows[^1];
-            LogGrid.ScrollIntoView(LogGrid.SelectedItem);
+            TimelineView.ClearRange();
+            row = _rows.FirstOrDefault(x => x.Id == id);
         }
+        if (row is null) return;
+        LogGrid.SelectedItem = row;
+        LogGrid.ScrollIntoView(row);
+    }
+
+    private void Timeline_RangeChanged((DateTimeOffset StartUtc, DateTimeOffset EndUtc)? range) => ApplyRows();
+    private void ZoomIn_Click(object sender, RoutedEventArgs e) => TimelineView.ZoomIn();
+    private void ZoomOut_Click(object sender, RoutedEventArgs e) => TimelineView.ZoomOut();
+    private void ResetDay_Click(object sender, RoutedEventArgs e) => TimelineView.ResetDay();
+    private void ClearRange_Click(object sender, RoutedEventArgs e) => TimelineView.ClearRange();
+
+    private void UpdateTimelineControls()
+    {
+        ZoomInButton.IsEnabled = TimelineView.CanZoomIn;
+        ZoomOutButton.IsEnabled = TimelineView.CanZoomOut;
+        ResetDayButton.IsEnabled = _dayView is not null;
+        ClearRangeButton.IsEnabled = TimelineView.Range is not null;
+        RangeText.Text = TimelineView.Range is { } range
+            ? $"日志范围：{DisplayText.Time(range.StartUtc, true)} — {DisplayText.Time(range.EndUtc, true)}（仅筛选日志）"
+            : "日志范围：全天。拖选或 Shift＋方向键可筛选；全天软件汇总保持不变。";
+        ViewRangeText.Text = _dayView is null ? string.Empty : TimelineView.CanZoomOut
+            ? $"显示：{DisplayText.Time(TimelineView.VisibleStart)} — {DisplayText.Time(TimelineView.VisibleEnd)}"
+            : "显示：全天";
     }
 
     private void ShowWarning(string? warning)
@@ -194,6 +246,8 @@ public partial class MainWindow : Window
         DetailsPanel.DataContext = row;
         DetailsPanel.Visibility = row is null ? Visibility.Collapsed : Visibility.Visible;
         DetailsEmptyText.Visibility = row is null ? Visibility.Visible : Visibility.Collapsed;
+        if (row is null) TimelineView.ClearSelection();
+        else TimelineView.SelectInterval(row.Id);
     }
 }
 

@@ -36,5 +36,5 @@ public static class DisplayText
         : "此区间不累计软件使用时长。";
 
     public static string Time(DateTimeOffset utc, bool full = false) => utc.ToLocalTime()
-        .ToString(full ? "yyyy-MM-dd HH:mm:ss.fff" : "HH:mm:ss", CultureInfo.CurrentCulture);
+        .ToString(full ? "yyyy-MM-dd HH:mm:ss.fff zzz" : "HH:mm:ss", CultureInfo.CurrentCulture);
 }

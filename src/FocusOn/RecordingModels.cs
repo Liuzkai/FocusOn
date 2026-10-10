@@ -36,4 +36,9 @@ public sealed record DayView(
     IReadOnlyList<RecordedInterval> Intervals,
     IReadOnlyList<AppTotal> Totals,
     string Status,
-    string? Warning);
+    string? Warning)
+{
+    public IReadOnlyList<RecordedInterval> FilterRange(DateTimeOffset startUtc, DateTimeOffset endUtc) => endUtc <= startUtc
+        ? []
+        : Intervals.Where(interval => interval.StartUtc < endUtc && interval.EndUtc > startUtc).ToArray();
+}
