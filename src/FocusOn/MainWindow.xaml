@@ -7,6 +7,36 @@
         <SolidColorBrush x:Key="ReviewText" Color="#E5E5E5" />
         <SolidColorBrush x:Key="ReviewMuted" Color="#A0A2A8" />
         <SolidColorBrush x:Key="ReviewAccent" Color="#78A4EF" />
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource ReviewSurface}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True" Orientation="{TemplateBinding Orientation}"
+                                   Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                                   Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                   ViewportSize="{TemplateBinding ViewportSize}">
+                                <Track.DecreaseRepeatButton><RepeatButton x:Name="PageBack" Command="{x:Static ScrollBar.PageUpCommand}" Opacity="0" Focusable="False" /></Track.DecreaseRepeatButton>
+                                <Track.Thumb><Thumb Background="{DynamicResource ReviewMuted}">
+                                    <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="{TemplateBinding Background}" CornerRadius="3" Margin="2" /></ControlTemplate></Thumb.Template>
+                                </Thumb></Track.Thumb>
+                                <Track.IncreaseRepeatButton><RepeatButton x:Name="PageForward" Command="{x:Static ScrollBar.PageDownCommand}" Opacity="0" Focusable="False" /></Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter Property="Width" Value="Auto" /><Setter Property="Height" Value="10" />
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                                <Setter TargetName="PageBack" Property="Command" Value="{x:Static ScrollBar.PageLeftCommand}" />
+                                <Setter TargetName="PageForward" Property="Command" Value="{x:Static ScrollBar.PageRightCommand}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource ReviewMuted}" />
             <Setter Property="Background" Value="Transparent" />
