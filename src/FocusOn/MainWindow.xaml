@@ -75,6 +75,8 @@
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="RowFace" Property="Background" Value="{DynamicResource ReviewHover}" />
+                                <Setter TargetName="RowFace" Property="BorderBrush" Value="{DynamicResource ReviewAccent}" />
+                                <Setter TargetName="RowFace" Property="BorderThickness" Value="1" />
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter TargetName="RowFace" Property="BorderThickness" Value="1" />

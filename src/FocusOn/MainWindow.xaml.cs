@@ -246,7 +246,8 @@ public partial class MainWindow : Window
     private void Timeline_IntervalSelected(long id)
     {
         var row = _rows.FirstOrDefault(x => x.Id == id);
-        if (row is null && _searchText.Length > 0)
+        if (row is null && _searchText.Length > 0 && _dayView?.Intervals.FirstOrDefault(x => x.Id == id) is { } target
+            && !DisplayText.MatchesSearch(target, _searchText))
         {
             SearchBox.Text = string.Empty;
             row = _rows.FirstOrDefault(x => x.Id == id);

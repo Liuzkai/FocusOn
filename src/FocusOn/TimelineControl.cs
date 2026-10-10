@@ -236,7 +236,7 @@ public sealed class TimelineControl : FrameworkElement
             if (interval.Id == selectedId)
             {
                 context.PushClip(new RectangleGeometry(rectangle));
-                context.DrawRectangle(null, new Pen(ReviewTheme.Accent, 2), rectangle);
+                context.DrawRectangle(SystemParameters.HighContrast ? ReviewTheme.Background : null, new Pen(ReviewTheme.Accent, 2), rectangle);
                 context.Pop();
             }
             if (interval.IsCurrent)
