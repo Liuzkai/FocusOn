@@ -11,3 +11,4 @@ __pycache__/
 !tests/FocusOn.Tests/Fixtures/recording-v1.db
 *.db-shm
 *.db-wal
+app-colors.json

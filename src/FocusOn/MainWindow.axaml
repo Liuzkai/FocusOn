@@ -36,7 +36,7 @@
     </StackPanel>
     <StackPanel Grid.Row="2" Spacing="6">
       <TextBlock x:Name="TotalsHeading" Text="全天软件汇总" FontWeight="SemiBold" />
-      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+      <ScrollViewer x:Name="TotalsScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" AllowAutoHide="False">
         <ItemsControl x:Name="TotalsList">
           <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>

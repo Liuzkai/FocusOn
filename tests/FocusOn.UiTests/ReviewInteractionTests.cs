@@ -32,6 +32,109 @@ public sealed class ReviewInteractionTests
     private static void AtEnd(DataGrid grid) => Assert.InRange(Bar(grid).Maximum - Bar(grid).Value, -0.01, 1);
 
     [AvaloniaFact]
+    public async Task Totals_scrollbar_occupies_its_own_row_and_refresh_keeps_the_horizontal_offset()
+    {
+        var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
+            .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
+        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask) { Width = 800 };
+        try
+        {
+            window.Show(); await window.StartRefreshAsync(); Pump(window);
+            var viewer = window.FindControl<ScrollViewer>("TotalsScrollViewer")!;
+            var bar = viewer.GetVisualDescendants().OfType<ScrollBar>().Single(x => x.Name == "PART_HorizontalScrollBar");
+            var list = window.FindControl<ItemsControl>("TotalsList")!;
+            Assert.True(bar.IsVisible); Assert.True(bar.Maximum > 1000);
+            var contentBottom = list.TranslatePoint(new Point(0, list.Bounds.Height), viewer)!.Value.Y;
+            var scrollbarTop = bar.TranslatePoint(default, viewer)!.Value.Y;
+            Assert.True(contentBottom <= scrollbarTop, "The scrollbar must not cover the totals chips.");
+            viewer.Offset = new Vector(bar.Maximum, 0); Pump(window);
+            var offset = viewer.Offset.X; Assert.True(offset > 1000);
+            var lastChip = list.GetVisualDescendants().OfType<TextBlock>().Single(x => x.Text == "Application number 19");
+            var position = lastChip.TranslatePoint(default, viewer)!.Value;
+            Assert.InRange(position.X, 0, viewer.Bounds.Width - lastChip.Bounds.Width);
+            await window.RefreshAsync(); Pump(window); Assert.Equal(offset, viewer.Offset.X, 1);
+        }
+        finally { window.StopRefresh(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public async Task Right_click_zooms_the_range_without_clearing_it_and_right_drag_still_pans()
+    {
+        var incoming = View(20);
+        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        try
+        {
+            window.Show(); await window.StartRefreshAsync(); Pump(window);
+            var timeline = window.FindControl<TimelineControl>("TimelineView")!;
+            var from = Plot(timeline, window, .2); var to = Plot(timeline, window, .4);
+            window.MouseDown(from, MouseButton.Left); window.MouseMove(to); window.MouseUp(to, MouseButton.Left); Pump(window);
+            var range = timeline.Range!.Value;
+            var ids = window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Select(x => x.Id).ToArray();
+            window.MouseDown(to, MouseButton.Right); window.MouseUp(to, MouseButton.Right); Pump(window);
+            Assert.Equal(range.StartUtc, timeline.VisibleStart); Assert.Equal(range.EndUtc, timeline.VisibleEnd);
+            Assert.Equal(range, timeline.Range);
+            Assert.Equal(ids, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Select(x => x.Id));
+            Assert.Equal(2, window.FindControl<ItemsControl>("TotalsList")!.ItemCount);
+            var width = timeline.VisibleEnd - timeline.VisibleStart; var previous = timeline.VisibleStart;
+            from = Plot(timeline, window, .6); to = Plot(timeline, window, .4);
+            window.MouseDown(from, MouseButton.Right); window.MouseMove(to); window.MouseUp(to, MouseButton.Right); Pump(window);
+            Assert.Equal(width, timeline.VisibleEnd - timeline.VisibleStart); Assert.True(timeline.VisibleStart > previous); Assert.Equal(range, timeline.Range);
+            await window.RefreshAsync(); Pump(window); Assert.Equal(width, timeline.VisibleEnd - timeline.VisibleStart);
+            window.KeyPressQwerty(PhysicalKey.Escape, RawInputModifiers.None); Pump(window);
+            Assert.Null(timeline.Range); Assert.Equal(20, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Count());
+            window.MouseWheel(Plot(timeline, window, .5), new Vector(0, 1)); Pump(window);
+            Assert.True(timeline.VisibleEnd - timeline.VisibleStart < width);
+        }
+        finally { window.StopRefresh(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public void App_colors_are_distinct_readable_and_survive_new_apps_reordering_and_restart()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "FocusOn-colors-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(directory); File.WriteAllText(Path.Combine(directory, "settings.json"), "{\"language\":\"zh-CN\"}");
+            var colors = new ApplicationColors(directory); colors.Register(["FocusOn", "WorkBuddy"]);
+            var focus = Assert.IsType<Avalonia.Media.SolidColorBrush>(colors.Get("FocusOn")).Color;
+            var buddy = Assert.IsType<Avalonia.Media.SolidColorBrush>(colors.Get("WorkBuddy")).Color;
+            Assert.NotEqual(focus, buddy);
+            Assert.True(Math.Abs(focus.R - buddy.R) + Math.Abs(focus.G - buddy.G) + Math.Abs(focus.B - buddy.B) > 190);
+            var keys = Enumerable.Range(0, 142).Select(x => "app" + x).ToArray(); colors.Register(keys);
+            var saved = keys.Append("FocusOn").Append("WorkBuddy").ToDictionary(x => x, x => Assert.IsType<Avalonia.Media.SolidColorBrush>(colors.Get(x)).Color);
+            Assert.Equal(saved.Count, saved.Values.Distinct().Count());
+            static double Luminance(Avalonia.Media.Color color)
+            {
+                static double Channel(byte value) => value <= 10 ? value / 255d / 12.92 : Math.Pow((value / 255d + .055) / 1.055, 2.4);
+                return .2126 * Channel(color.R) + .7152 * Channel(color.G) + .0722 * Channel(color.B);
+            }
+            foreach (var color in saved.Values)
+                Assert.True((Luminance(color) + .05) / (Luminance(Avalonia.Media.Color.Parse("#303034")) + .05) >= 4.5);
+            var restarted = new ApplicationColors(directory); restarted.Register(keys.Reverse().Append("newly installed app"));
+            foreach (var (key, color) in saved) Assert.Equal(color, Assert.IsType<Avalonia.Media.SolidColorBrush>(restarted.Get(key)).Color);
+            Assert.Equal("{\"language\":\"zh-CN\"}", File.ReadAllText(Path.Combine(directory, "settings.json")));
+            Assert.Empty(Directory.GetFiles(directory, "*.tmp"));
+        }
+        finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    }
+
+    [AvaloniaFact]
+    public void Invalid_color_preferences_are_preserved_and_do_not_prevent_session_colors()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "FocusOn-colors-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory);
+        try
+        {
+            var path = Path.Combine(directory, "app-colors.json"); File.WriteAllText(path, "{\"app\":null}");
+            var colors = new ApplicationColors(directory); var before = colors.Get("FocusOn"); colors.Register(["WorkBuddy"]);
+            Assert.Same(before, colors.Get("FocusOn")); Assert.Equal("{\"app\":null}", File.ReadAllText(path));
+            var unwritable = new ApplicationColors(path); var session = unwritable.Get("FocusOn");
+            unwritable.Register(["WorkBuddy"]); Assert.Same(session, unwritable.Get("FocusOn"));
+            Assert.Equal("{\"app\":null}", File.ReadAllText(path));
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
+    [AvaloniaFact]
     public async Task Hover_follows_the_mouse_within_one_interval_and_reopens_without_a_delay()
     {
         Localizer.SetLanguage("en");

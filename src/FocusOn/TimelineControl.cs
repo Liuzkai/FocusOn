@@ -107,6 +107,10 @@ public sealed class TimelineControl : Control
         SetViewport(center, width);
     }
     public void ZoomOut() { if (CanZoomOut) SetViewport(Middle(visibleStart, visibleEnd), (visibleEnd - visibleStart).Ticks * 2); }
+    public void ZoomToRange()
+    {
+        if (Range is { } range) SetViewport(Middle(range.StartUtc, range.EndUtc), (range.EndUtc - range.StartUtc).Ticks);
+    }
     public void ResetDay()
     {
         if (day is null) return;
@@ -222,7 +226,7 @@ public sealed class TimelineControl : Control
         var point = e.GetPosition(this);
         var start = dragAt; var end = TimeAt(point.X); var pan = panning;
         CancelDrag();
-        if (pan) { if (Math.Abs(point.X - origin.X) < 4) ClearRange(); }
+        if (pan) { if (Math.Pow(point.X - origin.X, 2) + Math.Pow(point.Y - origin.Y, 2) < 16) ZoomToRange(); }
         else if (Math.Abs(point.X - origin.X) >= 4 && start != end) SetRange(start < end ? start : end, start < end ? end : start);
         else if (Hit(point) is { } target) { SelectInterval(target.Id); IntervalSelected?.Invoke(target.Id); }
         InvalidateVisual(); e.Handled = true;

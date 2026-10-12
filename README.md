@@ -18,7 +18,9 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 
 The **[v0.1.2 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e)** adds pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
 
-![v0.1.2 timeline hints and log-end following with demonstration records](docs/images/focuson-ui-interactions.png)
+The next **v0.1.3 draft** also reserves a separate row for the totals scrollbar, saves more distinct app colors across restarts, and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
+
+![v0.1.3 totals scrollbar, app colors and range zoom with demonstration records](docs/images/focuson-ui-interactions.png)
 
 This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. The public v0.1.1 downloads below retain their original build.
 

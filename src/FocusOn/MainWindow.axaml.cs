@@ -119,6 +119,8 @@ public partial class MainWindow : Window
         {
             var incoming = await readDay(requestedDate);
             if (stopped || deleting || requestedDate != selectedDate || requestedTimerVersion != timerVersion) return;
+            ReviewTheme.RegisterApplications(incoming.Intervals.Where(x => x.Kind == IntervalKind.Usage).Select(x => x.AppKey)
+                .Concat(incoming.Totals.Select(x => x.AppKey)));
             view = incoming; TimelineView.SetDay(incoming); StatusText.Text = Localizer.Translate(incoming.Status);
             ShowWarning(incoming.Warning); ShowTimer(incoming.Timer); ApplyRows();
             UpdateTotals(incoming);
@@ -196,9 +198,9 @@ public partial class MainWindow : Window
         ResetDayButton.IsEnabled = view is not null; ClearRangeButton.IsEnabled = TimelineView.Range is not null;
         RecordedModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Normal : FontWeight.Bold;
         FullDayModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Bold : FontWeight.Normal;
-        RangeText.Text = TimelineView.Range is { } range ? Localizer.Get("日志范围：{0} — {1} · 全天汇总不变", DisplayText.Time(range.StartUtc), DisplayText.Time(range.EndUtc))
+        RangeText.Text = TimelineView.Range is { } range ? Localizer.Get("日志范围：{0} — {1} · 全天汇总不变 · 右键点击放大选区", DisplayText.Time(range.StartUtc), DisplayText.Time(range.EndUtc))
             : search.Length > 0 ? Localizer.Get("搜索：{0} · {1} 条匹配 · 全天汇总不变", search, rows.Count)
-            : Localizer.Get("{0} · 拖选筛选，滚轮缩放，右键平移或取消范围", Localizer.Get(TimelineView.FullDay ? "本地全天" : "记录范围"));
+            : Localizer.Get("{0} · 左键点击或拖选，滚轮缩放，右键拖动平移，右键点击放大选区", Localizer.Get(TimelineView.FullDay ? "本地全天" : "记录范围"));
     }
     private void ShowTimer(TitleTimerState? state)
     {

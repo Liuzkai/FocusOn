@@ -214,3 +214,7 @@ New-Item -ItemType Directory -Path $testData -Force | Out-Null
 - [ ] 所有平台：搜索/拖选不改变全天汇总；刷新保持选中详情、缩放和平移；真实键盘输入、窄窗口、DPI/缩放、高对比度、长列表及删除确认/取消。
 - [ ] 所有平台：启动第二进程只唤回已有数据目录实例；关闭可通过托盘/任务栏或再次运行恢复；窗口/托盘退出保存固定终点。不同测试目录独立，隔离入口不改正式自启。
 - [ ] 每种交付架构：在没有 SDK 的对应设备完整解压归档、断网运行；核对运行时、原生 SQLite、绘图与字体。macOS 检查 app bundle、签名与辅助功能授权归属，跨编译未签名产物的本机签名/首次打开流程单独记录。
+
+## v0.1.3 totals, colors and range zoom
+
+On physical Windows at 100%, 150% and 200% scale, narrow the window until daily totals overflow. Move/drag the horizontal scrollbar and confirm every label remains unobstructed, the last app can be reached and refresh retains the offset. Compare FocusOn/WorkBuddy and other apps in totals, logs and timeline; refresh, switch dates and restart with the same data directory to confirm stable assignments. Inspect high contrast and keep app names readable. Left-click a segment, left-drag a range, wheel-zoom, right-drag to pan, then right-click a selected range to fit its bounds; verify the range/log filter stays selected and full-day totals stay unchanged. Use Escape or Clear range to cancel. Test a tiny range (minimum viewport two seconds) and all screen edges/monitors. Automated headless and native Linux synthetic-data checks are separate evidence; these physical-device checks remain pending.

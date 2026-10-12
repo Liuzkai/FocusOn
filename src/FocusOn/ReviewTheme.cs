@@ -21,13 +21,12 @@ public static class ReviewTheme
         resources["ReviewWarningText"] = highContrast ? Brushes.Yellow : Brush.Parse("#F2C98C");
         resources["ReviewBadge"] = highContrast ? Brushes.Black : Brush.Parse("#303034");
     }
-    private static readonly IBrush[] Palette = [Brush.Parse("#82A6E3"), Brush.Parse("#68C091"),
-        Brush.Parse("#AC88C4"), Brush.Parse("#D49A48"), Brush.Parse("#D88BAB"), Brush.Parse("#96BB77"), Brush.Parse("#95A0DA"), Brush.Parse("#C4A280")];
+    private static ApplicationColors applicationColors = new();
+    public static void LoadApplicationColors(string directory) => applicationColors = new(directory);
+    public static void RegisterApplications(IEnumerable<string?> keys) => applicationColors.Register(keys);
     public static IBrush ApplicationBrush(string? key)
     {
         if (HighContrast) return Foreground;
-        uint hash = 2166136261;
-        foreach (var c in key ?? "unknown") hash = unchecked((hash ^ c) * 16777619);
-        return Palette[hash % Palette.Length];
+        return applicationColors.Get(key);
     }
 }

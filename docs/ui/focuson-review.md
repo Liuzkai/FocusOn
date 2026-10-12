@@ -26,7 +26,7 @@
 - 日期/当前记录状态保留一条紧凑操作栏；下一行仿参考的时长按钮、两个开合控件和右侧搜索；然后是三行时间总览、紧凑全天汇总、按小时分隔的日志。移除大标题与列头。详情默认隐藏，选择记录时展开，可由顶部或侧栏按钮关闭。
 - 三行采用 FocusOn 的“使用 / 停止 / 未记录”，不复制 Input/Model/Tools 或 USER/ASSISTANT 标签。软件时长条长继续按真实时间比例计算，左侧标签区不参与时间映射；不采用参考 CSS 的最小宽度和等宽时长模式。停止有原因文字，未记录有斜纹，删除洞保持空白。
 - 搜索限定当前日期的软件名、状态文字和窗口标题；只筛选日志并淡化不匹配时间条，全天汇总保持原口径。清空恢复当前范围的日志；点击被搜索/范围排除的时间条清除对应筛选并定位。搜索是此次用户截图版的范围补充，不能推导出跨日检索、导出或额外采集。
-- 保留拖选、精确悬停、双向选中、日期与删除确认；滚轮缩放时间域，右键单击取消范围，右键拖动平移缩放视窗。日志是虚拟化 ListBox，小时标签包含在行模板内，不通过嵌套分组破坏行虚拟化。
+- 保留拖选、精确悬停、双向选中、日期与删除确认；滚轮缩放时间域，右键拖动平移缩放视窗。v0.1.3 按截图反馈将右键单击改为放大所选范围，保留范围筛选；用取消范围按钮或 Escape 清除范围。日志保持虚拟化，不通过嵌套分组破坏行虚拟化。
 - 本地 `artifacts/ui-harness/` 的预览由真实 WPF 控件和合成 DayView 离屏渲染，包含正常、窄窗口、详情、搜索、无匹配和 2 倍像素输出；不运行采集、不写入数据库。离屏渲染与程序化控件操作不证明真实系统 DPI、高对比度、鼠标/键盘或 Windows 电源行为，相关 W07/W08 仍待 08 验收。
 
 ## 原界面指南（历史）
@@ -59,7 +59,7 @@
 
 - 正文与控件优先用系统 `Segoe UI`，由 Windows 字体回退覆盖中文；常规字号约 14 DIP，分组标题约 16–18 DIP。数据时刻对齐，字体保持一致，避免用等宽字体包装“技术感”。
 - 主要背景、文字、按钮面、选中态优先采用 WPF `SystemColors` 的动态资源，尊重高对比度。内容文字对比度至少 4.5:1，大字至少 3:1；检查实际渲染，不把声明当作结果。
-- 软件颜色由稳定 AppKey 的确定性映射取得，不能使用进程号、窗口句柄或每次启动变化的散列。相同软件跨日期和重启保持颜色。颜色仅是识别辅助，软件名称同时出现。
+- 软件颜色以稳定 AppKey 分配，不能使用进程号、窗口句柄或每次启动变化的散列。v0.1.3 首次分配在 144 个可读候选色中最大化与已有颜色的最小 OKLab 距离，稳定散列决定起始色及并列取舍；每批新增 AppKey 排序后分配。分配存于独立的 `app-colors.json`，相同软件跨日期和重启保持颜色，新增软件不重排已有颜色。汇总、日志和时间线共用同一分配。候选集有限，软件很多时不能承诺两两明显不同；颜色仅是识别辅助，软件名称同时出现。无法保存时本次进程保持稳定，损坏文件不覆盖。
 - 停止计时区间用中性灰和明确原因文字；未记录用不同纹理/轮廓及“未记录”文字。纹理只出现在数据时间线缺口，不做页面装饰。
 - 被选中片段用清晰轮廓及对应详情表达，不加宽数据片段；当前片段标“进行中”。软件两秒切换不能设置人为最小计时宽度。
 - 成功、暂停、异常分别有状态文字。保存失败用持续可见的行内提示，例如“记录异常：无法保存新的活动”，说明恢复路径；不只闪过通知或维持“正在记录”。
@@ -100,3 +100,9 @@
 原生按钮通过 Tab、Enter/Space 操作；日志保持行虚拟化。时间线额外提供左右键选择、Home/End、Shift＋方向键选择范围、加减键缩放、Escape取消范围，完整日志和详情提供文字等价信息。
 
 T09 在真实临时 SQLite 的公开每日查询结果上验证相交边界、不二次裁切及全天汇总不变。本文仅记录实现和自动化边界；W07、W08 的绘制、悬停、拖选、焦点及键盘实际操作仍需实机验收，不把编译或静态检查写成通过。
+
+## v0.1.3 screenshot feedback
+
+The totals ScrollViewer disables auto-hide so its horizontal scrollbar occupies the Fluent template’s separate grid row. Native Linux/Xvfb inspection placed label bottoms at Y=182 and the scrollbar at Y=188; a real thumb drag retained X=303.14 across refresh. Pointer events selected 08:02:34.4554455–08:07:46.4554455, and right-click made the viewport exactly match that selection without changing its seven intersecting log IDs (including the independent timer). Right-drag retained the range, Escape restored all 53 rows. Existing pointer hints, follow/up/resume and decorative-gap checks also passed.
+
+Color regression checks cover 144 distinct first assignments, WCAG contrast on the app-label surface, stable restart/reorder/new-app behavior and preserving corrupt/unwritable preferences. The updated README image is a real 1100×720 Linux window with synthetic DayView records, showing FocusOn and WorkBuddy with separate colors and an unobstructed horizontal scrollbar. It does not use a production database. Physical Windows/macOS DPI, multi-monitor and desktop input remain in ticket 08.

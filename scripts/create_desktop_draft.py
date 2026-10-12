@@ -22,16 +22,19 @@ assert reference['type'] == 'commit' and reference['sha'] == source, 'Tag must p
 report = {'sourceCommit':source,'releaseTag':tag,'status':'failed','macExcluded':[]}
 result_path = root / 'artifacts/desktop-release-result.json'
 
-def find(tag_name):
+def releases():
     for page in range(1, 11):
-        releases = api(f'repos/{repo}/releases?per_page=100&page={page}')
-        for release in releases:
-            if release['tag_name'] == tag_name: return release
-        if len(releases) < 100: return None
+        batch = api(f'repos/{repo}/releases?per_page=100&page={page}')
+        yield from batch
+        if len(batch) < 100: return
     raise RuntimeError('Release pagination limit reached')
 
+def find(tag_name):
+    return next((release for release in releases() if release['tag_name'] == tag_name), None)
+
 def snapshot(release):
-    return {a['name']:{k:a.get(k) for k in ['id','size','digest']} for a in release['assets']}
+    return {**{k:release.get(k) for k in ['tag_name','target_commitish','name','body','draft','prerelease']},
+            'assets':{a['name']:{k:a.get(k) for k in ['id','size','digest']} for a in release['assets']}}
 
 def extract(archive, package):
     with (zipfile.ZipFile(archive) if archive.suffix == '.zip' else tarfile.open(archive)) as stream:
@@ -51,8 +54,9 @@ def extract(archive, package):
         else: stream.extractall(package.parent, filter='data')
 
 try:
-    historical = find('v0.1.0'); assert historical, 'Original release is missing'
-    before = snapshot(historical)
+    historical = [release for release in releases() if release['tag_name'] != tag]
+    assert any(release['tag_name'] == 'v0.1.0' for release in historical), 'Original release is missing'
+    before = {release['id']:snapshot(release) for release in historical}
     assets = []
     for rid in ['win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64']:
         package = root / 'artifacts/release' / ('FocusOn-' + rid)
@@ -75,6 +79,8 @@ Includes the .NET runtime, the integrated FocusOn icon, recoverable tray behavio
 
 Timeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.
 
+The daily totals scrollbar occupies its own row and does not cover app labels. App colors are assigned for perceptual separation and saved across restarts. Left-click selects a record, left-drag filters a range, the wheel zooms, right-drag pans, and right-click zooms to the selected range without clearing its filter. Escape or Clear range removes the range filter.
+
 Validation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.
 
 macOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.
@@ -94,7 +100,9 @@ The existing v0.1.0 tag and all Windows/Linux attachments are preserved; their h
         for asset in assets:
             subprocess.run(['gh','release','download',tag,'--repo',repo,'--pattern',asset.name,'--dir',temporary],check=True)
             assert hashlib.sha256((pathlib.Path(temporary) / asset.name).read_bytes()).digest() == hashlib.sha256(asset.read_bytes()).digest()
-    assert snapshot(api(f'repos/{repo}/releases/{historical["id"]}')) == before, 'Historical release assets changed'
+    for release_id, original in before.items():
+        assert snapshot(api(f'repos/{repo}/releases/{release_id}')) == original, 'Historical release changed'
+    report['preservedReleases'] = list(before.values())
     report.update(status='draft',releaseUrl=updated['html_url'],assets=[{'name':a['name'],'size':a['size'],'digest':a.get('digest'),'url':a['browser_download_url']} for a in updated['assets']])
     print('Verified draft: ' + updated['html_url'])
 except Exception as error:
