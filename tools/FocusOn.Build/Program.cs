@@ -146,6 +146,7 @@ static void CopyDirectory(string source, string destination)
 {
     foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
     {
+        if (Path.GetRelativePath(source, file).Split(Path.DirectorySeparatorChar).Contains("__pycache__") || Path.GetExtension(file) is ".pyc" or ".pyo") continue;
         var target = Path.Combine(destination, Path.GetRelativePath(source, file)); Directory.CreateDirectory(Path.GetDirectoryName(target)!); File.Copy(file, target);
     }
 }

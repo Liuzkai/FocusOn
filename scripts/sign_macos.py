@@ -15,7 +15,10 @@ assert sys.platform == 'darwin' and app.name == 'FocusOn.app'
 report = app.parent / 'mac-signing.json'
 
 def run(label, args):
-    result = subprocess.run(args, capture_output=True, text=True, timeout=2700)
+    try:
+        result = subprocess.run(args, capture_output=True, text=True, timeout=2700)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(label + ' timed out; sensitive command arguments withheld.') from None
     if result.returncode:
         if os.environ.get('FOCUSON_MAC_SIGN') != 'developer-id':
             # Ad-hoc commands contain no certificate/private-key material.
@@ -26,8 +29,10 @@ def run(label, args):
 def code_files():
     for path in sorted(app.rglob('*')):
         if path.is_file() and not path.is_symlink():
+            # Sign the main executable through the app last, after its nested code.
+            if path == app / 'Contents/MacOS/FocusOn': continue
             with path.open('rb') as stream:
-                if stream.read(4) in {b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf', b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'}:
+                if path.suffix == '.dll' or stream.read(4) in {b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf', b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'}:
                     yield path
 
 if os.environ.get('FOCUSON_MAC_SIGN') != 'developer-id':
@@ -65,9 +70,9 @@ with tempfile.TemporaryDirectory(prefix='focuson-sign-', dir=os.environ.get('RUN
         identities = run('Validate unexpired identity', ['security', 'find-identity', '-v', '-p', 'codesigning', keychain])
         assert identity in identities and '0 valid identities' not in identities, 'No valid requested Developer ID certificate in supplied P12'
         for path in code_files():
-            arguments = ['codesign', '--force', '--sign', identity, '--keychain', keychain, '--timestamp', '--options', 'runtime']
-            if path.name == 'FocusOn': arguments += ['--entitlements', str(entitlements)]
-            run('Sign nested Mach-O', [*arguments, str(path)])
+            arguments = ['codesign', '--force', '--sign', identity, '--keychain', keychain, '--timestamp']
+            if path.suffix != '.dll': arguments += ['--options', 'runtime']
+            run('Sign nested code', [*arguments, str(path)])
         run('Sign app', ['codesign', '--force', '--sign', identity, '--keychain', keychain, '--timestamp', '--options', 'runtime', '--entitlements', str(entitlements), str(app)])
         run('Verify signatures', ['codesign', '--verify', '--deep', '--strict', '--verbose=2', str(app)])
         # Verify actual certificate authority, team, hardened runtime and the exact entitlement set.
