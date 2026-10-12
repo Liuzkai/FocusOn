@@ -5,6 +5,31 @@ namespace FocusOn.Tests;
 public sealed class ResidencyTests
 {
     [Fact]
+    public void Unix_aliases_activate_the_same_writer_including_case_insensitive_Mac_volumes()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        var directory = Path.Combine(Path.GetTempPath(), "FocusOn-alias-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            using var primary = new SingleInstance(Path.Combine(directory, "data"));
+            using var activated = new ManualResetEventSlim(); primary.Listen(activated.Set);
+            Directory.CreateSymbolicLink(Path.Combine(directory, "alias"), Path.Combine(directory, "data"));
+            using (var alias = new SingleInstance(Path.Combine(directory, "alias")))
+            {
+                Assert.False(alias.IsPrimary); alias.SignalExisting();
+                Assert.True(activated.Wait(TimeSpan.FromSeconds(5)));
+            }
+            if (Directory.Exists(Path.Combine(directory, "DATA")))
+            {
+                activated.Reset(); using var caseAlias = new SingleInstance(Path.Combine(directory, "DATA"));
+                Assert.False(caseAlias.IsPrimary); caseAlias.SignalExisting();
+                Assert.True(activated.Wait(TimeSpan.FromSeconds(5)));
+            }
+        }
+        finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    }
+
+    [Fact]
     public void Startup_command_uses_the_exact_fixed_program_location_with_startup_mode()
     {
         Assert.Equal("\"C:\\Program Files\\FocusOn\\FocusOn.exe\" --startup",

@@ -25,7 +25,9 @@ public sealed class SingleInstance : IDisposable
         directory = CanonicalDirectory(directory);
         var identityPath = OperatingSystem.IsWindows() ? directory.ToUpperInvariant() : directory;
         var identity = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Environment.UserName + "\0" + identityPath)));
-        pipeName = "FocusOn-" + identity;
+        // Darwin's per-user TMPDIR is long and Unix-domain pipe paths are limited
+        // to 104 bytes. Keep 128 bits of identity there; retain existing Win/Linux IPC names.
+        pipeName = "FocusOn-" + (OperatingSystem.IsMacOS() ? identity[..32] : identity);
         try
         {
             writer = new FileStream(Path.Combine(directory, ".focuson.lock"), FileMode.OpenOrCreate,
@@ -60,7 +62,12 @@ public sealed class SingleInstance : IDisposable
                 try
                 {
                     var buffer = new byte[1024];
-                    if (GetPath(fd, 50, buffer) == 0) directory = Encoding.UTF8.GetString(buffer, 0, Array.IndexOf(buffer, (byte)0));
+                    // fcntl is variadic. Darwin ARM64 passes varargs on the stack,
+                    // unlike the fixed three-argument P/Invoke ABI used on Intel.
+                    var result = RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+                        ? GetPathArm64(fd, 50, 0, 0, 0, 0, 0, 0, buffer) : GetPath(fd, 50, buffer);
+                    var length = Array.IndexOf(buffer, (byte)0);
+                    if (result == 0 && length > 0) directory = Encoding.UTF8.GetString(buffer, 0, length);
                 }
                 finally { Close(fd); }
             }
@@ -72,6 +79,8 @@ public sealed class SingleInstance : IDisposable
     [DllImport("libc", EntryPoint = "free")] private static extern void Free(nint pointer);
     [DllImport("/usr/lib/libSystem.B.dylib", EntryPoint = "open")] private static extern int Open(string path, int flags);
     [DllImport("/usr/lib/libSystem.B.dylib", EntryPoint = "fcntl")] private static extern int GetPath(int fd, int command, byte[] path);
+    [DllImport("/usr/lib/libSystem.B.dylib", EntryPoint = "fcntl")] private static extern int GetPathArm64(int fd, int command,
+        nint unused2, nint unused3, nint unused4, nint unused5, nint unused6, nint unused7, [Out] byte[] path);
     [DllImport("/usr/lib/libSystem.B.dylib", EntryPoint = "close")] private static extern int Close(int fd);
 
     private NamedPipeServerStream CreatePipe() => new(pipeName, PipeDirection.In, 1,
