@@ -125,7 +125,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 16 票（2026-10-12）：**继续用户 Windows 截图反馈：汇总滚动条独立占行、右键放大选区并保留筛选、软件颜色感知分离并保存。版本计划为新的 v0.1.3 草稿，旧 v0.1.1 正式版及 v0.1.2 草稿不覆盖。本地 90 核心/平台与 21 UI 回归、真实 Linux 合成记录鼠标/滚动/选区检查通过；物理 Windows DPI 等验收仍交 08。最终源码、云端结果和草稿链接待下方任务记录补齐。
+**最新 16 票（2026-10-12）：**继续用户 Windows 截图反馈：汇总滚动条独立占行、右键放大选区并保留筛选、软件颜色感知分离并保存。版本计划为新的 v0.1.3 草稿，旧 v0.1.1 正式版及 v0.1.2 草稿不覆盖。本地 90 核心/平台与 21 UI 回归、真实 Linux 合成记录鼠标/滚动/选区检查通过；物理 Windows DPI 等验收仍交 08。不可变源码 `9c6afdb` / v0.1.3；[run 38244571956](https://github.com/Liuzkai/FocusOn/actions/runs/38244571956) 重试草稿步骤后 Success，六架构各 111 项回归及原生/包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-4ffc94db1f1a690ca41f) 含 8 个 Windows/Linux 附件，下载校验及旧版本保存检查通过。工作流重试维护为 `4ba2fce`；不改变标签源码。Mac 仍仅临时 ad-hoc 验证产物。16 工程票关闭，08/整体规格保持开放。
 
 **最新 15 票（2026-10-12）：**实现随鼠标稳定移动的非交互时间轴提示、日志滚到底部后跟随新增/向上滚动及历史选择暂停、不同软件边界约 2 DIP 视觉间隙。107 项回归与实际 Linux/Xvfb 鼠标/跨行提示/底部跟随/历史位置/像素间隙检查通过；保留时间映射、SQLite、两语偏好及原生平台生命周期。[v0.1.2 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e)已创建，源 `8f25193` / [六架构 run 38237429087](https://github.com/Liuzkai/FocusOn/actions/runs/38237429087) Success，含四个 Windows/Linux 包及 SHA256（上传下载核对通过）；15 工程已完成，08 仍开放；已公开 v0.1.1 不改写，Mac 信任和物理设备验收限制不变。
 

@@ -16,9 +16,9 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 
 [View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
-The **[v0.1.2 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e)** adds pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
+The **[v0.1.3 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-4ffc94db1f1a690ca41f)** includes pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
 
-The next **v0.1.3 draft** also reserves a separate row for the totals scrollbar, saves more distinct app colors across restarts, and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
+This draft also reserves a separate row for the totals scrollbar, saves more distinct app colors across restarts, and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
 
 ![v0.1.3 totals scrollbar, app colors and range zoom with demonstration records](docs/images/focuson-ui-interactions.png)
 
