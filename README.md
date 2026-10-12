@@ -16,7 +16,7 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 
 [View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
-The next **v0.1.2 draft** adds pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
+The **[v0.1.2 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e)** adds pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
 
 ![v0.1.2 timeline hints and log-end following with demonstration records](docs/images/focuson-ui-interactions.png)
 

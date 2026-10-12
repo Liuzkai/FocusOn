@@ -125,7 +125,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 15 票（2026-10-12）：**实现随鼠标稳定移动的非交互时间轴提示、日志滚到底部后跟随新增/向上滚动及历史选择暂停、不同软件边界约 2 DIP 视觉间隙。107 项回归与实际 Linux/Xvfb 鼠标/跨行提示/底部跟随/历史位置/像素间隙检查通过；保留时间映射、SQLite、两语偏好及原生平台生命周期。下一版 v0.1.2 草稿已在本轮说明，正在完成六架构构建与草稿；已公开 v0.1.1 不改写，Mac 信任和物理设备验收限制不变。
+**最新 15 票（2026-10-12）：**实现随鼠标稳定移动的非交互时间轴提示、日志滚到底部后跟随新增/向上滚动及历史选择暂停、不同软件边界约 2 DIP 视觉间隙。107 项回归与实际 Linux/Xvfb 鼠标/跨行提示/底部跟随/历史位置/像素间隙检查通过；保留时间映射、SQLite、两语偏好及原生平台生命周期。[v0.1.2 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e)已创建，源 `8f25193` / [六架构 run 38237429087](https://github.com/Liuzkai/FocusOn/actions/runs/38237429087) Success，含四个 Windows/Linux 包及 SHA256（上传下载核对通过）；15 工程已完成，08 仍开放；已公开 v0.1.1 不改写，Mac 信任和物理设备验收限制不变。
 
 **最新 14 票（2026-10-12）：**用户明确要求公开 v0.1.1；[公开 Release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1)已发布并设为 latest，发布源/标签仍为 `45ad974`，没有重建或替换附件。[发布核对 run 38230937502](https://github.com/Liuzkai/FocusOn/actions/runs/38230937502) Success；四个 Windows/Linux x64/ARM64 包与四个 SHA256 公开直链下载再次匹配原草稿大小/哈希/manifest 源，v0.1.0 标签及资产保持。Mac 仅 Actions ad-hoc 验证，未 Developer ID 签名/公证，不是正式附件。14 工程完成，08 的设备/权限/签名待办及父规格继续开放；普通推送仍不直接公开发布，后续版本默认草稿。
 

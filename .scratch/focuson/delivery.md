@@ -1,3 +1,18 @@
+# 15: v0.1.2 UI interaction draft (2026-10-12)
+
+The three requested fixes are implemented at immutable tag/package source `8f25193fa09ec7672c197a80c4679eb0d4d5df44`: pointer-following non-interactive timeline hints with cleanup, log-end following that pauses for history/user scrolling, and small different-app separators without changing time/duration/hit testing. [v0.1.2 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-e5e1022863366939ef6e) contains four Windows/Linux x64/ARM64 archives and four SHA256 files. [Release workflow](https://github.com/Liuzkai/FocusOn/actions/runs/38237429087) is Success: all six native targets, source gate, package checks and draft upload pass; the explicit-publication job is skipped. Uploaded attachments were downloaded and SHA256 compared by the publisher. v0.1.0 remains intact; public/latest v0.1.1 stays at 45ad974 and is not rewritten or replaced.
+
+Local Release has zero warnings/errors; 90 core/platform + 17 UI regressions pass (107, zero failed/skipped). Actual Linux/Xvfb pointer and rendered-UI checks confirm hint movement/re-entry/cross-lane updates, appended-record following, history viewport stability and software-only pixel gaps. Detailed fixture/screenshot provenance is in tests/FocusOn.Tests/Verification.md and docs/ui/focuson-review.md; it uses synthetic records and no production data. Native build checks reuse the existing desktop controller/SQLite/instance/language/close/exit verification on each architecture. Physical Windows/macOS pointer/DPI/multi-monitor and other 08 acceptance remains pending.
+
+| Draft archive | Bytes | SHA256 |
+| --- | --- | --- |
+| [FocusOn-linux-arm64.tar.gz](https://github.com/Liuzkai/FocusOn/releases/download/untagged-e5e1022863366939ef6e/FocusOn-linux-arm64.tar.gz) | 45121775 | 4E40AED7B97937E50235AA3B3FF3DC0E55008A0EB661B5FB84CA3A48B4A9C17B |
+| [FocusOn-linux-x64.tar.gz](https://github.com/Liuzkai/FocusOn/releases/download/untagged-e5e1022863366939ef6e/FocusOn-linux-x64.tar.gz) | 47759063 | E432763125D0272E8DC5D813E26D2B1AD259392B1820D3C947AD6AA0D880B387 |
+| [FocusOn-win-arm64.zip](https://github.com/Liuzkai/FocusOn/releases/download/untagged-e5e1022863366939ef6e/FocusOn-win-arm64.zip) | 47204990 | A413245EE1BC41D944005A0B24FA77208741EA4553DBAD2E4E7C74DA36F6A075 |
+| [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/untagged-e5e1022863366939ef6e/FocusOn-win-x64.zip) | 49599424 | EB4202454E64CA816525CA90D77193D15E0089C6A847C893FCF6EFB8CB844803 |
+
+Both Mac native targets build/test/package successfully, but missing Developer ID/notary trust leaves `osx-x64` and `osx-arm64` excluded from Release attachments. Mac validation ZIPs remain seven-day [Actions artifacts](https://github.com/Liuzkai/FocusOn/actions/runs/38237429087); no formal Mac readiness or physical acceptance is claimed. Existing Apple Secrets/permission instructions and third-party notices are preserved. Main receives this delivery record after the immutable tag; it does not change package source. About remains manual/user-owned.
+
 # 14: Public v0.1.1 publication (2026-10-12)
 
 User explicitly requested “0.1.1 直接发布吧”. [v0.1.1](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1) is now public/latest, published at 2026-10-12T17:36:18+08:00 (Asia/Shanghai). [Publication workflow](https://github.com/Liuzkai/FocusOn/actions/runs/38230937502) is Success. Publication tooling source is f962ff5; package/immutable tag source remains `45ad974fc3f86c9721b78da560361a77d1e0809a`, from the already successful six-target [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38228221117). No rebuild, tag rewrite or asset replacement occurred.
