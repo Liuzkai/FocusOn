@@ -32,6 +32,21 @@ publish 会检查桌面运行时与 SQLite 必需文件，生成逐文件 SHA256
 
 `--startup --data-dir <测试目录>` 可隔离验证隐藏托盘启动；这两种隔离入口都不修改正式自启项。
 
+## GitHub Releases
+
+`.github/workflows/release.yml` 在推送 `v*` 标签时自动执行 Release 构建、测试、Windows x64 自包含打包和文件校验，再创建带 ZIP 与 SHA256 附件的 Release 草稿。SDK 从 `global.json` 安装，使用 GitHub 自动提供的令牌，无需新增个人 Token 或 Secrets。
+
+先提交并推送准备发布的代码，再创建新版本标签，例如：
+
+```powershell
+git tag -a v0.1.1 -m "FocusOn v0.1.1"
+git push origin v0.1.1
+```
+
+在仓库 Actions 查看 `Windows Release`；成功后到 Releases 检查草稿、填写版本说明并点击 Publish release。草稿附件可以通过重新运行该工作流更新；已经公开的版本应使用新标签发布。也可在 Actions 的 Run workflow 中选择已有 `v*` 标签重跑，选择分支不会创建 Release。
+
+下载完整 `FocusOn-win-x64.zip` 并解压运行，旁置 `.sha256` 用于校验。GitHub 自动生成的 Source code 附件是源码。自动化构建和文件校验不代替 `docs/manual-acceptance.md` 的实机验收。
+
 ## 规格与任务
 
 完整行为见[开发规格](.scratch/focuson/spec.md)，依赖与验收条件见[独立任务](.scratch/focuson/issues)。测试证据区分可控事件逻辑与真实 Windows/界面行为，不把模拟事件通过当作硬件兼容性通过。
