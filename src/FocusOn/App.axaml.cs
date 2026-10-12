@@ -10,6 +10,8 @@ namespace FocusOn;
 
 public partial class App : Application
 {
+    public App() { }
+    public App(SingleInstance instance) { singleInstance = instance; }
     private RecordingController? controller;
     private SingleInstance? singleInstance;
     private TrayController? tray;
@@ -42,7 +44,7 @@ public partial class App : Application
         {
             var (directory, isolated, startup) = PlatformPaths.ParseArguments(args);
             Localizer.SetLanguage(LanguagePreference.Load(directory));
-            singleInstance = new SingleInstance(directory);
+            singleInstance ??= new SingleInstance(directory);
             if (!singleInstance.IsPrimary) { singleInstance.SignalExisting(); singleInstance.Dispose(); singleInstance = null; desktop!.Shutdown(); return; }
             singleInstance.Listen(() => Dispatcher.UIThread.Post(ShowMainWindow));
             controller = new RecordingController(directory);
