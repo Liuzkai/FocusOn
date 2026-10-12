@@ -156,8 +156,10 @@ public sealed class RecordingController : IAsyncDisposable
             stopped = true;
             cutoff = at.MonotonicTicks;
         }
-        session?.Dispose();
-        observer?.Dispose();
+        // Native input/menu callbacks may still own their platform event lock.
+        // Yield before joining observers so their final native read can finish.
+        // The saved boundary remains the original 'at', not the cleanup completion.
+        await Task.Run(() => { session?.Dispose(); observer?.Dispose(); });
         lock (gate) cutoff = -1;
         try
         {
