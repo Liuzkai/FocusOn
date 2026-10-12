@@ -55,7 +55,8 @@ public sealed class MacSessionObserver : ISessionObserver
         try
         {
             var lockedValue = MacNative.DictionaryValue(dictionary, "CGSSessionScreenIsLocked");
-            var onConsole = MacNative.DictionaryValue(dictionary, "kCGSessionOnConsoleKey");
+            // Use the SDK macro's actual CFString value, not the macro's C name.
+            var onConsole = MacNative.SessionOnConsoleValue(dictionary);
             var locked = lockedValue != 0 && MacNative.CFBooleanGetValue(lockedValue);
             var available = onConsole != 0 && MacNative.CFBooleanGetValue(onConsole);
             if (MacNative.CGGetOnlineDisplayList(0, null, out var count) != 0 || count is 0 or > 256)

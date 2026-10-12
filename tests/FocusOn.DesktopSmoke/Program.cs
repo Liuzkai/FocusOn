@@ -6,7 +6,7 @@ using Avalonia.Themes.Fluent;
 using FocusOn;
 using System.Text.Json;
 
-AppBuilder.Configure<SmokeApp>().UsePlatformDetect().WithInterFont().LogToTrace().StartWithClassicDesktopLifetime(args);
+DesktopRendering.Configure(AppBuilder.Configure<SmokeApp>().UsePlatformDetect().WithInterFont().LogToTrace()).StartWithClassicDesktopLifetime(args);
 return SmokeApp.Result;
 
 sealed class SmokeApp : Application

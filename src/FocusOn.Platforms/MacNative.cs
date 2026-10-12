@@ -7,6 +7,8 @@ internal static class MacNative
     internal const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
     internal const string ApplicationServices = "/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices";
     internal const string IOKit = "/System/Library/Frameworks/IOKit.framework/IOKit";
+    // CGSession.h defines kCGSessionOnConsoleKey as CFSTR("kCGSSessionOnConsoleKey").
+    internal static nint SessionOnConsoleValue(nint dictionary) => DictionaryValue(dictionary, "kCGSSessionOnConsoleKey");
     internal static void LoadAppKit() => NativeLibrary.Load("/System/Library/Frameworks/AppKit.framework/AppKit");
     internal static nint Send(nint instance, string selector) => Message(instance, Selector(selector));
     internal static nint String(string text) => CFStringCreateWithCString(0, text, 0x08000100);
