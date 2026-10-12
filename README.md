@@ -20,7 +20,9 @@ The **[v0.1.3 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-4f
 
 This draft also reserves a separate row for the totals scrollbar, saves more distinct app colors across restarts, and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
 
-![v0.1.3 totals scrollbar, app colors and range zoom with demonstration records](docs/images/focuson-ui-interactions.png)
+The next **v0.1.4 draft** makes daily totals compact: drag any app label left or right to scroll, or use the wheel, horizontal trackpad or arrow/Home/End/Page keys. A thin position line appears during interaction and hides after about one second idle, without covering labels or shifting the layout.
+
+![v0.1.4 compact totals indicator and draggable app labels with demonstration records](docs/images/focuson-ui-interactions.png)
 
 This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. The public v0.1.1 downloads below retain their original build.
 

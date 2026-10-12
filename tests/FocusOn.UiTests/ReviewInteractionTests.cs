@@ -32,7 +32,7 @@ public sealed class ReviewInteractionTests
     private static void AtEnd(DataGrid grid) => Assert.InRange(Bar(grid).Maximum - Bar(grid).Value, -0.01, 1);
 
     [AvaloniaFact]
-    public async Task Totals_scrollbar_occupies_its_own_row_and_refresh_keeps_the_horizontal_offset()
+    public async Task Totals_indicator_is_compact_unobstructed_and_refresh_keeps_the_horizontal_offset()
     {
         var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
             .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
@@ -40,19 +40,90 @@ public sealed class ReviewInteractionTests
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
-            var viewer = window.FindControl<ScrollViewer>("TotalsScrollViewer")!;
+            var viewer = window.FindControl<AppTotalsScrollViewer>("TotalsScrollViewer")!;
             var bar = viewer.GetVisualDescendants().OfType<ScrollBar>().Single(x => x.Name == "PART_HorizontalScrollBar");
             var list = window.FindControl<ItemsControl>("TotalsList")!;
-            Assert.True(bar.IsVisible); Assert.True(bar.Maximum > 1000);
+            Assert.False(bar.IsVisible); Assert.True(viewer.Extent.Width - viewer.Viewport.Width > 1000);
             var contentBottom = list.TranslatePoint(new Point(0, list.Bounds.Height), viewer)!.Value.Y;
-            var scrollbarTop = bar.TranslatePoint(default, viewer)!.Value.Y;
-            Assert.True(contentBottom <= scrollbarTop, "The scrollbar must not cover the totals chips.");
-            viewer.Offset = new Vector(bar.Maximum, 0); Pump(window);
+            Assert.Equal(3, viewer.IndicatorBounds.Height);
+            Assert.True(contentBottom <= viewer.IndicatorBounds.Y, "The indicator must not cover the totals chips.");
+            foreach (var chip in list.GetVisualDescendants().OfType<Border>().Where(x => x.Child is StackPanel))
+            {
+                Assert.True(chip.Bounds.Height >= chip.DesiredSize.Height, "Reserve the footer without clipping the chip padding.");
+                Assert.True(chip.TranslatePoint(new Point(0, chip.Bounds.Height), viewer)!.Value.Y <= viewer.IndicatorBounds.Y);
+            }
+            Assert.InRange(viewer.Bounds.Height - list.Bounds.Height, 3, 6);
+            viewer.Offset = new Vector(viewer.Extent.Width - viewer.Viewport.Width, 0); Pump(window);
             var offset = viewer.Offset.X; Assert.True(offset > 1000);
             var lastChip = list.GetVisualDescendants().OfType<TextBlock>().Single(x => x.Text == "Application number 19");
             var position = lastChip.TranslatePoint(default, viewer)!.Value;
             Assert.InRange(position.X, 0, viewer.Bounds.Width - lastChip.Bounds.Width);
             await window.RefreshAsync(); Pump(window); Assert.Equal(offset, viewer.Offset.X, 1);
+        }
+        finally { window.StopRefresh(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public async Task Dragging_app_labels_scrolls_across_refresh_and_wheel_keyboard_and_idle_work()
+    {
+        var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
+            .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
+        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        try
+        {
+            window.Show(); window.MouseMove(new Point(-20, -20)); await window.StartRefreshAsync(); Pump(window);
+            var viewer = window.FindControl<AppTotalsScrollViewer>("TotalsScrollViewer")!;
+            var timeline = window.FindControl<TimelineControl>("TimelineView")!;
+            var startTime = timeline.VisibleStart; var endTime = timeline.VisibleEnd; var height = viewer.Bounds.Height;
+            Assert.False(viewer.IsIndicatorVisible);
+            var start = viewer.TranslatePoint(new Point(400, 14), window)!.Value;
+            window.MouseMove(start); window.MouseDown(start, MouseButton.Left); window.MouseMove(start - new Point(120, 0)); Pump(window);
+            Assert.Equal(120, viewer.Offset.X, 1); Assert.True(viewer.IsIndicatorVisible);
+            await window.RefreshAsync(); Pump(window); Assert.Equal(120, viewer.Offset.X, 1);
+            window.MouseMove(start - new Point(160, 0)); window.MouseUp(start - new Point(160, 0), MouseButton.Left); Pump(window);
+            Assert.Equal(160, viewer.Offset.X, 1);
+            window.MouseWheel(start, new Vector(0, -2)); Pump(window); Assert.Equal(256, viewer.Offset.X, 1);
+            window.MouseWheel(start, new Vector(-1, 0)); Pump(window); Assert.Equal(304, viewer.Offset.X, 1);
+            window.MouseDown(start, MouseButton.Right); window.MouseMove(start + new Point(80, 0)); window.MouseUp(start + new Point(80, 0), MouseButton.Right);
+            Assert.Equal(304, viewer.Offset.X, 1);
+            viewer.Focus(); window.KeyPressQwerty(PhysicalKey.End, RawInputModifiers.None); Pump(window);
+            Assert.Equal(viewer.Extent.Width - viewer.Viewport.Width, viewer.Offset.X, 1);
+            window.KeyPressQwerty(PhysicalKey.Home, RawInputModifiers.None); Pump(window); Assert.Equal(0, viewer.Offset.X);
+            window.KeyPressQwerty(PhysicalKey.ArrowRight, RawInputModifiers.None); Pump(window); Assert.Equal(48, viewer.Offset.X);
+            await Task.Delay(1350); Pump(window); Assert.False(viewer.IsIndicatorVisible);
+            Assert.Equal(height, viewer.Bounds.Height); Assert.Equal(48, viewer.Offset.X);
+            Assert.Equal(startTime, timeline.VisibleStart); Assert.Equal(endTime, timeline.VisibleEnd); Assert.Null(timeline.Range);
+            Assert.Null(window.FindControl<DataGrid>("LogGrid")!.SelectedItem);
+            Assert.Equal(20, window.FindControl<ItemsControl>("TotalsList")!.ItemCount);
+        }
+        finally { window.StopRefresh(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public async Task Thin_indicator_drag_clamps_at_both_ends_and_hide_releases_label_drag()
+    {
+        var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
+            .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
+        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        try
+        {
+            window.Show(); await window.StartRefreshAsync(); Pump(window);
+            var viewer = window.FindControl<AppTotalsScrollViewer>("TotalsScrollViewer")!;
+            var start = viewer.TranslatePoint(viewer.IndicatorBounds.Center, window)!.Value;
+            window.MouseMove(start); window.MouseDown(start, MouseButton.Left); window.MouseMove(start + new Point(40, 0)); Pump(window);
+            Assert.True(viewer.Offset.X > 40);
+            window.MouseMove(start + new Point(5000, 0)); Pump(window);
+            Assert.Equal(viewer.Extent.Width - viewer.Viewport.Width, viewer.Offset.X, 1);
+            window.MouseMove(start - new Point(5000, 0)); window.MouseUp(start - new Point(5000, 0), MouseButton.Left); Pump(window);
+            Assert.Equal(0, viewer.Offset.X);
+            start = viewer.TranslatePoint(new Point(400, 14), window)!.Value;
+            window.MouseDown(start, MouseButton.Left); window.MouseMove(start - new Point(80, 0)); Pump(window); Assert.Equal(80, viewer.Offset.X);
+            window.Hide(); Assert.False(viewer.IsIndicatorVisible); window.MouseUp(start, MouseButton.Left);
+            window.Show(); Pump(window); window.MouseMove(start - new Point(160, 0)); Pump(window); Assert.Equal(80, viewer.Offset.X);
+            incoming = incoming with { Totals = [new("editor", "Editor", TimeSpan.FromMinutes(1))] };
+            await window.RefreshAsync(); Pump(window); Assert.False(viewer.IsIndicatorVisible); Assert.Equal(0, viewer.Offset.X);
+            window.MouseDown(start, MouseButton.Left); window.MouseMove(start - new Point(80, 0)); window.MouseUp(start - new Point(80, 0), MouseButton.Left);
+            window.MouseWheel(start, new Vector(0, -3)); Pump(window); Assert.Equal(0, viewer.Offset.X); Assert.False(viewer.IsIndicatorVisible);
         }
         finally { window.StopRefresh(); window.Close(); }
     }

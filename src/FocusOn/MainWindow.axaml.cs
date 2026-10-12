@@ -38,7 +38,7 @@ public partial class MainWindow : Window
             {
                 if (Application.Current is { } app) ReviewTheme.Apply(app.Resources, colors.ContrastPreference == ColorContrastPreference.High);
                 foreach (var row in rows) row.RefreshAppearance();
-                TimelineView.InvalidateVisual();
+                TimelineView.InvalidateVisual(); TotalsScrollViewer.InvalidateVisual();
                 if (started && !stopped) _ = RefreshAsync();
             }
             ApplyTheme(settings.GetColorValues());
@@ -254,7 +254,7 @@ public partial class MainWindow : Window
                 (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"), (RecordedModeButton,"记录范围"),
                 (ResetDayButton,"重置"), (ClearRangeButton,"清除范围"), (DeleteDayButton,"删除所选日期") }) pair.Control.Content = Localizer.Get(pair.Text);
             foreach (var pair in new (Control Control, string Text)[] { (PreviousDayButton,"前一天"), (NextDayButton,"后一天"),
-                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"),
+                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"),
                 (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索当天软件或窗口标题") })
                 AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
             TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索当天软件或窗口标题");
