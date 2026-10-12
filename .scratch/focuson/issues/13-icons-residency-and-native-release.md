@@ -4,7 +4,7 @@
 
 **Blocked by:** None (existing implementation is available; hardware acceptance stays with 08)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -27,3 +27,5 @@
 - 2026-10-12: Release build 0 warnings/errors, 89 core/platform + 12 UI tests pass (0 failed/skipped), native X11/two-process smoke passes. Real Linux window/SQLite/timer/language/exit and no-tray fallback pass. Isolated real D-Bus StatusNotifier registration, hide/restore and host disappearance restores the window; this is protocol validation, not a GNOME/KDE physical desktop pass. actionlint, Python compile and diff checks pass. Native Actions validation pending.
 
 - 2026-10-12: Final pre-release native source `140d540e8832640b222a50334141ee94edf5ea57`, run https://github.com/Liuzkai/FocusOn/actions/runs/38226659404: all six native architectures pass Release build, 102 regressions each, desktop checks and packages. Both Mac architectures record actual foreground usage with Accessibility trusted and extracted final .app startup/native Quit exit 0. Developer ID bindings are missing; Mac archives are ad-hoc validation only. Reviewed source/tag/no-clobber/history guards; preparing user-approved v0.1.1 draft from the final committed documentation source, without moving v0.1.0.
+
+- 2026-10-12: Engineering delivery completed, reviewed and committed at `45ad974fc3f86c9721b78da560361a77d1e0809a` (immutable v0.1.1). All six native targets pass 102 regressions and native/package checks in https://github.com/Liuzkai/FocusOn/actions/runs/38228221117; workflow overall Success. Draft https://github.com/Liuzkai/FocusOn/releases/tag/untagged-9e6e4d5dd19f594f38a2 created with eight Windows/Linux archive/checksum attachments, all download digests checked; v0.1.0 asset snapshot unchanged. Mac actual foreground/.app/Quit checks pass but absent Apple credentials leave ad-hoc validation only, not release attachments. Secure account/certificate/Secrets/sign-notary and physical TCC/menu/power/WTS/GNOME/DPI/offline follow-ups are explicitly transferred to 08; no device or trust acceptance is marked passed. About remains manual/user-owned. Close this engineering ticket under issue-tracker's transfer rule; 08 and parent specification remain open.
