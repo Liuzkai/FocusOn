@@ -11,8 +11,9 @@ wanted = json.loads((root / '.github/about.json').read_text())
 result = {'status': 'blocked', 'desired': wanted}
 try:
     current = api(f'repos/{repo}')
-    if current.get('description') != wanted['description'] or current.get('homepage') != wanted['homepage']:
-        api(f'repos/{repo}', 'PATCH', {key: wanted[key] for key in ['description', 'homepage']})
+    homepage = current.get('homepage') or wanted['homepage']
+    if current.get('description') != wanted['description'] or current.get('homepage') != homepage:
+        api(f'repos/{repo}', 'PATCH', {'description': wanted['description'], 'homepage': homepage})
     topics = api(f'repos/{repo}/topics').get('names', [])
     combined = sorted(set(topics) | set(wanted['topics']))
     if len(combined) > 20:
@@ -21,7 +22,7 @@ try:
         api(f'repos/{repo}/topics', 'PUT', {'names': combined})
     actual = api(f'repos/{repo}')
     actual_topics = api(f'repos/{repo}/topics').get('names', [])
-    assert actual.get('description') == wanted['description'] and actual.get('homepage') == wanted['homepage']
+    assert actual.get('description') == wanted['description'] and actual.get('homepage') == homepage
     assert set(wanted['topics']) <= set(actual_topics)
     result.update(status='updated', actual={'description':actual['description'], 'homepage':actual['homepage'], 'topics':actual_topics})
     print('Verified English repository About metadata')

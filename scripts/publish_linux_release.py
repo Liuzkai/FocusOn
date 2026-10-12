@@ -6,6 +6,7 @@ import pathlib
 import re
 import subprocess
 import tempfile
+import urllib.error
 from github_api import api, error_summary
 
 root = pathlib.Path(__file__).resolve().parent.parent
@@ -21,10 +22,24 @@ report_path.parent.mkdir(exist_ok=True)
 def snapshot(assets):
     return {a['name']: {'id': a['id'], 'size': a['size'], 'digest': a.get('digest')} for a in assets if a['name'].startswith('FocusOn-win-')}
 
+def find_release():
+    # The tag endpoint may omit unpublished drafts. List releases with the
+    # workflow's contents-write permission and retain the exact matching ID.
+    for page in range(1, 11):
+        releases = api(f'repos/{repo}/releases?per_page=100&page={page}')
+        for candidate in releases:
+            if candidate['tag_name'] == tag:
+                return candidate
+        if len(releases) < 100:
+            report['visibleReleases'] = [{'tag': value['tag_name'], 'draft': value['draft']} for value in releases]
+            break
+    raise RuntimeError(f'No visible release for {tag}; the Windows release was not modified.')
+
 try:
     if os.environ.get('PACKAGE_RESULT', 'success') != 'success':
         raise RuntimeError('Linux build/package verification did not succeed; no assets were published.')
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    release = find_release()
+    release_id = release['id']
     windows = snapshot(release['assets'])
     if not windows:
         raise RuntimeError('The selected release has no Windows assets; refusing to publish to a different release.')
@@ -40,7 +55,7 @@ try:
                 raise RuntimeError(f'{asset.name} already exists with different contents; it was not replaced.')
         else:
             subprocess.run(['gh', 'release', 'upload', tag, str(asset), '--repo', repo], check=True)
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    release = api(f'repos/{repo}/releases/{release_id}')
     assert snapshot(release['assets']) == windows, 'Windows asset metadata changed'
     with tempfile.TemporaryDirectory() as temporary:
         for asset in assets:
@@ -66,7 +81,7 @@ try:
     else:
         body = body.rstrip() + '\n\n' + section
     api(f'repos/{repo}/releases/{release["id"]}', 'PATCH', {'body': body, 'draft': False})
-    published = api(f'repos/{repo}/releases/tags/{tag}')
+    published = api(f'repos/{repo}/releases/{release_id}')
     assert not published['draft'] and snapshot(published['assets']) == windows
     selected = {asset.name for asset in assets}
     report.update(status='published', releaseUrl=published['html_url'], releaseId=published['id'], windowsAssets=windows,
