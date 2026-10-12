@@ -59,9 +59,9 @@ try
                     Directory.CreateDirectory(Path.Combine(contents, "Resources"));
                     var macExecutable = Path.Combine(contents, "MacOS", "FocusOn");
                     Directory.CreateDirectory(Path.GetDirectoryName(macExecutable)!);
-                    var frameworkVersion = frameworks.EnumerateArray().First(x => x.GetProperty("name").GetString() == "Microsoft.NETCore.App").GetProperty("version").GetString()!;
-                    var cache = Environment.GetEnvironmentVariable("NUGET_PACKAGES") ?? throw new IOException("NUGET_PACKAGES is required for the apphost template.");
-                    var hostTemplate = Path.Combine(cache, "microsoft.netcore.app.host." + runtime, frameworkVersion, "runtimes", runtime, "native", "apphost");
+                    // Native SDKs keep host packs in SDK/packs; cross builds use NuGet.
+                    // Ask the pinned SDK for the exact resolved template instead of assuming either location.
+                    var hostTemplate = Capture(sdk, "msbuild", app, "-p:RuntimeIdentifier=" + runtime, "-p:Configuration=Release", "-target:ResolveFrameworkReferences", "-getProperty:AppHostSourcePath", "-p:RestoreLockedMode=true");
                     Microsoft.NET.HostModel.AppHost.HostWriter.CreateAppHost(hostTemplate, macExecutable, "../Resources/runtime/FocusOn.dll");
                     if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(macExecutable, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
                     File.Delete(Path.Combine(destination, "FocusOn"));
