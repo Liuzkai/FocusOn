@@ -35,7 +35,7 @@ try
             var package = Path.Combine(parent, name);
             // Build into a fresh staging directory; replace outputs only after all validation succeeds.
             var staging = Path.Combine(parent, ".staging-" + Guid.NewGuid().ToString("N"));
-            var destination = runtime.StartsWith("osx-") ? Path.Combine(staging, "FocusOn.app", "Contents", "MacOS") : staging;
+            var destination = runtime.StartsWith("osx-") ? Path.Combine(staging, "FocusOn.app", "Contents", "Resources", "runtime") : staging;
             try
             {
                 Run(sdk, "publish", app, "-c", "Release", "-r", runtime, "--self-contained", "true", "-o", destination, "--nologo");
@@ -55,8 +55,16 @@ try
                 if (!OperatingSystem.IsWindows() && !runtime.StartsWith("win-")) File.SetUnixFileMode(Path.Combine(destination, exe), UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
                 if (runtime.StartsWith("osx-"))
                 {
-                    var contents = Path.GetDirectoryName(destination)!;
+                    var contents = Path.GetDirectoryName(Path.GetDirectoryName(destination)!)!;
                     Directory.CreateDirectory(Path.Combine(contents, "Resources"));
+                    var macExecutable = Path.Combine(contents, "MacOS", "FocusOn");
+                    Directory.CreateDirectory(Path.GetDirectoryName(macExecutable)!);
+                    var frameworkVersion = frameworks.EnumerateArray().First(x => x.GetProperty("name").GetString() == "Microsoft.NETCore.App").GetProperty("version").GetString()!;
+                    var cache = Environment.GetEnvironmentVariable("NUGET_PACKAGES") ?? throw new IOException("NUGET_PACKAGES is required for the apphost template.");
+                    var hostTemplate = Path.Combine(cache, "microsoft.netcore.app.host." + runtime, frameworkVersion, "runtimes", runtime, "native", "apphost");
+                    Microsoft.NET.HostModel.AppHost.HostWriter.CreateAppHost(hostTemplate, macExecutable, "../Resources/runtime/FocusOn.dll");
+                    if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(macExecutable, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+                    File.Delete(Path.Combine(destination, "FocusOn"));
                     var version = System.Xml.Linq.XDocument.Load(Path.Combine(root, "Directory.Build.props")).Descendants("Version").Single().Value.Split('-')[0];
                     File.WriteAllText(Path.Combine(contents, "Info.plist"), $$"""
                         <?xml version="1.0" encoding="UTF-8"?>

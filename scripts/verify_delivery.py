@@ -83,7 +83,7 @@ def architectures(data):
     raise AssertionError('Unknown executable format')
 
 windows, mac = runtime.startswith('win-'), runtime.startswith('osx-')
-native = package / 'FocusOn.app/Contents/MacOS' if mac else package
+native = package / 'FocusOn.app/Contents/Resources/runtime' if mac else package
 target = (0xaa64 if 'arm64' in runtime else 0x8664) if windows else (0x100000c if 'arm64' in runtime else 0x1000007) if mac else (183 if 'arm64' in runtime else 62)
 files = ['FocusOn.exe' if windows else 'FocusOn', 'coreclr.dll' if windows else 'libcoreclr.dylib' if mac else 'libcoreclr.so',
          'e_sqlite3.dll' if windows else 'libe_sqlite3.dylib' if mac else 'libe_sqlite3.so',
@@ -91,7 +91,8 @@ files = ['FocusOn.exe' if windows else 'FocusOn', 'coreclr.dll' if windows else 
 if mac:
     files.append('libAvaloniaNative.dylib')
 for name in files:
-    assert target in architectures((native / name).read_bytes()), f'Wrong architecture: {name}'
+    path = package / 'FocusOn.app/Contents/MacOS/FocusOn' if mac and name == 'FocusOn' else native / name
+    assert target in architectures(path.read_bytes()), f'Wrong architecture: {name}'
 if windows:
     # Check the executable's actual Win32 icon resource, not just a loose ICO file.
     data = (native / 'FocusOn.exe').read_bytes()
@@ -124,7 +125,8 @@ if windows:
     sizes = {groups[0][6 + i * 14] or 256 for i in range(icon_count)}
     assert {16, 24, 32, 48, 64, 128, 256} <= sizes, 'Missing Windows icon resolutions'
 if not windows:
-    assert (native / 'FocusOn').stat().st_mode & 0o111
+    executable = package / 'FocusOn.app/Contents/MacOS/FocusOn' if mac else native / 'FocusOn'
+    assert executable.stat().st_mode & 0o111
 options = json.loads((native / 'FocusOn.runtimeconfig.json').read_text())['runtimeOptions']
 assert any(f['name'] == 'Microsoft.NETCore.App' for f in options['includedFrameworks']) and not options.get('framework')
 assert json.loads((native / 'FocusOn.deps.json').read_text())['runtimeTarget']['name'].endswith('/' + runtime)

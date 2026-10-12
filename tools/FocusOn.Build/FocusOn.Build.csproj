@@ -6,4 +6,5 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <ItemGroup><Reference Include="Microsoft.NET.HostModel"><HintPath>$(MSBuildSDKsPath)/../Microsoft.NET.HostModel.dll</HintPath></Reference></ItemGroup>
 </Project>

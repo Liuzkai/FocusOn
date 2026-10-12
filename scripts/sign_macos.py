@@ -32,7 +32,7 @@ def code_files():
             # Sign the main executable through the app last, after its nested code.
             if path == app / 'Contents/MacOS/FocusOn': continue
             with path.open('rb') as stream:
-                if path.suffix == '.dll' or stream.read(4) in {b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf', b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'}:
+                if stream.read(4) in {b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf', b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'}:
                     yield path
 
 if os.environ.get('FOCUSON_MAC_SIGN') != 'developer-id':
@@ -71,7 +71,7 @@ with tempfile.TemporaryDirectory(prefix='focuson-sign-', dir=os.environ.get('RUN
         assert identity in identities and '0 valid identities' not in identities, 'No valid requested Developer ID certificate in supplied P12'
         for path in code_files():
             arguments = ['codesign', '--force', '--sign', identity, '--keychain', keychain, '--timestamp']
-            if path.suffix != '.dll': arguments += ['--options', 'runtime']
+            arguments += ['--options', 'runtime']
             run('Sign nested code', [*arguments, str(path)])
         run('Sign app', ['codesign', '--force', '--sign', identity, '--keychain', keychain, '--timestamp', '--options', 'runtime', '--entitlements', str(entitlements), str(app)])
         run('Verify signatures', ['codesign', '--verify', '--deep', '--strict', '--verbose=2', str(app)])
