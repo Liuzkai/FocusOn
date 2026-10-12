@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "f45e2f2435c808d3b0afc5e1ace72cbf99e6e318",
+  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38202692331",
+  "release": {
+    "sourceCommit": "f45e2f2435c808d3b0afc5e1ace72cbf99e6e318",
+    "releaseTag": "v0.1.0",
+    "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38202692331",
+    "status": "failed",
+    "error": "GitHub HTTP 404: Not Found"
+  },
+  "about": {
+    "status": "blocked",
+    "desired": {
+      "description": "Offline desktop app for Windows, Linux and macOS that tracks foreground app usage and provides independent titled timers.",
+      "homepage": "https://github.com/Liuzkai/FocusOn#readme",
+      "topics": [
+        "time-tracking",
+        "productivity",
+        "desktop",
+        "offline",
+        "privacy",
+        "windows",
+        "linux",
+        "macos",
+        "avalonia",
+        "dotnet",
+        "csharp",
+        "sqlite"
+      ]
+    },
+    "error": "GitHub HTTP 403: Resource not accessible by integration"
+  }
+}
