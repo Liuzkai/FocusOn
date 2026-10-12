@@ -33,11 +33,16 @@ with tempfile.TemporaryDirectory(prefix='focuson-mac-package-') as temporary:
         ae.AEDisposeDesc.argtypes = [ctypes.POINTER(Desc)]
         def code(text):return int.from_bytes(text.encode(),'big')
         target,event,reply = Desc(),Desc(),Desc(); pid = ctypes.c_int32(process.pid)
-        time.sleep(1)  # SQLite initialization precedes the native application run loop.
         try:
             assert ae.AECreateDesc(code('kpid'),ctypes.byref(pid),4,ctypes.byref(target)) == 0
             assert ae.AECreateAppleEvent(code('aevt'),code('quit'),ctypes.byref(target),-1,0,ctypes.byref(event)) == 0
-            status = ae.AESendMessage(ctypes.byref(event),ctypes.byref(reply),1 | 0x10,-1)
+            # -600 means the still-starting process has not registered its Apple-event
+            # endpoint yet. Retry this specific startup state, never a permission/error denial.
+            for attempt in range(75):
+                assert process.poll() is None, 'Packaged app exited before native Quit became available'
+                status = ae.AESendMessage(ctypes.byref(event),ctypes.byref(reply),1 | 0x10,-1)
+                if status != -600: break
+                time.sleep(0.2)
             assert status == 0, 'Native PID Quit Apple event failed: OSStatus ' + str(status)
         finally:
             for descriptor in [reply,event,target]: ae.AEDisposeDesc(ctypes.byref(descriptor))
