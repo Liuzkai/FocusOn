@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using System.Globalization;
 
 namespace FocusOn;
 
@@ -17,7 +18,11 @@ public partial class App : Application
     private readonly DispatcherTimer checkpoint = new() { Interval = TimeSpan.FromSeconds(5) };
     private bool exiting, pendingOpen;
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        Localizer.SetLanguage(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "zh" ? "zh-CN" : "en");
+        AvaloniaXamlLoader.Load(this);
+    }
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
@@ -32,11 +37,13 @@ public partial class App : Application
         try
         {
             var (directory, isolated, startup) = PlatformPaths.ParseArguments(args);
+            Localizer.SetLanguage(LanguagePreference.Load(directory));
             singleInstance = new SingleInstance(directory);
             if (!singleInstance.IsPrimary) { singleInstance.SignalExisting(); singleInstance.Dispose(); singleInstance = null; desktop!.Shutdown(); return; }
             singleInstance.Listen(() => Dispatcher.UIThread.Post(ShowMainWindow));
             controller = new RecordingController(directory);
-            window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync);
+            window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync, language => LanguagePreference.Save(directory, language));
+            window.LanguageChanged += () => tray?.RefreshLanguage();
             desktop!.MainWindow = window;
             using (var resource = AssetLoader.Open(new Uri("avares://FocusOn/Assets/focuson.png"))) window.Icon = new WindowIcon(resource);
             window.PauseRequested += async (_, _) => await SetPausedAsync(!controller.ManualPaused);

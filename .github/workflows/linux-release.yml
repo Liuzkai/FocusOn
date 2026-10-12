@@ -1,0 +1,94 @@
+name: Linux Release
+
+on:
+  push:
+    branches: [codex/linux-release]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing Windows release to append Linux assets to
+        required: true
+        default: v0.1.0
+      source_ref:
+        description: Committed cross-platform source ref (empty uses the selected workflow ref)
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-release-${{ inputs.release_tag || 'v0.1.0' }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      - name: Build and regressions
+        run: |
+          ./build.sh build
+          ./build.sh test
+      - name: Native X11 and process activation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libx11-6 libxext6
+          xvfb-run -a ./build.sh smoke
+      - name: Self-contained Linux packages
+        run: |
+          ./build.sh publish linux-x64
+          python3 scripts/verify_delivery.py linux-x64
+          ./build.sh publish linux-arm64
+          python3 scripts/verify_delivery.py linux-arm64
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: linux-release-packages
+          retention-days: 7
+          path: |
+            artifacts/release/FocusOn-linux-*/**
+            artifacts/release/FocusOn-linux-*.tar.gz
+            artifacts/release/FocusOn-linux-*.tar.gz.sha256
+
+  publish:
+    needs: package
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.release_tag || 'v0.1.0' }}
+      PACKAGE_RESULT: ${{ needs.package.result }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        if: needs.package.result == 'success'
+        with:
+          name: linux-release-packages
+          path: artifacts/release
+      - name: Restore executable modes lost by artifact storage
+        if: needs.package.result == 'success'
+        run: chmod +x artifacts/release/FocusOn-linux-*/FocusOn
+      - name: Append verified Linux assets and publish existing release
+        run: python3 scripts/publish_linux_release.py
+      - name: Apply English About metadata when permitted
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.ABOUT_TOKEN || github.token }}
+        run: python3 scripts/update_repository_about.py
+      - name: Save publication receipt for Git-only clients
+        if: always()
+        run: python3 scripts/write_release_report.py

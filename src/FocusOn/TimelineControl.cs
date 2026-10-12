@@ -26,7 +26,7 @@ public sealed class TimelineControl : Control
     {
         Focusable = true; ClipToBounds = true; Height = 96;
         Cursor = new Cursor(StandardCursorType.Cross);
-        AutomationProperties.SetName(this, "使用时间线。方向键选择，Shift 加方向键选择范围，加减键缩放，Escape 取消范围。");
+        RefreshLanguage();
     }
 
     public event Action<long>? IntervalSelected;
@@ -65,7 +65,7 @@ public sealed class TimelineControl : Control
         if (target.EndUtc <= boundsStart || target.StartUtc >= boundsEnd) SetFullDay(true);
         if (target.EndUtc <= visibleStart || target.StartUtc >= visibleEnd)
             SetViewport(Middle(target.StartUtc, target.EndUtc), (visibleEnd - visibleStart).Ticks);
-        AutomationProperties.SetName(this, "已选：" + TipText(target));
+        AutomationProperties.SetName(this, Localizer.Get("已选：{0}", TipText(target)));
         InvalidateVisual();
     }
     public void ClearSelection() { selectedId = null; keyboardAnchor = null; InvalidateVisual(); }
@@ -117,7 +117,7 @@ public sealed class TimelineControl : Control
         base.Render(context);
         if (Bounds.Width <= LabelWidth) return;
         context.DrawRectangle(ReviewTheme.Surface, null, new Rect(0, 0, Bounds.Width, 72));
-        for (var lane = 0; lane < 3; lane++) context.DrawText(Text(new[] { "使用", "停止", "计时" }[lane], ReviewTheme.Muted), new Point(8, BarTop + LaneHeight * lane));
+        for (var lane = 0; lane < 3; lane++) context.DrawText(Text(Localizer.Get(new[] { "使用", "停止", "计时" }[lane]), ReviewTheme.Muted), new Point(8, BarTop + LaneHeight * lane));
         if (day is null || visibleEnd <= visibleStart) return;
         foreach (var interval in intervals)
         {
@@ -221,4 +221,10 @@ public sealed class TimelineControl : Control
         SelectInterval(target.Id); IntervalSelected?.Invoke(target.Id); e.Handled = true;
     }
     private void SetRange(DateTimeOffset start, DateTimeOffset end) { Range = (start, end); InvalidateVisual(); RangeChanged?.Invoke(Range); }
+    public void RefreshLanguage()
+    {
+        var selected = intervals.FirstOrDefault(x => x.Id == selectedId);
+        AutomationProperties.SetName(this, selected is null ? Localizer.Get("使用时间线。方向键选择，Shift 加方向键选择范围，加减键缩放，Escape 取消范围。") : Localizer.Get("已选：{0}", TipText(selected)));
+        ToolTip.SetTip(this, null); InvalidateVisual();
+    }
 }

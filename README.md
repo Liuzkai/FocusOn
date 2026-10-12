@@ -1,30 +1,72 @@
 # FocusOn
 
-Windows、Linux、macOS 的个人前台软件使用记录工具。以当前激活窗口为时间归属，保留窗口与标题切换；没有键鼠输入仍计时。数据仅保存在当前用户本机，标题计时独立保存，不计入软件使用汇总。
+An offline desktop app for **Windows, Linux, and macOS** that records foreground app usage and provides independent titled timers. Records stay on your computer in a local SQLite database.
 
-## 界面预览
+FocusOn measures how long an app's window stays active, including reading or watching without keyboard input. It does not measure attention or count background apps.
 
-![FocusOn 界面：标题计时、全天软件汇总、三行时间线与日志](docs/images/focuson-ui.png)
+## Interface
 
-Linux 实际截图，记录为演示数据；黄色提示来自云环境缺少真实桌面会话。
+![FocusOn: titled timer, daily app totals, three timeline lanes, and activity log](docs/images/focuson-ui.png)
 
-## 使用
+An actual Linux screenshot with demonstration records. The session warning appears because the cloud environment has no real desktop login session.
 
-统一桌面界面支持每日软件汇总、使用/停止/计时三行时间线、日期回看、搜索/拖选/缩放/详情、按天删除和标题计时。
+The interface supports **English and Simplified Chinese**. Use the language selector in the top row to switch immediately. The preference is saved for the selected data directory; the first launch follows the system language, with English as the fallback. App names, window titles, timer titles, and historical records are preserved in their original language.
 
-- Windows：完整解压后运行 `FocusOn.exe`。
-- Linux：在桌面会话运行 `./FocusOn`；支持 X11，GNOME Wayland 需要启用随附扩展。
-- macOS：打开完整 `FocusOn.app`，授予辅助功能权限后重新启动。
+[View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
-普通首次启动配置当前用户登录自启；关闭窗口继续记录，使用窗口或托盘的「退出」停止。重复启动唤回已有实例。Linux 保留最小化的任务栏入口。
+## Features
 
-平台版本、依赖、权限、数据路径、Wayland 桥接和迁移步骤见[平台说明](docs/platforms.md)，详细操作见[使用说明](docs/usage.md)。Windows 原有 `%LOCALAPPDATA%\FocusOn` 数据与 SQLite 格式保持兼容。
+- Daily app totals and a timeline with separate usage, stopped, and timer lanes.
+- Window and title changes recorded as separate segments.
+- Independent titled timers with start, pause, resume, and stop controls.
+- Date navigation, search, range filtering, zoom, and record details. Filters do not change daily totals.
+- Manual recording pause and platform session observation for lock, sleep, and display state.
+- Confirmation before deleting a day's records; records on other dates are preserved.
+- Local storage, login startup, and activation of the existing instance when launched again.
 
-## 开发
+## Download and run
 
-需要 `global.json` 指定的 .NET SDK 10.0.401。工程使用 .NET 10、Avalonia 11.3 和 Microsoft.Data.Sqlite；安装与首次恢复需要联网，应用运行不需要联网。SDK 可安装到系统，或解压到忽略的 `.tools/dotnet/`。
+Download the complete package from [GitHub Releases](https://github.com/Liuzkai/FocusOn/releases). The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
 
-Windows PowerShell：
+| Platform | Architectures | Package and launch |
+| --- | --- | --- |
+| Windows | x64, ARM64 | Extract the complete ZIP and run `FocusOn.exe`. |
+| Linux with glibc | x64, ARM64 | Extract the complete `.tar.gz` and run `./FocusOn` in a graphical desktop session. |
+| macOS 15+ | Intel x64, Apple Silicon ARM64 | Move the complete `FocusOn.app` to a stable location, then open it. |
+
+Packages listed here describe the supported build targets. Availability depends on the assets attached to each release. Linux assets appended to the existing Windows `v0.1.0` release use the cross-platform source commit recorded in their `manifest.json` and release notes; the original Windows tag and assets remain unchanged.
+
+Linux X11 foreground capture requires a desktop session with X11 and systemd-logind. Debian/Ubuntu graphical dependencies commonly include `libx11-6 libxext6 libice6 libsm6 libfontconfig1 libgl1`. GNOME Wayland requires the bundled extension in `gnome/focuson@focuson.local/`; see the [platform guide](docs/platforms.md) for installation. Other Wayland desktops can use history and titled timers, but foreground capture is unavailable.
+
+macOS requires permission in **System Settings → Privacy & Security → Accessibility**, followed by a restart. Screen Recording permission is not requested. Native macOS packaging uses ad-hoc signing; developer signing and notarization are not included.
+
+An ordinary first launch registers login startup for the current user. Closing the window keeps recording: Windows/macOS use the tray or menu bar; Linux keeps a minimized taskbar entry. Choose **Exit** in the window or tray to save and stop the process.
+
+For detailed operation and platform requirements, see the [usage guide](docs/usage.md), [platform guide](docs/platforms.md), and [manual acceptance checklist](docs/manual-acceptance.md). These supporting documents currently use Chinese.
+
+## Data and privacy
+
+| Platform | Default data directory |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\FocusOn` |
+| Linux | `$XDG_DATA_HOME/FocusOn`, or `~/.local/share/FocusOn` |
+| macOS | `~/Library/Application Support/FocusOn` |
+
+The existing Windows SQLite data remains compatible. Exit the old version before upgrading or backing up the complete data directory. Window titles can contain private information; FocusOn records titles but does not capture screenshots, document content, or keyboard input. There is no cloud sync or automatic history cleanup.
+
+Use a separate data directory for development or demonstrations; this also skips login startup registration:
+
+```bash
+./FocusOn --data-dir /tmp/focuson-demo
+```
+
+On Windows, run `FocusOn.exe --data-dir <test-directory>` instead. Language preferences are stored in `settings.json` alongside the database, independently of recording history.
+
+## Development
+
+Use the .NET SDK pinned by [global.json](global.json), currently **10.0.401**. The app uses .NET 10, Avalonia 11.3, and Microsoft.Data.Sqlite. Restoring dependencies requires a network connection; the installed app runs offline.
+
+Windows PowerShell:
 
 ```powershell
 ./build.ps1 build
@@ -32,51 +74,35 @@ Windows PowerShell：
 ./build.ps1 publish -Runtime win-x64
 ```
 
-Linux / macOS：
+Linux / macOS:
 
 ```bash
 ./build.sh build
 ./build.sh test
-./build.sh publish linux-x64   # macOS 使用 osx-x64 或 osx-arm64
+./build.sh publish linux-x64  # Use osx-x64 or osx-arm64 on macOS.
 ```
 
-`test` 执行真实临时 SQLite 的核心/平台回归和 Avalonia 无显示器界面测试，不需要 Windows 桌面运行时。Linux 原生前台检查可在隔离的 X11 桌面执行：
+The scripts prefer a repository SDK in `.tools/dotnet/`, then the SDK on `PATH`. Dependencies use committed lockfiles. `test` runs the core/platform SQLite regressions and headless Avalonia UI tests on all supported operating systems. Native Linux window capture and cross-process activation can be checked in an isolated X11 display:
 
 ```bash
 xvfb-run -a ./build.sh smoke
 ```
 
-`publish` 要求干净且已提交的工作区，生成 `artifacts/release/FocusOn-<runtime>/`、完整归档、逐文件 SHA256 清单与归档校验值。支持 `win-x64`、`win-arm64`、`linux-x64`、`linux-arm64`、`osx-x64`、`osx-arm64`。macOS 交付为 app bundle；Unix tar 包保留执行权限。
+`publish` requires a clean, committed working tree. It creates a self-contained directory, archive, per-file manifest, and archive SHA256 under `artifacts/release/`. Supported runtime identifiers are `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, and `osx-arm64`. Unix archives preserve executable permissions.
 
-开发时用 `./build.sh package-check <runtime>` 或 `./build.ps1 package-check -Runtime <runtime>` 检查未提交的实际工作区，产物写入 `artifacts/validation/`，清单明确标为开发验证，不冒充正式发布源版本。发布名称可指定第三个 shell 参数或 PowerShell 的 `-PackageName`。
+For uncommitted development checks, use `./build.sh package-check <runtime>` or `./build.ps1 package-check -Runtime <runtime>`. These outputs go to `artifacts/validation/` and are marked as development validation; they are not formal committed releases.
 
-隔离运行避免写正式数据和自启：
+## GitHub release automation
 
-```bash
-dotnet run --project src/FocusOn/FocusOn.csproj -- --data-dir /tmp/focuson-qa
-```
+The Windows release workflow builds, tests, packages, and verifies version tags before creating a release draft. The Linux release workflow builds and verifies x64/ARM64 packages, then appends them to the selected existing release without replacing Windows assets. It uses GitHub's built-in workflow token, without requiring a personal token for uploading release assets.
 
-仓库 SDK 需将 `.tools/dotnet/` 加入 PATH 或直接使用其中的 `dotnet`。Windows 隔离目录可使用 `$env:TEMP` 下的测试路径。
+Linux release notes record the exact source commit and validation scope. Cross-compilation and automated tests do not replace real-device checks for permissions, sleep, lock, tray behavior, DPI, or ARM64 startup.
 
-## GitHub Releases
+## Source layout
 
-`.github/workflows/release.yml` 在推送 `v*` 标签时自动执行 Release 构建、测试、Windows x64 自包含打包和文件校验，再创建带 ZIP 与 SHA256 附件的 Release 草稿。SDK 从 `global.json` 安装，使用 GitHub 自动提供的令牌，无需新增个人 Token 或 Secrets。
+- `src/FocusOn.Core/`: recording rules, SQLite persistence, daily projection, titled timers, and display text.
+- `src/FocusOn.Platforms/`: native foreground/session observers, data paths, single instance, login startup, and language preferences.
+- `src/FocusOn/`: the shared Avalonia desktop interface, timeline, and tray.
+- `tests/`: core/platform regressions, headless UI tests, and native X11 smoke checks.
 
-先提交并推送准备发布的代码，再创建新版本标签，例如：
-
-```powershell
-git tag -a v0.1.1 -m "FocusOn v0.1.1"
-git push origin v0.1.1
-```
-
-在仓库 Actions 查看 `Windows Release`；成功后到 Releases 检查草稿、填写版本说明并点击 Publish release。草稿附件可以通过重新运行该工作流更新；已经公开的版本应使用新标签发布。也可在 Actions 的 Run workflow 中选择已有 `v*` 标签重跑，选择分支不会创建 Release。
-
-下载完整 `FocusOn-win-x64.zip` 并解压运行，旁置 `.sha256` 用于校验。GitHub 自动生成的 Source code 附件是源码。自动化构建和文件校验不代替 `docs/manual-acceptance.md` 的实机验收。
-
-## 工程与验收
-
-- `src/FocusOn.Core/`：记录会话、真实 SQLite、每日投影、标题计时；与桌面平台无关。
-- `src/FocusOn.Platforms/`：各系统前台与会话观测、数据路径、单实例和自启。
-- `src/FocusOn/`：统一 Avalonia 界面、时间线与托盘。
-
-规格与任务保存在 [.scratch/focuson/spec.md](.scratch/focuson/spec.md) 和 [11 全平台票](.scratch/focuson/issues/11-cross-platform.md)。平台边界见 [ADR 0003](docs/adr/0003-cross-platform-desktop.md)。实际测试证据见[验证记录](tests/FocusOn.Tests/Verification.md)，Windows/macOS/Wayland 的真实窗口、权限、锁屏、睡眠、托盘和 DPI 等操作仍须[人工验收](docs/manual-acceptance.md)。
+Product rules and work items are maintained in the [specification](.scratch/focuson/spec.md) and [local issue tracker](.scratch/focuson/issues). See [ADR 0003](docs/adr/0003-cross-platform-desktop.md) for platform boundaries and the [verification record](tests/FocusOn.Tests/Verification.md) for actual results and remaining device checks.

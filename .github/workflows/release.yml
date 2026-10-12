@@ -54,8 +54,8 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           $assets = @(
-            'artifacts/FocusOn-win-x64.zip',
-            'artifacts/FocusOn-win-x64.zip.sha256'
+            'artifacts/release/FocusOn-win-x64.zip',
+            'artifacts/release/FocusOn-win-x64.zip.sha256'
           )
           $existing = gh release view "$env:RELEASE_TAG" --json isDraft 2>$null
           if ($LASTEXITCODE -eq 0) {

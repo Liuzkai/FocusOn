@@ -125,6 +125,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
+**最新 12 票（2026-10-12）：**用户要求 Linux 追加现有 v0.1.0，并补英文 About/README 和中英文界面。跨平台代码已提交 2321305，并合并远端 Windows 发布历史为 48264ea。99 项回归通过（89 核心/平台、10 UI），真实 X11 与中英文窗口切换/持久偏好/重启通过，截图已更新。英文 README、`.github/about.json`、语言目录配置与 Linux 发布工作流已准备。外部发布/权限结果以 12 票和交付文件后续回读为准；不要把 About JSON 或工作流存在当作外部操作成功。
+
 **最新 11 票（2026-10-11）：**用户扩展全平台；统一 Avalonia 界面及 Windows/Linux/macOS 平台层已接入，无桌面依赖核心保留旧库兼容。87 项核心/平台及 7 项界面测试通过；真实虚拟 X11 窗口/标题/SQLite 与跨进程单实例验证通过，Linux 桌面按钮输入与保存验证通过。六架构开发验证产物在 `artifacts/validation/`。当前验证与剩余限制以 11 票及 tests/FocusOn.Tests/Verification.md 跨平台章节为准；下列 Windows 版本结果为历史证据。工作区未提交，原生 Windows/macOS/GNOME 与电源、DPI 等待人工验收。
 
 **2026-10-12 GitHub 发布配置：**新增 `.github/workflows/release.yml`，推送 `v*` 标签后执行 Windows Release 构建、测试、自包含发布和 `scripts/verify_delivery.py` 独立校验，上传 ZIP 与 SHA256 到 Release 草稿。工作流显式申请 contents: write，使用内置令牌；Actions 已启用，不需要个人 Token Secrets。固定官方 Actions 的提交版本；重跑只更新草稿附件，已发布版本要求新标签。README.md 已记录操作。actionlint 1.7.12 检查通过；配置提交 `43d6dfd` 已推送 main 并标记 `v0.1.0`。GitHub run 38198854147 全部通过，构建零警告/错误、79 项测试通过；首个草稿含 ZIP 和 SHA256，已补中文说明，下载附件后的独立完整性校验通过。详细源提交、链接及哈希见 delivery.md；草稿等待用户检查并公开发布，真实设备验收仍按 08 继续。
@@ -167,6 +169,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 | 日期 | 变更与验证 | 后续 |
 | --- | --- | --- |
+| 2026-10-12 | 12 票：英文 README、中英文界面与偏好保存，99 回归、真实 X11、两语实际窗口及英文偏好重启通过；发布脚本/工作流准备，actionlint 通过。合并 Windows 发布历史并保留 v0.1.0 标签及附件。 | 正式 Linux 包核验并经 Actions 追加 v0.1.0；回读实际发布及 About 权限结果。设备验收继续保持开放。 |
 | 2026-10-12 | 按用户要求将 Linux 实际界面截图保存到 `docs/images/focuson-ui.png` 并嵌入 README，注明演示数据与云环境会话提示。图片内容与原预览一致，相对链接及非忽略路径核对通过；仅文档/图片修改，未重跑程序测试。 | 后续更新截图时替换仓库内图片，保留平台和数据来源说明。 |
 | 2026-10-11 | 全平台 11 票：net10.0 核心、Avalonia 桌面、Windows/Linux/macOS 适配与六架构打包。87 核心/平台 + 7 UI 通过，真实虚拟 X11/单实例及 Linux 包标题计时保存通过，六包独立哈希/架构/权限验证通过；云安装/启动配置草稿已保存。基准 3e1d78f 加未提交修改。 | 11 保持 ready-for-human；Windows/macOS/GNOME、真实 logind/电源/托盘/DPI/ARM64 与原生签名待验收，08/规格开放。环境设置需用户保存并发布；配置保存不等于已应用。 |
 | 2026-10-10 | 根据原始设计过程和 `f02d28e` 仓库创建本交接记录，关联现有任务与证据；核对源码入口、SDK 要求及本地缺项。仅文档整理，未重跑 66 项历史测试。 | 准备匹配 SDK；按 08 与人工清单接续验收并记录实际结果。 |

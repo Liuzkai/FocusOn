@@ -2,6 +2,18 @@
 
 测试边界是公开 `RecordingSession` 输入和 `GetDay` 回看结果，使用可控 UTC/单调时间与真实临时 SQLite。测试不读取表字段或私有状态。
 
+## 12：中英文界面与 Linux 发布准备（2026-10-12）
+
+当前跨平台源基于提交 2321305、合并提交 48264ea，发布清单将记录最终提交。使用 Linux x64 / SDK 10.0.401。
+
+- `bash build.sh build`：Release 通过，0 warning/error。
+- `bash build.sh test`：89 项核心/平台 + 10 项界面，共 99 passed、0 failed/skipped。语言测试覆盖真实配置文件重开、系统语言回退、其他设置保留、即时切换、保存失败回滚、标题原文、选择/缩放/总计/计时状态保持及英文删除取消。
+- 真实虚拟 X11 `bash build.sh smoke`：跨进程写锁排他/激活、Unicode 标题切换、失效窗口拒绝、3 条 Usage 保存和 SQLite 重开通过。
+- 实际 Linux 窗口：默认英文、下拉切中文再切英文、settings.json 持久化、正常退出并重启后保持英文通过；截图在 `docs/images/focuson-ui.png` 和 `focuson-ui.zh-CN.png`。使用隔离演示数据库，无真实用户记录或自启操作。
+- actionlint 1.7.12 对现有及新增工作流检查通过；Python 发布/校验脚本语法通过；README 英文与本地链接检查通过。外部发布和 About 的实际结果记录在 12 票及交付文件，不能把工作流定义或 about.json 当作上传/设置成功。
+
+原生 Windows/macOS、GNOME、实际 logind 与硬件验收仍未在本机执行；ARM64 包为交叉构建。界面翻译仅在显示边界进行，原有 SQLite 数据和核心状态文本约定保持。
+
 ## 11：跨平台验证（2026-10-11）
 
 环境：Debian 13 Linux x64 云容器、官方 SHA512 校验的 SDK 10.0.401。源为基准 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加当前未提交工作区；以下结果属于本轮，后续章节保留历史 Windows 证据。

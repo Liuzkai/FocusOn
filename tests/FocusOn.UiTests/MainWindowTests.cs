@@ -40,6 +40,77 @@ public sealed class MainWindowTests
     private static void Click(MainWindow window, string name) => window.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
     [AvaloniaFact]
+    public async Task Switching_languages_preserves_records_timer_selection_and_zoom_and_saves_preference()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "FocusOn-language-" + Guid.NewGuid().ToString("N"));
+        var timerChanges = 0;
+        Localizer.SetLanguage("zh-CN");
+        var original = View() with { Timer = new("用户标题 · 不翻译", TimeSpan.FromMinutes(5), true), Warning = "Linux：无法确认锁屏和会话状态，请在支持 logind 的本地桌面会话运行。标题计时和历史回看仍可使用。" };
+        var window = new MainWindow(_ => Task.FromResult(original), _ => Task.CompletedTask, (_, _) => { timerChanges++; return Task.CompletedTask; }, language => LanguagePreference.Save(directory, language));
+        try
+        {
+            window.Show(); await window.StartRefreshAsync();
+            var log = window.FindControl<DataGrid>("LogGrid")!; var selected = log.ItemsSource.Cast<IntervalRow>().First(); log.SelectedItem = selected;
+            var timeline = window.FindControl<TimelineControl>("TimelineView")!; timeline.ZoomIn(); var start = timeline.VisibleStart; var end = timeline.VisibleEnd;
+            window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 1;
+            Assert.Equal("en", LanguagePreference.Load(directory, System.Globalization.CultureInfo.GetCultureInfo("zh-CN")));
+            Assert.Equal("Pause recording", window.FindControl<Button>("PauseButton")!.Content);
+            Assert.Equal("Daily app totals", window.FindControl<TextBlock>("TotalsHeading")!.Text);
+            Assert.Equal("App / status", log.Columns[1].Header); Assert.Equal("App usage", selected.Kind);
+            Assert.StartsWith("Linux: Lock and session state cannot be confirmed.", window.FindControl<TextBlock>("WarningText")!.Text);
+            Assert.Equal("用户标题 · 不翻译", window.FindControl<TextBox>("TimerTitleBox")!.Text);
+            Assert.Equal("计划.md", selected.Title); Assert.Equal("编辑器", selected.Application);
+            Assert.Same(selected, log.SelectedItem); Assert.Equal(start, timeline.VisibleStart); Assert.Equal(end, timeline.VisibleEnd);
+            Assert.Equal(2, window.FindControl<ItemsControl>("TotalsList")!.ItemCount); Assert.Equal(0, timerChanges);
+            window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 0;
+            Assert.Equal("zh-CN", LanguagePreference.Load(directory, System.Globalization.CultureInfo.GetCultureInfo("en-US")));
+            Assert.Equal("软件使用", selected.Kind); Assert.Equal("暂停记录", window.FindControl<Button>("PauseButton")!.Content);
+        }
+        finally { window.StopRefresh(); window.Close(); Localizer.SetLanguage("zh-CN"); if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    }
+
+    [AvaloniaFact]
+    public async Task Failed_language_save_keeps_the_previous_language_and_recording_state()
+    {
+        Localizer.SetLanguage("zh-CN");
+        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask, _ => throw new IOException("denied"));
+        try
+        {
+            window.Show(); await window.StartRefreshAsync(); window.SetPauseState(true);
+            window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 1;
+            Assert.Equal("zh-CN", Localizer.Language); Assert.Equal(0, window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex);
+            Assert.Equal("继续记录", window.FindControl<Button>("PauseButton")!.Content);
+            Assert.Contains("denied", window.FindControl<TextBlock>("WarningText")!.Text);
+            Assert.Equal(2, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Count());
+        }
+        finally { window.StopRefresh(); window.Close(); Localizer.SetLanguage("zh-CN"); }
+    }
+
+    [AvaloniaFact]
+    public async Task English_delete_confirmation_and_cached_diagnostics_leave_user_text_unchanged()
+    {
+        Localizer.SetLanguage("en");
+        var deleted = false;
+        var window = new MainWindow(_ => Task.FromResult(View()), _ => { deleted = true; return Task.CompletedTask; }, (_, _) => Task.CompletedTask);
+        try
+        {
+            window.Show(); await window.StartRefreshAsync(); Click(window, "DeleteDayButton");
+            var dialog = Assert.Single(window.OwnedWindows);
+            Assert.Equal("Confirm day deletion", dialog.Title);
+            var buttons = dialog.GetVisualDescendants().OfType<Button>().ToArray();
+            Assert.Equal("Delete", buttons.Single(x => x.Name == "AcceptButton").Content);
+            buttons.Single(x => x.Name == "CancelButton").RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); await Task.Yield(); Assert.False(deleted);
+            Assert.Equal("Unable to save records: database is locked", Localizer.Translate("无法保存记录：database is locked"));
+            Assert.Equal("custom diagnostics", Localizer.Translate("custom diagnostics"));
+            var userRecord = View().Intervals[0] with { WindowTitle = "记录异常 · 未记录 · 自己的标题" };
+            Assert.Equal(userRecord.WindowTitle, DisplayText.Title(userRecord));
+            Localizer.SetLanguage("zh-CN");
+            Assert.Equal("无法保存记录：database is locked", Localizer.Translate("Unable to save records: database is locked"));
+        }
+        finally { window.StopRefresh(); window.Close(); Localizer.SetLanguage("zh-CN"); }
+    }
+
+    [AvaloniaFact]
     public async Task Search_changes_logs_and_preserves_full_day_totals_and_selection_details()
     {
         var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);

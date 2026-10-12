@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia;
 using Avalonia.Platform;
+using Avalonia.Automation;
 
 namespace FocusOn;
 
@@ -13,10 +14,11 @@ public partial class MainWindow : Window
     private readonly Func<DateOnly, Task<DayView>> readDay;
     private readonly Func<DateOnly, Task> deleteDay;
     private readonly Func<TimerAction, string?, Task> changeTimer;
+    private readonly Action<string>? saveLanguage;
     private readonly ObservableCollection<IntervalRow> rows = [];
     private readonly DispatcherTimer refreshTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
-    private bool followToday = true, started, stopped, refreshing, deleting, changingTimer, showGroups = true;
+    private bool followToday = true, started, stopped, refreshing, deleting, changingTimer, showGroups = true, applyingLanguage, manualPaused;
     private long timerVersion;
     private DayView? view;
     private TitleTimerState? timerState;
@@ -25,9 +27,9 @@ public partial class MainWindow : Window
     public MainWindow() : this(_ => Task.FromException<DayView>(new InvalidOperationException("记录会话尚未初始化。")),
         _ => Task.CompletedTask, (_, _) => Task.CompletedTask) { }
 
-    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay, Func<TimerAction, string?, Task> changeTimer)
+    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay, Func<TimerAction, string?, Task> changeTimer, Action<string>? saveLanguage = null)
     {
-        this.readDay = readDay; this.deleteDay = deleteDay; this.changeTimer = changeTimer;
+        this.readDay = readDay; this.deleteDay = deleteDay; this.changeTimer = changeTimer; this.saveLanguage = saveLanguage;
         InitializeComponent();
         if (PlatformSettings is { } settings)
         {
@@ -56,7 +58,7 @@ public partial class MainWindow : Window
         StopTimerButton.Click += async (_, _) => await ChangeTimerAsync(TimerAction.Stop);
         SearchBox.TextChanged += (_, _) => { search = SearchBox.Text?.Trim() ?? string.Empty; TimelineView.SetSearch(search); ApplyRows(); };
         DurationButton.Click += (_, _) => TimelineView.IsVisible = !TimelineView.IsVisible;
-        GroupsButton.Click += (_, _) => { showGroups = !showGroups; GroupsButton.Content = showGroups ? "时段 ⊟" : "时段 ⊞"; ApplyRows(); };
+        GroupsButton.Click += (_, _) => { showGroups = !showGroups; GroupsButton.Content = Localizer.Get(showGroups ? "时段 ⊟" : "时段 ⊞"); ApplyRows(); };
         DetailsButton.Click += (_, _) => SetInspector(!InspectorPane.IsVisible);
         RecordedModeButton.Click += (_, _) => TimelineView.SetFullDay(false);
         FullDayModeButton.Click += (_, _) => TimelineView.SetFullDay(true);
@@ -76,13 +78,20 @@ public partial class MainWindow : Window
         };
         refreshTimer.Tick += async (_, _) => await RefreshAsync();
         Closed += (_, _) => StopRefresh();
-        UpdateDateControls(); UpdateTimelineControls();
+        LanguagePicker.SelectionChanged += (_, _) =>
+        {
+            if (applyingLanguage || LanguagePicker.SelectedItem is not ComboBoxItem { Tag: string language } || language == Localizer.Language) return;
+            try { this.saveLanguage?.Invoke(language); Localizer.SetLanguage(language); ApplyLanguage(); LanguageChanged?.Invoke(); }
+            catch (Exception error) { ApplyLanguage(); ShowWarning(Localizer.Get("无法保存界面语言：{0}", Localizer.Translate(error.Message))); }
+        };
+        ApplyLanguage(); UpdateDateControls(); UpdateTimelineControls();
     }
 
     public event EventHandler? PauseRequested;
     public event EventHandler? ExitRequested;
     public event Action<DayView>? DayRefreshed;
-    public void SetPauseState(bool paused) => PauseButton.Content = paused ? "继续记录" : "暂停记录";
+    public event Action? LanguageChanged;
+    public void SetPauseState(bool paused) { manualPaused = paused; PauseButton.Content = Localizer.Get(paused ? "继续记录" : "暂停记录"); }
     public void StopRefresh() { stopped = true; refreshTimer.Stop(); }
     public async Task StartRefreshAsync()
     {
@@ -100,16 +109,15 @@ public partial class MainWindow : Window
         {
             var incoming = await readDay(requestedDate);
             if (stopped || deleting || requestedDate != selectedDate || requestedTimerVersion != timerVersion) return;
-            view = incoming; TimelineView.SetDay(incoming); StatusText.Text = incoming.Status;
+            view = incoming; TimelineView.SetDay(incoming); StatusText.Text = Localizer.Translate(incoming.Status);
             ShowWarning(incoming.Warning); ShowTimer(incoming.Timer); ApplyRows();
-            TotalsList.ItemsSource = incoming.Totals.OrderByDescending(x => x.Duration).Select(x => new { x.AppName, Duration = DisplayText.Duration(x.Duration), Color = ReviewTheme.ApplicationBrush(x.AppKey) }).ToArray();
-            TotalsEmptyText.Text = $"{incoming.Date:yyyy-MM-dd} 尚无软件使用片段。"; TotalsEmptyText.IsVisible = incoming.Totals.Count == 0;
+            UpdateTotals(incoming);
             DayRefreshed?.Invoke(incoming);
         }
         catch (Exception error)
         {
             if (stopped || requestedDate != selectedDate) return;
-            StatusText.Text = "回看更新失败"; ShowWarning($"无法更新回看：{error.Message}。已显示的记录可能不是最新。");
+            StatusText.Text = Localizer.Get("回看更新失败"); ShowWarning(Localizer.Get("无法更新回看：{0}。已显示的记录可能不是最新。", Localizer.Translate(error.Message)));
         }
         finally
         {
@@ -125,7 +133,7 @@ public partial class MainWindow : Window
         followToday = day == today;
         if (selectedDate == day) { UpdateDateControls(); return; }
         selectedDate = day; view = null; TimelineView.Clear(); rows.Clear(); TotalsList.ItemsSource = null;
-        LogEmptyText.Text = "正在读取所选日期…"; LogEmptyText.IsVisible = true;
+        LogEmptyText.Text = Localizer.Get("正在读取所选日期…"); LogEmptyText.IsVisible = true;
         UpdateDateControls(); if (started) _ = RefreshAsync();
     }
     private void UpdateDateControls()
@@ -152,9 +160,9 @@ public partial class MainWindow : Window
             else rows.Insert(i, new IntervalRow(interval));
             var local = interval.StartUtc.ToLocalTime();
             var previous = i > 0 ? incoming[i - 1].StartUtc.ToLocalTime() : (DateTimeOffset?)null;
-            rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour) ? $"{local:HH}:00 时段" : string.Empty);
+            rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour) ? Localizer.Get("{0:HH}:00 时段", local) : string.Empty);
         }
-        LogEmptyText.Text = search.Length > 0 ? "没有匹配的软件或窗口标题。" : TimelineView.Range is not null ? "所选范围没有可用记录。" : $"{view.Date:yyyy-MM-dd} 没有可用记录。";
+        LogEmptyText.Text = search.Length > 0 ? Localizer.Get("没有匹配的软件或窗口标题。") : TimelineView.Range is not null ? Localizer.Get("所选范围没有可用记录。") : Localizer.Get("{0} 没有可用记录。", view.Date.ToString("yyyy-MM-dd"));
         LogEmptyText.IsVisible = rows.Count == 0; UpdateTimelineControls();
     }
     private void SelectInterval(long id)
@@ -165,29 +173,29 @@ public partial class MainWindow : Window
         if (row is null) return;
         LogGrid.SelectedItem = row; LogGrid.ScrollIntoView(row, null);
     }
-    private void SetInspector(bool show) { InspectorPane.IsVisible = show; DetailsButton.Content = show ? "详情 ⊟" : "详情 ⊞"; }
+    private void SetInspector(bool show) { InspectorPane.IsVisible = show; DetailsButton.Content = Localizer.Get(show ? "详情 ⊟" : "详情 ⊞"); }
     private void UpdateTimelineControls()
     {
         ZoomInButton.IsEnabled = TimelineView.CanZoomIn; ZoomOutButton.IsEnabled = TimelineView.CanZoomOut;
         ResetDayButton.IsEnabled = view is not null; ClearRangeButton.IsEnabled = TimelineView.Range is not null;
         RecordedModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Normal : FontWeight.Bold;
         FullDayModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Bold : FontWeight.Normal;
-        RangeText.Text = TimelineView.Range is { } range ? $"日志范围：{DisplayText.Time(range.StartUtc)} — {DisplayText.Time(range.EndUtc)} · 全天汇总不变"
-            : search.Length > 0 ? $"搜索：{search} · {rows.Count} 条匹配 · 全天汇总不变"
-            : $"{(TimelineView.FullDay ? "本地全天" : "记录范围")} · 拖选筛选，滚轮缩放，右键平移或取消范围";
+        RangeText.Text = TimelineView.Range is { } range ? Localizer.Get("日志范围：{0} — {1} · 全天汇总不变", DisplayText.Time(range.StartUtc), DisplayText.Time(range.EndUtc))
+            : search.Length > 0 ? Localizer.Get("搜索：{0} · {1} 条匹配 · 全天汇总不变", search, rows.Count)
+            : Localizer.Get("{0} · 拖选筛选，滚轮缩放，右键平移或取消范围", Localizer.Get(TimelineView.FullDay ? "本地全天" : "记录范围"));
     }
     private void ShowTimer(TitleTimerState? state)
     {
         timerState = state; TimerTitleBox.IsReadOnly = state is not null;
         if (state is not null) TimerTitleBox.Text = state.Title;
         StartTimerButton.IsVisible = state is null; PauseTimerButton.IsVisible = StopTimerButton.IsVisible = state is not null;
-        PauseTimerButton.Content = state?.IsRunning == true ? "暂停" : "继续";
+        PauseTimerButton.Content = Localizer.Get(state?.IsRunning == true ? "暂停" : "继续");
         TimerElapsedText.Text = state is null ? string.Empty : $"{(int)state.Duration.TotalHours:00}:{state.Duration.Minutes:00}:{state.Duration.Seconds:00}";
     }
     private async Task ChangeTimerAsync(TimerAction action)
     {
         if (changingTimer || deleting || stopped) return;
-        if (action == TimerAction.Start && string.IsNullOrWhiteSpace(TimerTitleBox.Text)) { TimerErrorText.Text = "请先填写计时标题"; TimerTitleBox.Focus(); return; }
+        if (action == TimerAction.Start && string.IsNullOrWhiteSpace(TimerTitleBox.Text)) { TimerErrorText.Text = Localizer.Get("请先填写计时标题"); TimerTitleBox.Focus(); return; }
         changingTimer = true; StartTimerButton.IsEnabled = PauseTimerButton.IsEnabled = StopTimerButton.IsEnabled = false; TimerErrorText.Text = string.Empty;
         try
         {
@@ -195,34 +203,69 @@ public partial class MainWindow : Window
             if (action == TimerAction.Stop) TimerTitleBox.Text = string.Empty;
             await RefreshAsync();
         }
-        catch (Exception error) { TimerErrorText.Text = "计时操作失败：" + error.Message; }
+        catch (Exception error) { TimerErrorText.Text = Localizer.Get("计时操作失败：{0}", Localizer.Translate(error.Message)); }
         finally { changingTimer = false; StartTimerButton.IsEnabled = PauseTimerButton.IsEnabled = StopTimerButton.IsEnabled = true; }
     }
     private async Task DeleteDayAsync()
     {
         if (deleting || changingTimer || stopped) return;
         var day = selectedDate; var (start, end) = DailyProjection.Bounds(day, TimeZoneInfo.Local);
-        if (!await MessageDialog.ShowAsync(this, $"删除 {day:yyyy-MM-dd} 的所有记录？\n本地范围：{DisplayText.Time(start, true)} 至 {DisplayText.Time(end, true)}（不含结束）。\n跨日记录保留其他日期部分。删除无法撤销，删除今天后继续记录未来活动。", confirm: true)) return;
+        if (!await MessageDialog.ShowAsync(this, Localizer.Get("删除 {0} 的所有记录？\n本地范围：{1} 至 {2}（不含结束）。\n跨日记录保留其他日期部分。删除无法撤销，删除今天后继续记录未来活动。", day.ToString("yyyy-MM-dd"), DisplayText.Time(start, true), DisplayText.Time(end, true)), confirm: true)) return;
         deleting = true; DeleteDayButton.IsEnabled = false;
         try { await deleteDay(day); TimelineView.ClearRange(); LogGrid.SelectedItem = null; }
-        catch (Exception error) { await MessageDialog.ShowAsync(this, "删除操作出现异常：" + error.Message); }
+        catch (Exception error) { await MessageDialog.ShowAsync(this, Localizer.Get("删除操作出现异常：{0}", Localizer.Translate(error.Message))); }
         finally { deleting = false; DeleteDayButton.IsEnabled = !stopped; await RefreshAsync(); }
     }
-    public void ShowWarning(string? message) { WarningText.Text = message; WarningPanel.IsVisible = !string.IsNullOrWhiteSpace(message); }
+    public void ShowWarning(string? message) { WarningText.Text = Localizer.Translate(message); WarningPanel.IsVisible = !string.IsNullOrWhiteSpace(message); }
+
+    private void UpdateTotals(DayView incoming)
+    {
+        TotalsList.ItemsSource = incoming.Totals.OrderByDescending(x => x.Duration).Select(x => new { AppName = x.AppKey == "unknown" ? Localizer.Get("未知软件") : x.AppName, Duration = DisplayText.Duration(x.Duration), Color = ReviewTheme.ApplicationBrush(x.AppKey) }).ToArray();
+        TotalsEmptyText.Text = Localizer.Get("{0} 尚无软件使用片段。", incoming.Date.ToString("yyyy-MM-dd")); TotalsEmptyText.IsVisible = incoming.Totals.Count == 0;
+    }
+
+    private void ApplyLanguage()
+    {
+        applyingLanguage = true;
+        try
+        {
+            LanguagePicker.SelectedIndex = Localizer.Language == "en" ? 1 : 0;
+            foreach (var pair in new (Button Control, string Text)[] {
+                (TodayButton,"今天"), (ExitButton,"退出"), (StartTimerButton,"开始计时"), (StopTimerButton,"停止"),
+                (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"), (RecordedModeButton,"记录范围"),
+                (ResetDayButton,"重置"), (ClearRangeButton,"清除范围"), (DeleteDayButton,"删除所选日期") }) pair.Control.Content = Localizer.Get(pair.Text);
+            foreach (var pair in new (Control Control, string Text)[] { (PreviousDayButton,"前一天"), (NextDayButton,"后一天"),
+                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"),
+                (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索当天软件或窗口标题") })
+                AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
+            TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索当天软件或窗口标题");
+            TotalsHeading.Text = Localizer.Get("全天软件汇总"); DetailsHeading.Text = Localizer.Get("记录详情"); DetailsEmptyText.Text = Localizer.Get("选择一条记录查看详情。");
+            var headers = new[] { "开始时间", "软件 / 状态", "窗口标题 / 说明", "时长" };
+            for (var i = 0; i < headers.Length; i++) LogGrid.Columns[i].Header = Localizer.Get(headers[i]);
+            SetPauseState(manualPaused); SetInspector(InspectorPane.IsVisible); ShowTimer(timerState);
+            TimerErrorText.Text = Localizer.Translate(TimerErrorText.Text);
+            TimelineView.RefreshLanguage();
+            foreach (var row in rows) row.RefreshAppearance();
+            if (view is not null) { StatusText.Text = Localizer.Translate(view.Status); ShowWarning(view.Warning); UpdateTotals(view); ApplyRows(); }
+            else { StatusText.Text = Localizer.Get("正在启动…"); LogEmptyText.Text = Localizer.Get("正在读取记录…"); }
+            UpdateTimelineControls();
+        }
+        finally { applyingLanguage = false; }
+    }
 }
 
 public sealed class IntervalRow(RecordedInterval interval) : INotifyPropertyChanged
 {
     private RecordedInterval value = interval;
     public long Id => value.Id;
-    public string Application => DisplayText.AppName(value) + (value.IsCurrent ? " · 进行中" : string.Empty);
+    public string Application => DisplayText.AppName(value) + (value.IsCurrent ? Localizer.Get(" · 进行中") : string.Empty);
     public string StartTime => DisplayText.Time(value.StartUtc);
     public string Title => DisplayText.Title(value);
     public string Duration => DisplayText.Duration(value.Duration);
     public string PreciseDuration => DisplayText.Duration(value.Duration, true);
     public string StartFull => DisplayText.Time(value.StartUtc, true);
     public string EndFull => DisplayText.Time(value.EndUtc, true);
-    public string CurrentNote => value.IsCurrent ? "进行中；尾段可能尚未保存。" : string.Empty;
+    public string CurrentNote => value.IsCurrent ? Localizer.Get("进行中；尾段可能尚未保存。") : string.Empty;
     public string Kind => DisplayText.Kind(value.Kind);
     public IBrush Color => value.Kind == IntervalKind.TaskTimer ? ReviewTheme.Accent : value.Kind == IntervalKind.Usage ? ReviewTheme.ApplicationBrush(value.AppKey) : ReviewTheme.Muted;
     public IBrush BadgeBackground => ReviewTheme.HighContrast ? ReviewTheme.Background : Color is SolidColorBrush color ? new SolidColorBrush(color.Color, 0.15) : ReviewTheme.Surface;

@@ -4,6 +4,8 @@
 artifacts/
 .impeccable/review/
 TestResults/
+__pycache__/
+*.py[cod]
 *.user
 *.db
 !tests/FocusOn.Tests/Fixtures/recording-v1.db

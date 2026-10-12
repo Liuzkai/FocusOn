@@ -1,50 +1,98 @@
+"""Independently verify a self-contained package produced from the current commit."""
 import hashlib
 import json
 import pathlib
+import plistlib
 import struct
 import subprocess
-import zipfile
 import sys
+import tarfile
+import zipfile
 
 root = pathlib.Path(__file__).resolve().parent.parent
-package_name = sys.argv[1] if len(sys.argv) > 1 else 'FocusOn-win-x64'
-package = root / 'artifacts' / package_name
-archive = root / 'artifacts' / (package_name + '.zip')
-manifest = json.loads((package / 'manifest.json').read_text(encoding='utf-8-sig'))
+runtime = (sys.argv[1] if len(sys.argv) > 1 else 'win-x64').removeprefix('FocusOn-')
+assert runtime in {'win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64'}
+package_parent = pathlib.Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else root / 'artifacts' / 'release'
+package = package_parent / ('FocusOn-' + runtime)
+archive = pathlib.Path(str(package) + ('.zip' if runtime.startswith('win-') else '.tar.gz'))
 source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-assert manifest['sourceCommit'] == source, 'Manifest source differs from HEAD'
-assert manifest['runtime'] == 'win-x64' and manifest['selfContained'] is True
-expected = {entry['path'].replace('\\', '/'): entry for entry in manifest['files']}
+manifest = json.loads((package / 'manifest.json').read_text(encoding='utf-8-sig'))
+assert manifest['sourceCommit'] == source and manifest['baseCommit'] == source
+assert manifest['buildKind'] == 'release' and manifest['runtime'] == runtime and manifest['selfContained'] is True
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest().upper()
+
+expected = {entry['path']: (entry['bytes'], entry['sha256'].upper()) for entry in manifest['files']}
+assert len(expected) == len(manifest['files']), 'Duplicate manifest entries'
+manifest_data = (package / 'manifest.json').read_bytes()
+expected['manifest.json'] = (len(manifest_data), digest(manifest_data))
 actual = {p.relative_to(package).as_posix() for p in package.rglob('*') if p.is_file()}
-assert actual == set(expected) | {'manifest.json'}, 'Unexpected or missing package files'
-for name, entry in expected.items():
+assert actual == set(expected), 'Unexpected or missing files'
+for name, (size, sha) in expected.items():
     data = (package / name).read_bytes()
-    assert len(data) == entry['bytes'], f'Size mismatch: {name}'
-    assert hashlib.sha256(data).hexdigest().upper() == entry['sha256'].upper(), f'Hash mismatch: {name}'
-with zipfile.ZipFile(archive) as z:
-    files = {i.filename for i in z.infolist() if not i.is_dir()}
-    assert files == {package.name + '/' + name for name in actual}, 'ZIP file inventory mismatch'
-    assert z.testzip() is None, 'ZIP CRC failure'
-    for name in actual:
-        assert z.read(package.name + '/' + name) == (package / name).read_bytes(), f'ZIP mismatch: {name}'
-architecture = {}
-for name in ['FocusOn.exe', 'coreclr.dll', 'e_sqlite3.dll']:
-    data = (package / name).read_bytes()
-    assert data[:2] == b'MZ', f'Invalid executable: {name}'
-    offset = struct.unpack_from('<I', data, 0x3c)[0]
-    assert data[offset:offset + 4] == b'PE\0\0'
-    machine = struct.unpack_from('<H', data, offset + 4)[0]
-    assert machine == 0x8664, f'Not AMD64: {name}'
-    architecture[name] = 'AMD64'
-zip_hash = hashlib.sha256(archive.read_bytes()).hexdigest().upper()
-declared_hash = pathlib.Path(str(archive) + '.sha256').read_text().split()[0]
-assert zip_hash == declared_hash, 'ZIP SHA256 mismatch'
-config = json.loads((package / 'FocusOn.runtimeconfig.json').read_text())
-frameworks = config['runtimeOptions']['includedFrameworks']
-assert {f['name'] for f in frameworks} >= {'Microsoft.NETCore.App', 'Microsoft.WindowsDesktop.App'}
-assert not config['runtimeOptions'].get('framework'), 'Framework-dependent package'
-result = dict(sourceCommit=source, verifiedFiles=len(expected), zipBytes=archive.stat().st_size,
-              zipSha256=zip_hash, architecture=architecture, includedFrameworks=frameworks,
-              manifestAndZip='passed', scope='file integrity only; no Windows UI or offline execution')
-(root / 'artifacts' / (package_name + '-verification.json')).write_text(json.dumps(result, indent=2), encoding='utf-8')
-print(json.dumps(result, indent=2))
+    assert len(data) == size and digest(data) == sha, f'File mismatch: {name}'
+
+archived = {}
+if runtime.startswith('win-'):
+    with zipfile.ZipFile(archive) as stream:
+        assert stream.testzip() is None
+        for entry in stream.infolist():
+            if not entry.is_dir():
+                name = entry.filename.split('/', 1)[1]
+                assert name not in archived, 'Duplicate archive member'
+                data = stream.read(entry)
+                archived[name] = (len(data), digest(data))
+else:
+    with tarfile.open(archive) as stream:
+        for entry in stream:
+            if entry.isfile():
+                name = entry.name.split('/', 1)[1]
+                assert name not in archived, 'Duplicate archive member'
+                data = stream.extractfile(entry).read()
+                archived[name] = (len(data), digest(data))
+                if name == 'FocusOn' or name.endswith('/MacOS/FocusOn'):
+                    assert entry.mode & 0o111, 'Archive lost executable permission'
+assert archived == expected, 'Archive contents differ from the verified directory'
+
+def architectures(data):
+    if data[:2] == b'MZ':
+        offset = struct.unpack_from('<I', data, 0x3c)[0]
+        assert data[offset:offset + 4] == b'PE\0\0'
+        return {struct.unpack_from('<H', data, offset + 4)[0]}
+    if data[:4] == b'\x7fELF':
+        assert data[4] == 2
+        return {struct.unpack_from('<H' if data[5] == 1 else '>H', data, 18)[0]}
+    if data[:4] in (b'\xcf\xfa\xed\xfe', b'\xfe\xed\xfa\xcf'):
+        return {struct.unpack_from('<I' if data[0] == 0xcf else '>I', data, 4)[0]}
+    if data[:4] in (b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'):
+        count = struct.unpack_from('>I', data, 4)[0]
+        size = 32 if data[3] == 0xbf else 20
+        return {struct.unpack_from('>I', data, 8 + i * size)[0] for i in range(count)}
+    raise AssertionError('Unknown executable format')
+
+windows, mac = runtime.startswith('win-'), runtime.startswith('osx-')
+native = package / 'FocusOn.app/Contents/MacOS' if mac else package
+target = (0xaa64 if 'arm64' in runtime else 0x8664) if windows else (0x100000c if 'arm64' in runtime else 0x1000007) if mac else (183 if 'arm64' in runtime else 62)
+files = ['FocusOn.exe' if windows else 'FocusOn', 'coreclr.dll' if windows else 'libcoreclr.dylib' if mac else 'libcoreclr.so',
+         'e_sqlite3.dll' if windows else 'libe_sqlite3.dylib' if mac else 'libe_sqlite3.so',
+         'libSkiaSharp.dll' if windows else 'libSkiaSharp.dylib' if mac else 'libSkiaSharp.so']
+if mac:
+    files.append('libAvaloniaNative.dylib')
+for name in files:
+    assert target in architectures((native / name).read_bytes()), f'Wrong architecture: {name}'
+if not windows:
+    assert (native / 'FocusOn').stat().st_mode & 0o111
+options = json.loads((native / 'FocusOn.runtimeconfig.json').read_text())['runtimeOptions']
+assert any(f['name'] == 'Microsoft.NETCore.App' for f in options['includedFrameworks']) and not options.get('framework')
+assert json.loads((native / 'FocusOn.deps.json').read_text())['runtimeTarget']['name'].endswith('/' + runtime)
+if mac:
+    info = plistlib.loads((package / 'FocusOn.app/Contents/Info.plist').read_bytes())
+    assert info['CFBundleExecutable'] == 'FocusOn' and info['LSMinimumSystemVersion'] == '15.0'
+    assert (package / 'FocusOn.app/Contents/Resources/focuson.icns').is_file()
+sha = digest(archive.read_bytes())
+assert pathlib.Path(str(archive) + '.sha256').read_text().split()[0].upper() == sha
+report = {'runtime': runtime, 'sourceCommit': source, 'files': len(manifest['files']), 'archiveBytes': archive.stat().st_size,
+          'archiveSha256': sha, 'nativeFilesChecked': files, 'result': 'PASS'}
+(root / 'artifacts' / ('delivery-verification-' + runtime + '.json')).write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps(report))

@@ -1,0 +1,5 @@
+{
+  "description": "Offline desktop app for Windows, Linux and macOS that tracks foreground app usage and provides independent titled timers.",
+  "homepage": "https://github.com/Liuzkai/FocusOn#readme",
+  "topics": ["time-tracking", "productivity", "desktop", "offline", "privacy", "windows", "linux", "macos", "avalonia", "dotnet", "csharp", "sqlite"]
+}
