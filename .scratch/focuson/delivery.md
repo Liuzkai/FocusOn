@@ -188,3 +188,18 @@ Initial draft creation returned GitHub 403 while the tag’s workflow changes ha
 | linux-arm64 | 45126444 | `FC605F32D864C72CB52994475254FC7054CEC2C4E25CE853D381ADD11FE52C2C` |
 
 The new snapshot and saved earlier receipts confirm v0.1.1/v0.1.2 attachment sizes/digests unchanged; v0.1.0 metadata and its six attachments unchanged. All three remote tag objects, the latest MIT license and third-party notices remain intact. Mac Intel/Apple Silicon bundles pass native tests and actual .app/package checks but remain ad-hoc validation only, excluded from Release without Developer ID/notary credentials; temporary artifacts expire after seven days. Physical Windows DPI/monitor/input and prior platform power/permission/offline checks remain in ticket 08. The v0.1.3 draft has not been publicly published; public v0.1.1 remains unchanged.
+
+## 2026-10-12: v0.1.4 compact totals draft
+
+Immutable source `eafc2053e5377dfe52af00013e4d5975c75d2893`, annotated tag `v0.1.4` (object `ef5ef6c9593bf3d54a42b62e5813bcdb8e7217cc`). [Build/draft](https://github.com/Liuzkai/FocusOn/actions/runs/38254694792) Success; six native standard hosted targets each pass 90 core/platform + 23 UI regressions, no failures/skips, desktop smoke and package/source/runtime checks. [Draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-2e201aae9575a400ec4c) has eight Windows/Linux archive/checksum attachments, uploaded and downloaded SHA256 checks pass. Source reached main before the tag; no failed-job retry needed.
+
+App totals now scroll by dragging any label, either wheel axis, keyboard arrows/Home/End/Page keys or the thin footer. Three-DIP line shows during input and hides after about one second idle; the six-DIP footer preserves complete chip padding and stable layout. Mouse capture, endpoint clamping, refresh stability and hide/deactivate/lost-capture cleanup are scoped to the totals. Existing data, color assignments, language, timeline gestures and log following retained. Native Linux synthetic-data checks confirm drag offsets 180→180 across refresh→240, wheel to 288, full chip bottom 188 versus indicator top 190, visible line RGB(160,162,168) returning to background RGB(34,34,34) after idle, with labels pixel-identical as the line hides. README image refreshed.
+
+| Architecture | Archive bytes | SHA256 |
+| --- | ---: | --- |
+| win-x64 | 49608482 | `AADC30BC768410802D268132DDB243632F55F88EF4625D8FBC958A930430CEC7` |
+| win-arm64 | 47214059 | `DEEFC2479DD445666F837958D4D003B6725FFE53B70197A057199F75BEA3EF32` |
+| linux-x64 | 47765387 | `18A8303BCE7B19E96E23ED6857844ECD6C94CD0D04E23A8737CCD977E76252D6` |
+| linux-arm64 | 45131114 | `116D801DE74A27330A9A117829CEDB7C781AD94A916997EA6AC3A7A979B5687A` |
+
+Every older Release metadata/asset snapshot remained unchanged; saved v0.1.1/v0.1.2/v0.1.3 attachment sizes/digests also match. Existing remote tags, MIT license and third-party notices remain intact. Mac Intel/Apple Silicon .app bundles pass native tests/package checks but are ad-hoc validation only; excluded from Release without Developer ID signing/notary trust, seven-day Actions retention. Windows/macOS physical DPI, trackpad and input/device/power/permissions acceptance remains with ticket 08. v0.1.4 remains a draft; public v0.1.1 is not republished or replaced.
