@@ -89,8 +89,8 @@ try
                     }
                     else File.WriteAllText(Path.Combine(staging, "mac-signing.json"), "{\"status\":\"cross-compiled-unverified\",\"notarized\":false,\"stapled\":false,\"formalReady\":false}");
                 }
-                File.Copy(Path.Combine(root, "docs", "usage.md"), Path.Combine(staging, "使用说明.md"));
-                File.Copy(Path.Combine(root, "docs", "platforms.md"), Path.Combine(staging, "平台说明.md"));
+                File.Copy(Path.Combine(root, "docs", "usage.md"), Path.Combine(staging, "Usage.zh-CN.md"));
+                File.Copy(Path.Combine(root, "docs", "platforms.md"), Path.Combine(staging, "Platforms.zh-CN.md"));
                 File.Copy(Path.Combine(root, "README.md"), Path.Combine(staging, "README.md"));
                 File.Copy(Path.Combine(root, "LICENSE"), Path.Combine(staging, "LICENSE"));
                 CopyDirectory(Path.Combine(root, "docs", "licenses"), Path.Combine(staging, "licenses"));
