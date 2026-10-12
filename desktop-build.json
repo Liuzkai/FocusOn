@@ -53,9 +53,15 @@
     },
     {
       "name": "build / receipt",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38244571956/job/114796370469"
+    },
+    {
+      "name": "draft",
       "status": "in_progress",
       "conclusion": null,
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38244571956/job/114796370469"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38244571956/job/114796440758"
     }
   ],
   "evidence": {
@@ -207,5 +213,15 @@
       "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"osx-arm64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":true,\"platformWarning\":null,\"macForegroundUsageObserved\":true,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
       "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 2.48 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    90, Skipped:     0, Total:    90, Duration: 4 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.09 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    21, Skipped:     0, Total:    21, Duration: 2 s - FocusOn.UiTests.dll (net10.0)\n"
     }
+  },
+  "release": {
+    "sourceCommit": "9c6afdb9febf4793764985bca8b9f91ca53fcf40",
+    "releaseTag": "v0.1.3",
+    "status": "failed",
+    "macExcluded": [
+      "osx-x64",
+      "osx-arm64"
+    ],
+    "error": "GitHub HTTP 403: Resource not accessible by integration"
   }
 }
