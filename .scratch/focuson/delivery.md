@@ -1,10 +1,10 @@
 # 13: Icon/residency update and native draft pipeline (2026-10-12)
 
-Continuation on main baseline 12f482c, no duplicate project/worktree. Existing published v0.1.0 remains: Windows tag/source 43d6dfd and Linux source 409cb51; their assets/checksums are preserved. New v0.1.1 draft is proposed, awaiting user version choice. About is now user-managed manually.
+Continuation on main baseline 12f482c, no duplicate project/worktree. User approved a separate v0.1.1 draft. Existing published v0.1.0 remains: Windows tag/source 43d6dfd and Linux source 409cb51. About is user-managed manually.
 
-Integrated executable/window/tray/desktop/bundle icons, Mac menu bar template and Dock Reopen, confirmed Linux StatusNotifier availability with recoverable fallback, preserved timer/recording on Close, and explicit exit cleanup. Local Release build 0 warning/error; 101 tests and native X11/no-tray/real isolated D-Bus host-loss checks pass. Source changes/verification are in ticket 13.
+Integrated Windows executable/window/tray icons, Linux hicolor/desktop entry, Mac ICNS/menu bar template and Dock Reopen; recoverable Linux tray fallback; resident recording/timers; explicit exit cleanup and activation before secondary GUI startup. English README includes updated real English/Chinese screenshots; language preference and existing databases/notice bytes are preserved.
 
-Standard GitHub-hosted Windows/Linux/Mac x64/ARM64 workflows, seven-day temporary artifacts, immutable-source draft upload and optional Apple Secrets signing/notarization are prepared. Native cloud results and package hashes will be appended once read back. No new tag or public release is claimed; no Developer ID/notarization or physical Mac acceptance is claimed. Installation, runner/version policy and secure credential configuration are in docs/releases.md and docs/macos.md.
+Pre-release native source `140d540e8832640b222a50334141ee94edf5ea57`: [six-target run](https://github.com/Liuzkai/FocusOn/actions/runs/38226659404) succeeds. Each native standard Windows/Linux/Mac x64/ARM64 runner passes 102 regressions, native desktop checks and architecture/runtime/archive/SHA256 checks. Both Mac targets actually observe positive foreground Usage and start/quit the self-contained app bundle. This does not replace physical power/TCC/menu/DPI checks in 08. Mac reports absent Apple credentials, ad-hoc validation only; no Developer ID/notarization/stapling claim and no Mac formal Release attachment. Secure seven-Secret configuration is documented in docs/macos.md. Final tag/source/upload/download results will follow below.
 
 # FocusOn 第一版工程交付
 
@@ -25,7 +25,7 @@ Windows ZIP 保持资产 ID `632512486`、大小 `77388363`、SHA256 `ABF0326490
 
 公开下载的 Linux x64 包实际启动、中英文即时切换、独立计时继续/暂停、偏好保存及正常退出 0 通过；设置 DOTNET_ROOT 为不存在的 SDK 路径仍可运行，实际使用随包运行时。隔离 SQLite 重开得到演示计时 603.3514426 秒。ARM64 为交叉构建，未在 ARM64 机器执行；真实 logind、GNOME Wayland、电源、DPI、Windows/macOS 硬件与离线无 SDK 设备验收仍待人工完成。
 
-英文 README 与双语源码已推送。About 设置实际被 GitHub 403 拒绝，默认工作流令牌缺少 Administration 写权限；英文配置在 `.github/about.json`，待用户在 Actions Secrets 配置 ABOUT_TOKEN。独立 Repository About 工作流可只更新并回读元数据，保留已成功发布的 Linux 回执。外部 About 尚未完成，12 保持 needs-info；08 与整体规格不因此关闭。
+英文 README 与双语源码已推送。About 设置实际被 GitHub 403 拒绝，默认工作流令牌缺少 Administration 写权限；英文配置在 `.github/about.json`，用户已选择手动填写 About，不再请求 ABOUT_TOKEN 或执行元数据工作流。外部 About 由用户处理，12 保持 ready-for-human；08 与整体规格不因此关闭。
 
 ## 11：跨平台开发验证交付（2026-10-11）
 

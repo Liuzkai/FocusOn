@@ -103,7 +103,7 @@ The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-h
 
 The [desktop release workflow](.github/workflows/release.yml) accepts an explicit version tag or manual dispatch with an existing tag. Build/test/package verification must all succeed before it uploads anything. The tag, application version and every attached package source must agree. Releases stay **drafts**, and assets are never silently overwritten. Ordinary code pushes do not publish releases. See [release instructions](docs/releases.md) for exact steps, runner scope and Apple Secrets.
 
-The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version is proposed as `v0.1.1`; no old tag is rewritten.
+The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version uses a separate `v0.1.1` draft; no old tag is rewritten.
 
 Developer ID signing, hardened runtime, minimal .NET JIT entitlements, Apple notarization, app stapling and Gatekeeper checks are configured for native Mac runners. They require an existing Apple Developer Program membership and securely configured Actions Secrets. Missing credentials exclude Mac assets from Release uploads. Successful signing and notarization still require physical desktop, Accessibility and power acceptance; see [Mac validation](docs/macos.md).
 

@@ -1,6 +1,6 @@
 # macOS installation, permissions and release trust
 
-FocusOn uses native macOS foreground and session observers, with the shared Avalonia interface and local SQLite storage. macOS 15+ is the minimum supported .NET 10 platform. Intel (`osx-x64`) and Apple Silicon (`osx-arm64`) are separate self-contained app bundles; no Rosetta dependency is intended.
+FocusOn uses native macOS foreground and session observers, software rendering in a native Cocoa window, with the shared Avalonia interface and local SQLite storage. macOS 15+ is the minimum supported .NET 10 platform. Intel (`osx-x64`) and Apple Silicon (`osx-arm64`) are separate self-contained app bundles; no Rosetta dependency is intended.
 
 1. Check the build/release's recorded trust status and the ZIP SHA256 before downloading. A cross-compiled archive or ad-hoc signature does not establish Mac compatibility or a trusted distribution.
 2. Extract the complete ZIP. Move `FocusOn.app` to `/Applications` or another stable folder before running; keep the included MIT/third-party notices for redistribution.
@@ -13,7 +13,7 @@ FocusOn uses native macOS foreground and session observers, with the shared Aval
 
 NSWorkspace identifies the active app; Accessibility reads its focused window and title. Samples arrive about every 200ms, so shorter switches may be missed. IOKit receives sleep/wake events; CoreGraphics queries console/lock/display state. A sampling gap is preserved as unrecorded rather than attributing sleep to an old window. Titled timers pause conservatively after an interrupted sample stream. Real sleep, lock, fast user switching and multi-monitor behavior require physical acceptance.
 
-Native standard GitHub runners build and test each architecture separately. The desktop smoke check opens a real Avalonia window, exercises close/restore, timer persistence, language selection, single writer and resource release; Mac checks call the real continuous clock/session APIs and record whether Accessibility is granted. A separate check starts the actual self-contained `.app`, confirms SQLite initialization and sends native Quit. A CI denial of Accessibility is expected and **does not verify authorized foreground capture**. Evidence/run links are recorded in the delivery record.
+Native standard GitHub runners build and test each architecture separately. The desktop smoke check opens a real Avalonia window, exercises close/restore, timer persistence, language selection, single writer and resource release; Mac checks call the real continuous clock/session APIs and record whether Accessibility is granted. A separate check starts the actual self-contained `.app`, confirms SQLite initialization and sends native Quit. When Accessibility is granted, the check requires a positive real foreground usage segment; a denial **does not verify authorized foreground capture**. Evidence/run links are recorded in the delivery record.
 
 ## Developer ID and notarization
 
@@ -30,6 +30,8 @@ No membership is purchased or assumed. A maintainer must already have an active 
 | `APPLE_API_PRIVATE_KEY` | Complete P8 API private key; preserve its actual newlines. |
 
 The release workflow opts into signing. Manual desktop validation can opt in with `sign_mac`; ordinary pushes build validation bundles. The pipeline verifies all secret bindings exist, imports the P12 into a temporary keychain, checks a valid matching identity/team, signs nested Mach-O libraries and then the app, and cleans up the keychain/P12/P8 in `finally`. Sensitive tool output is withheld on failures.
+
+The app bundle keeps its single executable in `Contents/MacOS` and managed/runtime resources in `Contents/Resources/runtime`; the pinned SDK creates an apphost bound to that relative assembly path. This avoids treating JSON and managed resources as unsigned nested executable code. Native libraries are signed explicitly, and the app is signed last.
 
 The app uses hardened runtime. Entitlements are limited to `com.apple.security.cs.allow-jit` and `com.apple.security.cs.allow-unsigned-executable-memory` for .NET's JIT/executable code paths, including Intel. All bundled native code is signed with the same identity, so library-validation disabling is not requested. There is no App Sandbox, automation, device or file-access entitlement; Accessibility still requires the user's separate TCC consent.
 
