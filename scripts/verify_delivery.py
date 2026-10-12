@@ -64,7 +64,7 @@ else:
                 archived[name] = (len(data), digest(data))
                 if name == 'FocusOn' or name.endswith('/MacOS/FocusOn'):
                     assert entry.mode & 0o111, 'Archive lost executable permission'
-assert archived == expected, 'Archive contents differ from the verified directory'
+assert archived == expected, 'Archive mismatch: ' + json.dumps({'missing':sorted(set(expected)-set(archived))[:12], 'extra':sorted(set(archived)-set(expected))[:12], 'changed':[name for name in archived if name in expected and archived[name] != expected[name]][:12]}, ensure_ascii=False)
 
 def architectures(data):
     if data[:2] == b'MZ':
