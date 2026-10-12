@@ -1,12 +1,51 @@
 {
-  "sourceCommit": "f45e2f2435c808d3b0afc5e1ace72cbf99e6e318",
-  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38202692331",
+  "sourceCommit": "409cb51ed57f79637cfbca6691480aa5bb6a3a69",
+  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38203441571",
   "release": {
-    "sourceCommit": "f45e2f2435c808d3b0afc5e1ace72cbf99e6e318",
+    "sourceCommit": "409cb51ed57f79637cfbca6691480aa5bb6a3a69",
     "releaseTag": "v0.1.0",
-    "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38202692331",
-    "status": "failed",
-    "error": "GitHub HTTP 404: Not Found"
+    "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38203441571",
+    "status": "published",
+    "releaseUrl": "https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.0",
+    "releaseId": 410109763,
+    "windowsAssets": {
+      "FocusOn-win-x64.zip": {
+        "id": 632512486,
+        "size": 77388363,
+        "digest": "sha256:abf032649026e773d96dd530e0d427b26703181a4d83800d1a5d3185e328f803"
+      },
+      "FocusOn-win-x64.zip.sha256": {
+        "id": 632512487,
+        "size": 87,
+        "digest": "sha256:50b809bb2fa52e558a365e95b42b3e4e863a13d231392e6c754dd8233360a392"
+      }
+    },
+    "assets": [
+      {
+        "name": "FocusOn-linux-arm64.tar.gz",
+        "size": 44169273,
+        "digest": "sha256:5a81564dea6f212dcd0f6c7f12fefd0a9a3e7997ddbfb2694d6e3c22abc8e1ab",
+        "url": "https://github.com/Liuzkai/FocusOn/releases/download/v0.1.0/FocusOn-linux-arm64.tar.gz"
+      },
+      {
+        "name": "FocusOn-linux-arm64.tar.gz.sha256",
+        "size": 93,
+        "digest": "sha256:b481f5e9f07ec6863b18b64b76694a1d5cdf268059b9831747d123629f2fb2c8",
+        "url": "https://github.com/Liuzkai/FocusOn/releases/download/v0.1.0/FocusOn-linux-arm64.tar.gz.sha256"
+      },
+      {
+        "name": "FocusOn-linux-x64.tar.gz",
+        "size": 46835098,
+        "digest": "sha256:36dc66bf3ec12a2e459047af0d18c3194393a812d9381c0f7dc2b471aa5e8d2b",
+        "url": "https://github.com/Liuzkai/FocusOn/releases/download/v0.1.0/FocusOn-linux-x64.tar.gz"
+      },
+      {
+        "name": "FocusOn-linux-x64.tar.gz.sha256",
+        "size": 91,
+        "digest": "sha256:7096933c79e5c4f11779f63db91736df58789192474c8f8ed06cce5d405ff516",
+        "url": "https://github.com/Liuzkai/FocusOn/releases/download/v0.1.0/FocusOn-linux-x64.tar.gz.sha256"
+      }
+    ]
   },
   "about": {
     "status": "blocked",
