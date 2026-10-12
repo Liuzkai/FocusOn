@@ -1,6 +1,6 @@
 # Build and release instructions
 
-The public `v0.1.0` release is historical and immutable: Windows source/tag `43d6dfd`, Linux source `409cb51`. Its original Windows ZIP and checksum and the appended Linux x64/ARM64 archives/checksums remain intact. GitHub tag source downloads refer to the older Windows source; each Linux manifest/release note states its actual source. The icon/residency update proposes a new `v0.1.1` draft, pending the user's version choice.
+The public `v0.1.0` release is historical and immutable: Windows source/tag `43d6dfd`, Linux source `409cb51`. Its original Windows ZIP and checksum and the appended Linux x64/ARM64 archives/checksums remain intact. GitHub tag source downloads refer to the older Windows source; each Linux manifest/release note states its actual source. The icon/residency update proposes a new `v0.1.1` draft, confirmed by the user.
 
 ## Standard runner builds
 

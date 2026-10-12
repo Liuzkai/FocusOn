@@ -57,9 +57,10 @@ jobs:
       - name: Locked build and regressions
         shell: pwsh
         run: |
-          ./build.ps1 build
+          New-Item -ItemType Directory -Force "artifacts/evidence/$env:RUNTIME" | Out-Null
+          ./build.ps1 build 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/build.log"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ./build.ps1 test
+          ./build.ps1 test 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/tests.log"
           exit $LASTEXITCODE
       - name: Native desktop on Windows or Mac
         if: runner.os != 'Linux'

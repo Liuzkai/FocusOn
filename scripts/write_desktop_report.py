@@ -15,6 +15,10 @@ report = {'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
 for name in ['verification.json', 'mac-signing.json']:
     for path in (root / 'artifacts/evidence').rglob(name):
         value = json.loads(path.read_text()); report['evidence'].setdefault(path.parent.name.removeprefix('evidence-'), {})[name] = value
+for path in (root / 'artifacts/evidence').rglob('*.log'):
+    # Build/test/smoke output only; signing steps never write sensitive tool output here.
+    log = path.read_text(errors='replace')
+    report['evidence'].setdefault(path.parent.name.removeprefix('evidence-'), {})[path.name] = log[-14000:]
 result_file = root / 'artifacts/desktop-release-result.json'
 if result_file.exists(): report['release'] = json.loads(result_file.read_text())
 branch = 'heads/codex/desktop-status'

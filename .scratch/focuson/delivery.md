@@ -1,3 +1,11 @@
+# 13: Icon/residency update and native draft pipeline (2026-10-12)
+
+Continuation on main baseline 12f482c, no duplicate project/worktree. Existing published v0.1.0 remains: Windows tag/source 43d6dfd and Linux source 409cb51; their assets/checksums are preserved. New v0.1.1 draft is proposed, awaiting user version choice. About is now user-managed manually.
+
+Integrated executable/window/tray/desktop/bundle icons, Mac menu bar template and Dock Reopen, confirmed Linux StatusNotifier availability with recoverable fallback, preserved timer/recording on Close, and explicit exit cleanup. Local Release build 0 warning/error; 101 tests and native X11/no-tray/real isolated D-Bus host-loss checks pass. Source changes/verification are in ticket 13.
+
+Standard GitHub-hosted Windows/Linux/Mac x64/ARM64 workflows, seven-day temporary artifacts, immutable-source draft upload and optional Apple Secrets signing/notarization are prepared. Native cloud results and package hashes will be appended once read back. No new tag or public release is claimed; no Developer ID/notarization or physical Mac acceptance is claimed. Installation, runner/version policy and secure credential configuration are in docs/releases.md and docs/macos.md.
+
 # FocusOn 第一版工程交付
 
 ## 当前 GitHub Linux 发布（2026-10-12）
@@ -124,11 +132,3 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - [v0.1.0 Release 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1f0e09351dfa32edc5eb) 已创建并补充中文功能、下载、升级和验证说明，包含 `FocusOn-win-x64.zip`（77,388,363 字节）和 `.zip.sha256`。API 核对 isDraft=true、tagName=v0.1.0，两个附件均 uploaded。
 - 草稿 ZIP SHA256：`ABF032649026E773D96DD530E0D427B26703181A4D83800D1A5D3185E328F803`，与 GitHub 资产 digest 和旁置 SHA256 一致；下载后再次核对 manifest 源提交、479 文件集合/逐文件大小与哈希、ZIP CRC、运行时及三个 AMD64 文件，全部通过。
 - 本地云端日志 `.tools/github-release-v0.1.0.log`，下载附件 `.tools/release-v0.1.0/`，均被忽略。草稿尚未公开，后续由用户检查后 Publish release；人工验收与整体规格状态不因此关闭。
-# 13: Icon/residency update and native draft pipeline (2026-10-12)
-
-Continuation on main baseline 12f482c, no duplicate project/worktree. Existing published v0.1.0 remains: Windows tag/source 43d6dfd and Linux source 409cb51; their assets/checksums are preserved. New v0.1.1 draft is proposed, awaiting user version choice. About is now user-managed manually.
-
-Integrated executable/window/tray/desktop/bundle icons, Mac menu bar template and Dock Reopen, confirmed Linux StatusNotifier availability with recoverable fallback, preserved timer/recording on Close, and explicit exit cleanup. Local Release build 0 warning/error; 101 tests and native X11/no-tray/real isolated D-Bus host-loss checks pass. Source changes/verification are in ticket 13.
-
-Standard GitHub-hosted Windows/Linux/Mac x64/ARM64 workflows, seven-day temporary artifacts, immutable-source draft upload and optional Apple Secrets signing/notarization are prepared. Native cloud results and package hashes will be appended once read back. No new tag or public release is claimed; no Developer ID/notarization or physical Mac acceptance is claimed. Installation, runner/version policy and secure credential configuration are in docs/releases.md and docs/macos.md.
-

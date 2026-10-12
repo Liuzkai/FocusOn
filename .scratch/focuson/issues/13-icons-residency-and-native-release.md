@@ -19,7 +19,7 @@
 
 ## Comments
 
-- 2026-10-12: Baseline main 12f482c is clean and matches origin/main. Original MIT notice from d21c09f is retained. v0.1.0 remains at 43d6dfd; published Linux source is 409cb51. A separate v0.1.1 draft is proposed; awaiting user version choice while implementation proceeds.
+- 2026-10-12: Baseline main 12f482c is clean and matches origin/main. Original MIT notice from d21c09f is retained. v0.1.0 remains at 43d6dfd; published Linux source is 409cb51. A separate v0.1.1 draft is proposed; user confirmed the v0.1.1 draft while implementation proceeds.
 - 2026-10-12: User will set About manually. Do not request ABOUT_TOKEN or change repository About as part of this ticket.
 - 2026-10-12: Implemented integrated 16–256 Windows ICO/executable resource, window/tray PNG, Linux 16–1024 hicolor/desktop installer, and multi-size Mac ICNS/template. Added recoverable residency and Dock Reopen; controller/database/language rules preserved. Native Mac observer implementation reviewed; TCC permission denial remains explicit.
 - 2026-10-12: Release build 0 warnings/errors, 89 core/platform + 12 UI tests pass (0 failed/skipped), native X11/two-process smoke passes. Real Linux window/SQLite/timer/language/exit and no-tray fallback pass. Isolated real D-Bus StatusNotifier registration, hide/restore and host disappearance restores the window; this is protocol validation, not a GNOME/KDE physical desktop pass. actionlint, Python compile and diff checks pass. Native Actions validation pending.

@@ -1,6 +1,6 @@
 # 0005: Recoverable residency and release trust
 
-Status: accepted for implementation; the proposed new version tag requires user confirmation.
+Status: accepted for implementation; v0.1.1 draft confirmed by the user.
 
 Close preserves the one window, recording controller, titled timer and data-directory lock. A confirmed tray hides the window. When a Linux StatusNotifier host is missing, its item registration cannot be confirmed, or it disappears, the window stays visible or is restored. This also covers tray creation failure on Windows/macOS. Explicit Exit and native Quit save the final boundary and dispose owned resources. Dock Reopen and a second invocation restore the existing window.
 
