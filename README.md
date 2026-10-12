@@ -58,6 +58,21 @@ dotnet run --project src/FocusOn/FocusOn.csproj -- --data-dir /tmp/focuson-qa
 
 仓库 SDK 需将 `.tools/dotnet/` 加入 PATH 或直接使用其中的 `dotnet`。Windows 隔离目录可使用 `$env:TEMP` 下的测试路径。
 
+## GitHub Releases
+
+`.github/workflows/release.yml` 在推送 `v*` 标签时自动执行 Release 构建、测试、Windows x64 自包含打包和文件校验，再创建带 ZIP 与 SHA256 附件的 Release 草稿。SDK 从 `global.json` 安装，使用 GitHub 自动提供的令牌，无需新增个人 Token 或 Secrets。
+
+先提交并推送准备发布的代码，再创建新版本标签，例如：
+
+```powershell
+git tag -a v0.1.1 -m "FocusOn v0.1.1"
+git push origin v0.1.1
+```
+
+在仓库 Actions 查看 `Windows Release`；成功后到 Releases 检查草稿、填写版本说明并点击 Publish release。草稿附件可以通过重新运行该工作流更新；已经公开的版本应使用新标签发布。也可在 Actions 的 Run workflow 中选择已有 `v*` 标签重跑，选择分支不会创建 Release。
+
+下载完整 `FocusOn-win-x64.zip` 并解压运行，旁置 `.sha256` 用于校验。GitHub 自动生成的 Source code 附件是源码。自动化构建和文件校验不代替 `docs/manual-acceptance.md` 的实机验收。
+
 ## 工程与验收
 
 - `src/FocusOn.Core/`：记录会话、真实 SQLite、每日投影、标题计时；与桌面平台无关。

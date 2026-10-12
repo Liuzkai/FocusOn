@@ -1,0 +1,73 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: ./build.ps1 build
+
+      - name: Test
+        run: ./build.ps1 test
+
+      - name: Package Windows x64
+        run: ./build.ps1 publish
+
+      - name: Verify package and ZIP
+        run: python scripts/verify_delivery.py FocusOn-win-x64
+
+      - name: Create or update release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $assets = @(
+            'artifacts/FocusOn-win-x64.zip',
+            'artifacts/FocusOn-win-x64.zip.sha256'
+          )
+          $existing = gh release view "$env:RELEASE_TAG" --json isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if (-not ($existing | ConvertFrom-Json).isDraft) {
+              throw 'This release is published. Create a new version tag.'
+            }
+            gh release upload "$env:RELEASE_TAG" @assets --clobber
+          } else {
+            gh release create "$env:RELEASE_TAG" @assets `
+              --verify-tag `
+              --title "FocusOn $env:RELEASE_TAG" `
+              --generate-notes `
+              --draft
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
