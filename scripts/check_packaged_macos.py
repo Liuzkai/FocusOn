@@ -1,5 +1,6 @@
 """Start the actual packaged Mac app and quit via its native application lifetime."""
 import json
+import ctypes
 import pathlib
 import subprocess
 import sys
@@ -22,10 +23,24 @@ with tempfile.TemporaryDirectory(prefix='focuson-mac-package-') as temporary:
             if database.is_file(): break
             time.sleep(0.2)
         assert database.is_file(), 'Packaged Mac app did not initialize SQLite'
-        # Send kAEQuitApplication to this exact process; avoids UI scripting/TCC and other installed instances.
-        # AppleScript by bundle path addresses this validation bundle, never the user's installed copy.
-        result = subprocess.run(['osascript', '-e', f'tell application "{bundle}" to quit'], capture_output=True, text=True, timeout=20)
-        assert result.returncode == 0, 'Native Quit Apple event failed: ' + result.stderr.strip()
+        # Direct launch has no LaunchServices path registration. Target the actual PID.
+        class Desc(ctypes.Structure):
+            _fields_ = [('type',ctypes.c_uint32),('handle',ctypes.c_void_p)]
+        ae = ctypes.CDLL('/System/Library/Frameworks/CoreServices.framework/CoreServices')
+        ae.AECreateDesc.argtypes = [ctypes.c_uint32,ctypes.c_void_p,ctypes.c_long,ctypes.POINTER(Desc)]
+        ae.AECreateAppleEvent.argtypes = [ctypes.c_uint32,ctypes.c_uint32,ctypes.POINTER(Desc),ctypes.c_int16,ctypes.c_int32,ctypes.POINTER(Desc)]
+        ae.AESendMessage.argtypes = [ctypes.POINTER(Desc),ctypes.POINTER(Desc),ctypes.c_int32,ctypes.c_int32]
+        ae.AEDisposeDesc.argtypes = [ctypes.POINTER(Desc)]
+        def code(text):return int.from_bytes(text.encode(),'big')
+        target,event,reply = Desc(),Desc(),Desc(); pid = ctypes.c_int32(process.pid)
+        time.sleep(1)  # SQLite initialization precedes the native application run loop.
+        try:
+            assert ae.AECreateDesc(code('kpid'),ctypes.byref(pid),4,ctypes.byref(target)) == 0
+            assert ae.AECreateAppleEvent(code('aevt'),code('quit'),ctypes.byref(target),-1,0,ctypes.byref(event)) == 0
+            status = ae.AESendMessage(ctypes.byref(event),ctypes.byref(reply),1 | 0x10,-1)
+            assert status == 0, 'Native PID Quit Apple event failed: OSStatus ' + str(status)
+        finally:
+            for descriptor in [reply,event,target]: ae.AEDisposeDesc(ctypes.byref(descriptor))
         process.wait(timeout=20); assert process.returncode == 0, 'Packaged app did not exit normally'
         print(json.dumps({'result':'PASS','runtime':runtime,'checks':['actual self-contained .app startup','SQLite initialized','native Quit event','normal exit']}))
     finally:
