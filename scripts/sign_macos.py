@@ -17,6 +17,9 @@ report = app.parent / 'mac-signing.json'
 def run(label, args):
     result = subprocess.run(args, capture_output=True, text=True, timeout=2700)
     if result.returncode:
+        if os.environ.get('FOCUSON_MAC_SIGN') != 'developer-id':
+            # Ad-hoc commands contain no certificate/private-key material.
+            print(result.stderr.strip(), file=sys.stderr)
         raise RuntimeError(f'{label} failed (exit {result.returncode}); sensitive tool output withheld.')
     return result.stdout
 

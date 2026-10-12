@@ -68,6 +68,15 @@ sealed class SmokeApp : Application
             var trustedMac = OperatingSystem.IsMacOS() ? MacPermissions.IsAccessibilityTrusted : (bool?)null;
             if (OperatingSystem.IsMacOS())
             {
+                // When the runner has TCC access, require real foreground usage;
+                // permission denial remains a distinct, explicitly recorded outcome.
+                if (trustedMac == true)
+                {
+                    window.Activate();
+                    for (var attempt = 0; attempt < 15 && !day.Intervals.Any(x => x.Kind == IntervalKind.Usage && x.Duration > TimeSpan.Zero); attempt++)
+                    { await Task.Delay(200); day = await recording.ReadDayAsync(DateOnly.FromDateTime(DateTime.Today)); }
+                    Require(day.Intervals.Any(x => x.Kind == IntervalKind.Usage && x.Duration > TimeSpan.Zero), "Trusted Mac foreground API recorded no active window.");
+                }
                 var clock = PlatformClock.Create(); var before = clock.Now(); await Task.Delay(50); var after = clock.Now();
                 Require(after.MonotonicTicks > before.MonotonicTicks, "Mac native continuous clock did not advance.");
                 using var session = new MacSessionObserver(_ => { }); session.Start(); await Task.Delay(800);
@@ -82,6 +91,7 @@ sealed class SmokeApp : Application
             using var nextInstance = new SingleInstance(directory); Require(nextInstance.IsPrimary, "Exit leaked the writer lock.");
             Console.WriteLine(JsonSerializer.Serialize(new { result = "PASS", nativeRuntime = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier,
                 trayConfirmed = expectTray, macAccessibilityTrusted = trustedMac, platformWarning,
+                macForegroundUsageObserved = OperatingSystem.IsMacOS() && day.Intervals.Any(x => x.Kind == IntervalKind.Usage && x.Duration > TimeSpan.Zero),
                 checks = new[] { "native window", "close residency", "restore", "running timer", "single writer", "persisted languages", "exit/reopen SQLite", "resource release" } }));
             Result = 0;
         }

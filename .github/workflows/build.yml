@@ -92,16 +92,16 @@ jobs:
           APPLE_API_PRIVATE_KEY: ${{ github.event_name != 'pull_request' && secrets.APPLE_API_PRIVATE_KEY || '' }}
         run: |
           if ($IsMacOS -and $env:APPLE_CREDENTIALS_CONFIGURED -ne 'true') { $env:FOCUSON_MAC_SIGN = 'validation' }
-          ./build.ps1 publish -Runtime $env:RUNTIME
+          ./build.ps1 publish -Runtime $env:RUNTIME 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/publish.log"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/verify_delivery.py $env:RUNTIME
+          python scripts/verify_delivery.py $env:RUNTIME 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/package-check.log"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           New-Item -ItemType Directory -Force "artifacts/evidence/$env:RUNTIME" | Out-Null
           Copy-Item "artifacts/delivery-verification-$env:RUNTIME.json" "artifacts/evidence/$env:RUNTIME/verification.json"
           Copy-Item "artifacts/release/FocusOn-$env:RUNTIME/manifest.json" "artifacts/evidence/$env:RUNTIME/manifest.json"
           if ($IsMacOS) {
             Copy-Item "artifacts/release/FocusOn-$env:RUNTIME/mac-signing.json" "artifacts/evidence/$env:RUNTIME/mac-signing.json"
-            python scripts/check_packaged_macos.py $env:RUNTIME
+            python scripts/check_packaged_macos.py $env:RUNTIME 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/app-bundle.log"
             exit $LASTEXITCODE
           }
       - name: Seven-day validation archives (not Release attachments)
