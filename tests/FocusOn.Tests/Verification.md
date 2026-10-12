@@ -1,3 +1,8 @@
+# 14: Public release verification (2026-10-12)
+
+- [Publication run](https://github.com/Liuzkai/FocusOn/actions/runs/38230937502) succeeds. v0.1.1 public source/tag remains `45ad974fc3f86c9721b78da560361a77d1e0809a`; previous six-target native validation is reused without rebuilding. Existing archives are downloaded/verified before visibility changes, and all eight public archive/checksum URLs downloaded in this cloud match the original draft sizes/SHA256. Four package manifests match the exact source/runtime/release kind; v0.1.0 tag/assets stay unchanged. Mac trust/device limitations remain unchanged.
+- Publication guard fixtures: nine passed, zero failed; changed tag, failed native build, missing native job, changed asset, incorrect manifest source, corrupt download and unexpected Mac asset all prevent the PATCH. Approved publication and an already-public retry succeed. actionlint/Python compilation/diff checks pass. These are publication checks; no extra application regressions are claimed for the later metadata/doc commits.
+
 # 13: Icons, recoverable residency and native release validation (2026-10-12)
 
 - Source `140d540e8832640b222a50334141ee94edf5ea57`, [native validation run](https://github.com/Liuzkai/FocusOn/actions/runs/38226659404): all six standard native runner targets succeeded. Each runs 90 core/platform + 12 UI tests (102 passed, zero failed/skipped), Release build, native desktop checks and complete self-contained archive verification. The pre-release validation commit differs from the final documentation/tag commit; final release-source/run evidence is recorded in delivery.md.

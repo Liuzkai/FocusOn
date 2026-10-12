@@ -29,7 +29,7 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 
 ## Download and run
 
-Download the complete package from [GitHub Releases](https://github.com/Liuzkai/FocusOn/releases). The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
+Download the latest Windows/Linux **[v0.1.1 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1)**. Windows x64 users can download [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.1/FocusOn-win-x64.zip) directly; ARM64 and Linux packages are on the release page. The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
 
 | Platform | Architectures | Package and launch |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-h
 
 The [desktop release workflow](.github/workflows/release.yml) accepts an explicit version tag or manual dispatch with an existing tag. Build/test/package verification must all succeed before it uploads anything. The tag, application version and every attached package source must agree. Releases stay **drafts**, and assets are never silently overwritten. Ordinary code pushes do not publish releases. See [release instructions](docs/releases.md) for exact steps, runner scope and Apple Secrets.
 
-The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version uses a separate `v0.1.1` draft; no old tag is rewritten.
+The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version was built separately as `v0.1.1` and published on explicit user approval; no old tag is rewritten.
 
 Developer ID signing, hardened runtime, minimal .NET JIT entitlements, Apple notarization, app stapling and Gatekeeper checks are configured for native Mac runners. They require an existing Apple Developer Program membership and securely configured Actions Secrets. Missing credentials exclude Mac assets from Release uploads. Successful signing and notarization still require physical desktop, Accessibility and power acceptance; see [Mac validation](docs/macos.md).
 

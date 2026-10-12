@@ -1,3 +1,11 @@
+# 14: Public v0.1.1 publication (2026-10-12)
+
+User explicitly requested “0.1.1 直接发布吧”. [v0.1.1](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1) is now public/latest, published at 2026-10-12T17:36:18+08:00 (Asia/Shanghai). [Publication workflow](https://github.com/Liuzkai/FocusOn/actions/runs/38230937502) is Success. Publication tooling source is f962ff5; package/immutable tag source remains `45ad974fc3f86c9721b78da560361a77d1e0809a`, from the already successful six-target [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38228221117). No rebuild, tag rewrite or asset replacement occurred.
+
+All four Windows/Linux x64/ARM64 archives and their four SHA256 files were checked again before publication: immutable tag/source, successful native jobs, exact sizes/digests, archive manifests and checksum contents. After publication the cloud downloaded all eight public URLs without owner credentials; every size/SHA256 and all four package manifests match the verified original draft. Existing v0.1.0 tag and asset ID/size/digest snapshots remain unchanged. Mac ad-hoc validation outputs are excluded; Developer ID/notarization/physical permission and device acceptance are still pending with 08.
+
+Publication tooling's nine offline guard cases pass, including refusal on tag/build/job/asset/source/download/Mac-attachment mismatches and an idempotent already-public case. actionlint, Python compilation and diff checks pass. New version builds still default to drafts; ordinary code/document pushes do not publish. Explicit approval is recorded in `.github/release-publication/v0.1.1.json`; future manual publication requires a matching approval record. About remains manual/user-owned.
+
 # 13: Icon/residency update and native draft pipeline (2026-10-12)
 
 Continuation on main baseline 12f482c, no duplicate project/worktree. User approved a separate v0.1.1 draft. Existing published v0.1.0 remains: Windows tag/source 43d6dfd and Linux source 409cb51. About is user-managed manually.

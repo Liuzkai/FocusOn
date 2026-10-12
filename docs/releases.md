@@ -1,6 +1,6 @@
 # Build and release instructions
 
-The public `v0.1.0` release is historical and immutable: Windows source/tag `43d6dfd`, Linux source `409cb51`. Its original Windows ZIP and checksum and the appended Linux x64/ARM64 archives/checksums remain intact. GitHub tag source downloads refer to the older Windows source; each Linux manifest/release note states its actual source. The icon/residency update uses a separate `v0.1.1` draft, confirmed by the user.
+The public `v0.1.0` release is historical and immutable: Windows source/tag `43d6dfd`, Linux source `409cb51`. Its original Windows ZIP and checksum and the appended Linux x64/ARM64 archives/checksums remain intact. GitHub tag source downloads refer to the older Windows source; each Linux manifest/release note states its actual source. The icon/residency update is the separate public [v0.1.1 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1), published on explicit user approval after native verification. New version builds still default to drafts.
 
 ## Standard runner builds
 
@@ -33,4 +33,4 @@ The legacy Linux append workflow is manual, defaults to the already published `4
 
 Publishing an existing verified draft requires explicit user authorization recorded in `.github/release-publication/<version>.json`, with its immutable source, successful native build run and exact attachment sizes/SHA256 digests. The publication job checks the tag, all six native jobs, downloads the existing attachments, verifies every archive's source and checksum, and then changes only the release's visibility/notes. It does not rebuild or overwrite packages. The existing v0.1.0 tag/assets are checked before and after.
 
-The v0.1.1 authorization record was added on the user's request to publish that draft. Only changes to authorization records trigger the publication job on main; ordinary code pushes do not publish. A maintainer can also manually select `publish_existing` with an existing approved `version_tag`. New version builds still create drafts by default, and unnotarized Mac validation packages remain excluded.
+The v0.1.1 authorization record was added on the user's request, and that verified draft is now public. Only changes to authorization records trigger the publication job on main; ordinary code pushes do not publish. A maintainer can also manually select `publish_existing` with an existing approved `version_tag`. New version builds still create drafts by default, and unnotarized Mac validation packages remain excluded.
