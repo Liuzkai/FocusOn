@@ -25,7 +25,7 @@ with tempfile.TemporaryDirectory(prefix='focuson-mac-package-') as temporary:
         # Send kAEQuitApplication to this exact process; avoids UI scripting/TCC and other installed instances.
         # AppleScript by bundle path addresses this validation bundle, never the user's installed copy.
         result = subprocess.run(['osascript', '-e', f'tell application "{bundle}" to quit'], capture_output=True, text=True, timeout=20)
-        assert result.returncode == 0, 'Native Quit Apple event failed'
+        assert result.returncode == 0, 'Native Quit Apple event failed: ' + result.stderr.strip()
         process.wait(timeout=20); assert process.returncode == 0, 'Packaged app did not exit normally'
         print(json.dumps({'result':'PASS','runtime':runtime,'checks':['actual self-contained .app startup','SQLite initialized','native Quit event','normal exit']}))
     finally:
