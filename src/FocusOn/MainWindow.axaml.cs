@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly Func<TimerAction, string?, Task> changeTimer;
     private readonly Action<string>? saveLanguage;
     private readonly ObservableCollection<IntervalRow> rows = [];
+    private readonly LogEndFollower logEndFollower;
     private readonly DispatcherTimer refreshTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private bool followToday = true, started, stopped, refreshing, deleting, changingTimer, showGroups = true, applyingLanguage, manualPaused;
@@ -46,6 +47,7 @@ public partial class MainWindow : Window
             Closed += (_, _) => settings.ColorValuesChanged -= themeChanged;
         }
         LogGrid.ItemsSource = rows;
+        logEndFollower = new(LogGrid, () => LogGrid.CollectionView.Cast<object>().LastOrDefault());
         PreviousDayButton.Click += (_, _) => { if (selectedDate.DayNumber > 0) SelectDate(selectedDate.AddDays(-1)); };
         NextDayButton.Click += (_, _) => SelectDate(selectedDate.AddDays(1));
         TodayButton.Click += (_, _) => SelectDate(DateOnly.FromDateTime(DateTime.Today));
@@ -72,6 +74,7 @@ public partial class MainWindow : Window
         LogGrid.SelectionChanged += (_, _) =>
         {
             var row = LogGrid.SelectedItem as IntervalRow;
+            if (row is not null && row != rows.LastOrDefault()) logEndFollower.Pause();
             DetailsPanel.DataContext = row; DetailsPanel.IsVisible = row is not null; DetailsEmptyText.IsVisible = row is null;
             if (row is not null) { TimelineView.SelectInterval(row.Id); SetInspector(true); }
             else TimelineView.ClearSelection();
@@ -92,7 +95,7 @@ public partial class MainWindow : Window
     public event Action<DayView>? DayRefreshed;
     public event Action? LanguageChanged;
     public void SetPauseState(bool paused) { manualPaused = paused; PauseButton.Content = Localizer.Get(paused ? "继续记录" : "暂停记录"); }
-    public void StopRefresh() { stopped = true; refreshTimer.Stop(); }
+    public void StopRefresh() { stopped = true; refreshTimer.Stop(); logEndFollower.Dispose(); }
     private bool trayAvailable = true;
     public void SetTrayAvailable(bool available)
     {
@@ -139,7 +142,7 @@ public partial class MainWindow : Window
         if (day > today) day = today;
         followToday = day == today;
         if (selectedDate == day) { UpdateDateControls(); return; }
-        selectedDate = day; view = null; TimelineView.Clear(); rows.Clear(); TotalsList.ItemsSource = null;
+        selectedDate = day; view = null; TimelineView.Clear(); logEndFollower.Reset(); rows.Clear(); TotalsList.ItemsSource = null;
         LogEmptyText.Text = Localizer.Get("正在读取所选日期…"); LogEmptyText.IsVisible = true;
         UpdateDateControls(); if (started) _ = RefreshAsync();
     }
@@ -155,22 +158,27 @@ public partial class MainWindow : Window
     private void ApplyRows()
     {
         if (view is null) return;
-        var filtered = TimelineView.Range is { } range ? view.FilterRange(range.StartUtc, range.EndUtc) : view.Intervals;
-        var incoming = filtered.Where(x => DisplayText.MatchesSearch(x, search)).OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
-        var ids = incoming.Select(x => x.Id).ToHashSet();
-        for (var i = rows.Count - 1; i >= 0; i--) if (!ids.Contains(rows[i].Id)) rows.RemoveAt(i);
-        var existing = rows.ToDictionary(x => x.Id);
-        for (var i = 0; i < incoming.Length; i++)
+        logEndFollower.BeginUpdate();
+        try
         {
-            var interval = incoming[i];
-            if (existing.TryGetValue(interval.Id, out var row)) { row.Update(interval); if (rows[i] != row) rows.Move(rows.IndexOf(row), i); }
-            else rows.Insert(i, new IntervalRow(interval));
-            var local = interval.StartUtc.ToLocalTime();
-            var previous = i > 0 ? incoming[i - 1].StartUtc.ToLocalTime() : (DateTimeOffset?)null;
-            rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour) ? Localizer.Get("{0:HH}:00 时段", local) : string.Empty);
+            var filtered = TimelineView.Range is { } range ? view.FilterRange(range.StartUtc, range.EndUtc) : view.Intervals;
+            var incoming = filtered.Where(x => DisplayText.MatchesSearch(x, search)).OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+            var ids = incoming.Select(x => x.Id).ToHashSet();
+            for (var i = rows.Count - 1; i >= 0; i--) if (!ids.Contains(rows[i].Id)) rows.RemoveAt(i);
+            var existing = rows.ToDictionary(x => x.Id);
+            for (var i = 0; i < incoming.Length; i++)
+            {
+                var interval = incoming[i];
+                if (existing.TryGetValue(interval.Id, out var row)) { row.Update(interval); if (rows[i] != row) rows.Move(rows.IndexOf(row), i); }
+                else rows.Insert(i, new IntervalRow(interval));
+                var local = interval.StartUtc.ToLocalTime();
+                var previous = i > 0 ? incoming[i - 1].StartUtc.ToLocalTime() : (DateTimeOffset?)null;
+                rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour) ? Localizer.Get("{0:HH}:00 时段", local) : string.Empty);
+            }
+            LogEmptyText.Text = search.Length > 0 ? Localizer.Get("没有匹配的软件或窗口标题。") : TimelineView.Range is not null ? Localizer.Get("所选范围没有可用记录。") : Localizer.Get("{0} 没有可用记录。", view.Date.ToString("yyyy-MM-dd"));
+            LogEmptyText.IsVisible = rows.Count == 0; UpdateTimelineControls();
         }
-        LogEmptyText.Text = search.Length > 0 ? Localizer.Get("没有匹配的软件或窗口标题。") : TimelineView.Range is not null ? Localizer.Get("所选范围没有可用记录。") : Localizer.Get("{0} 没有可用记录。", view.Date.ToString("yyyy-MM-dd"));
-        LogEmptyText.IsVisible = rows.Count == 0; UpdateTimelineControls();
+        finally { logEndFollower.EndUpdate(); }
     }
     private void SelectInterval(long id)
     {
@@ -178,6 +186,7 @@ public partial class MainWindow : Window
         if (row is null && search.Length > 0) { SearchBox.Text = string.Empty; row = rows.FirstOrDefault(x => x.Id == id); }
         if (row is null && TimelineView.Range is not null) { TimelineView.ClearRange(); row = rows.FirstOrDefault(x => x.Id == id); }
         if (row is null) return;
+        logEndFollower.Pause();
         LogGrid.SelectedItem = row; LogGrid.ScrollIntoView(row, null);
     }
     private void SetInspector(bool show) { InspectorPane.IsVisible = show; DetailsButton.Content = Localizer.Get(show ? "详情 ⊟" : "详情 ⊞"); }

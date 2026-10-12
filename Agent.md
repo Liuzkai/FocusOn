@@ -125,6 +125,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
+**最新 15 票（2026-10-12）：**实现随鼠标稳定移动的非交互时间轴提示、日志滚到底部后跟随新增/向上滚动及历史选择暂停、不同软件边界约 2 DIP 视觉间隙。107 项回归与实际 Linux/Xvfb 鼠标/跨行提示/底部跟随/历史位置/像素间隙检查通过；保留时间映射、SQLite、两语偏好及原生平台生命周期。下一版 v0.1.2 草稿已在本轮说明，正在完成六架构构建与草稿；已公开 v0.1.1 不改写，Mac 信任和物理设备验收限制不变。
+
 **最新 14 票（2026-10-12）：**用户明确要求公开 v0.1.1；[公开 Release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1)已发布并设为 latest，发布源/标签仍为 `45ad974`，没有重建或替换附件。[发布核对 run 38230937502](https://github.com/Liuzkai/FocusOn/actions/runs/38230937502) Success；四个 Windows/Linux x64/ARM64 包与四个 SHA256 公开直链下载再次匹配原草稿大小/哈希/manifest 源，v0.1.0 标签及资产保持。Mac 仅 Actions ad-hoc 验证，未 Developer ID 签名/公证，不是正式附件。14 工程完成，08 的设备/权限/签名待办及父规格继续开放；普通推送仍不直接公开发布，后续版本默认草稿。
 
 **最新 13 票（2026-10-12）：**同一项目接入三平台图标、关闭驻留、恢复/退出、Mac Dock Reopen、Linux StatusNotifier 确认与宿主消失恢复。用户已确认独立 v0.1.1 草稿，保留 v0.1.0。源码 `140d540e8832640b222a50334141ee94edf5ea57` 的[六架构原生验证](https://github.com/Liuzkai/FocusOn/actions/runs/38226659404)全部通过：每目标 90 核心/平台 + 12 UI（102 项，0 失败/跳过），真实原生桌面、SQLite、计时/语言/单实例/退出及六包完整性/架构/校验。Mac Intel/Apple Silicon 均实际记录前台 Usage，并启动最终自包含 .app、正常 native Quit；修复 Darwin IPC 长度、ARM64 fcntl ABI、会话字典常量、原生回调退出死锁及 Mac 包规范布局。Apple Secrets 未配置，Mac 仅 ad-hoc 验证，未做 Developer ID/公证/staple，不上传为正式附件。物理权限、电源、GNOME/KDE 菜单等仍由 08 人工验收。[v0.1.1 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-9e6e4d5dd19f594f38a2)已创建，正式源 `45ad974` / [run 38228221117](https://github.com/Liuzkai/FocusOn/actions/runs/38228221117) 六架构全部通过，含四个 Windows/Linux 包及 SHA256；上传后下载核对及 v0.1.0 资产快照保持通过，详见 delivery.md；以 13 票、docs/releases.md、docs/macos.md 和最新验收记录为准。

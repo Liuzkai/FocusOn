@@ -73,6 +73,8 @@ try:
 
 Includes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.
 
+Timeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.
+
 Validation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.
 
 macOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.

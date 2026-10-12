@@ -83,7 +83,7 @@ try:
 
 Includes the FocusOn executable/window/tray icons, close-to-tray with restore and explicit Exit, recoverable Linux tray fallback, English / Simplified Chinese with a saved language preference, and the .NET runtime. Existing local records remain compatible. Archives retain MIT and third-party notices; adjacent SHA256 files verify downloads.
 
-Validation: six standard native GitHub-hosted targets passed 102 regressions each, native desktop lifecycle checks, and self-contained file/archive/architecture/runtime verification. Mac native foreground recording and actual .app startup / Quit passed. Linux checks include X11 capture and isolated StatusNotifier registration / host loss. Physical power, DPI, desktop tray panels and permission acceptance remain pending.
+Validation: six standard native GitHub-hosted targets passed their core/platform and UI regressions, native desktop lifecycle checks, and self-contained file/archive/architecture/runtime verification. Mac native foreground recording and actual .app startup / Quit passed. Linux checks include X11 capture and isolated StatusNotifier registration / host loss. Physical power, DPI, desktop tray panels and permission acceptance remain pending.
 
 macOS is not included in this release. Apple credentials are not configured; Mac outputs are ad-hoc validation artifacts, not Developer ID-signed or notarized distributions. Signing, hardened runtime, notarization, stapling and Gatekeeper verification are configured but have not completed. See the repository's docs/macos.md for secure Secrets and permission setup.
 

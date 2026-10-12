@@ -2,6 +2,8 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Primitives.PopupPositioning;
 using Avalonia.Input;
 using Avalonia.Media;
 
@@ -21,11 +23,27 @@ public sealed class TimelineControl : Control
     private bool panning;
     private RecordedInterval? keyboardAnchor;
     private IPointer? captured;
+    private readonly TextBlock hoverText = new() { TextWrapping = TextWrapping.Wrap };
+    private readonly Popup hoverPopup;
+    private Point? hoverPoint;
+    private Window? owner;
+    private readonly HashSet<long> gapBefore = [], gapAfter = [];
 
     public TimelineControl()
     {
         Focusable = true; ClipToBounds = true; Height = 96;
         Cursor = new Cursor(StandardCursorType.Cross);
+        hoverPopup = new Popup
+        {
+            Name = "TimelineHoverPopup", PlacementTarget = this, Placement = PlacementMode.AnchorAndGravity,
+            PlacementAnchor = PopupAnchor.BottomRight, PlacementGravity = PopupGravity.BottomRight,
+            HorizontalOffset = 14, VerticalOffset = 18, IsHitTestVisible = false,
+            // A non-interactive overlay cannot intercept movement into another timeline lane.
+            ShouldUseOverlayLayer = true,
+            TakesFocusFromNativeControl = false, WindowManagerAddShadowHint = false,
+            Child = new ToolTip { Content = hoverText, MaxWidth = 460, Opacity = 1, IsHitTestVisible = false }
+        };
+        LogicalChildren.Add(hoverPopup);
         RefreshLanguage();
     }
 
@@ -45,16 +63,24 @@ public sealed class TimelineControl : Control
         var newDay = day is null || day.Date != value.Date || day.StartUtc != value.StartUtc || day.EndUtc != value.EndUtc;
         day = value;
         intervals = value.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+        gapBefore.Clear(); gapAfter.Clear();
+        RecordedInterval? previousUsage = null;
+        foreach (var usage in intervals.Where(x => x.Kind == IntervalKind.Usage))
+        {
+            if (previousUsage is not null && previousUsage.EndUtc == usage.StartUtc && previousUsage.AppKey != usage.AppKey)
+            { gapAfter.Add(previousUsage.Id); gapBefore.Add(usage.Id); }
+            previousUsage = usage;
+        }
         (boundsStart, boundsEnd) = TimelineBounds.For(value, FullDay);
         if (newDay || autoViewport) { visibleStart = boundsStart; visibleEnd = boundsEnd; autoViewport = true; }
         else SetViewport(Middle(visibleStart, visibleEnd), (visibleEnd - visibleStart).Ticks);
         if (newDay) { Range = null; selectedId = null; keyboardAnchor = null; CancelDrag(); }
         if (selectedId is { } id && !intervals.Any(x => x.Id == id)) selectedId = null;
-        InvalidateVisual(); ViewChanged?.Invoke();
+        InvalidateVisual(); ViewChanged?.Invoke(); RefreshHover();
     }
     public void Clear()
     {
-        day = null; intervals = []; selectedId = null; keyboardAnchor = null; Range = null; CancelDrag();
+        day = null; intervals = []; gapBefore.Clear(); gapAfter.Clear(); selectedId = null; keyboardAnchor = null; Range = null; CancelDrag(); HideHover();
         InvalidateVisual(); ViewChanged?.Invoke();
     }
     public void SelectInterval(long id)
@@ -86,6 +112,7 @@ public sealed class TimelineControl : Control
         if (day is null) return;
         autoViewport = true; (boundsStart, boundsEnd) = TimelineBounds.For(day, FullDay);
         visibleStart = boundsStart; visibleEnd = boundsEnd; ClearRange(); InvalidateVisual(); ViewChanged?.Invoke();
+        RefreshHover();
     }
     public void SetFullDay(bool value) { FullDay = value; ResetDay(); }
     public static IBrush ApplicationBrush(string? key) => ReviewTheme.ApplicationBrush(key);
@@ -98,12 +125,14 @@ public sealed class TimelineControl : Control
         visibleStart = new(Math.Clamp(center.UtcTicks - width / 2, boundsStart.UtcTicks, boundsEnd.UtcTicks - width), TimeSpan.Zero);
         visibleEnd = visibleStart.AddTicks(width); autoViewport = width == total;
         InvalidateVisual(); ViewChanged?.Invoke();
+        RefreshHover();
     }
     private double X(DateTimeOffset at) => LabelWidth + Math.Clamp((at - visibleStart).TotalSeconds / Math.Max(0.000001, (visibleEnd - visibleStart).TotalSeconds), 0, 1) * Math.Max(0, Bounds.Width - LabelWidth);
     private DateTimeOffset TimeAt(double x) => visibleStart.AddTicks((long)(Math.Clamp((x - LabelWidth) / Math.Max(1, Bounds.Width - LabelWidth), 0, 1) * (visibleEnd - visibleStart).Ticks));
     private static int Lane(RecordedInterval interval) => interval.Kind == IntervalKind.TaskTimer ? 2 : interval.Kind is IntervalKind.Usage or IntervalKind.Unrecorded ? 0 : 1;
     private RecordedInterval? Hit(Point point)
     {
+        if (point.X < LabelWidth || point.X >= Bounds.Width || point.Y < 0 || point.Y >= Bounds.Height) return null;
         var at = TimeAt(point.X);
         return intervals.FirstOrDefault(x => x.StartUtc <= at && x.EndUtc > at
             && point.Y >= BarTop + Lane(x) * LaneHeight && point.Y <= BarTop + Lane(x) * LaneHeight + BarHeight);
@@ -123,6 +152,12 @@ public sealed class TimelineControl : Control
         {
             if (interval.EndUtc <= visibleStart || interval.StartUtc >= visibleEnd) continue;
             var rectangle = new Rect(X(interval.StartUtc), BarTop + Lane(interval) * LaneHeight, X(interval.EndUtc) - X(interval.StartUtc), BarHeight);
+            // Decorative insets only: UTC hit testing, selection and duration stay unchanged.
+            // Narrow segments retain at least 60% of their true width; none are expanded.
+            var inset = Math.Min(1, rectangle.Width * 0.2);
+            var left = interval.Kind == IntervalKind.Usage && gapBefore.Contains(interval.Id) && interval.StartUtc > visibleStart ? inset : 0;
+            var right = interval.Kind == IntervalKind.Usage && gapAfter.Contains(interval.Id) && interval.EndUtc < visibleEnd ? inset : 0;
+            rectangle = new Rect(rectangle.X + left, rectangle.Y, rectangle.Width - left - right, rectangle.Height);
             var brush = interval.Kind == IntervalKind.Usage ? ApplicationBrush(interval.AppKey)
                 : interval.Kind == IntervalKind.TaskTimer ? ReviewTheme.Accent : ReviewTheme.Muted;
             using (context.PushOpacity(DisplayText.MatchesSearch(interval, search) ? 0.85 : 0.16))
@@ -159,6 +194,7 @@ public sealed class TimelineControl : Control
         base.OnPointerPressed(e);
         var point = e.GetCurrentPoint(this);
         if (day is null || point.Position.X < LabelWidth) return;
+        HideHover();
         Focus(); dragOrigin = point.Position; dragAt = dragEnd = TimeAt(point.Position.X);
         panning = point.Properties.IsRightButtonPressed;
         panStart = visibleStart; panEnd = visibleEnd; captured = e.Pointer; e.Pointer.Capture(this); e.Handled = true;
@@ -177,7 +213,7 @@ public sealed class TimelineControl : Control
             else { dragEnd = TimeAt(point.X); InvalidateVisual(); }
             e.Handled = true;
         }
-        else ToolTip.SetTip(this, Hit(point) is { } target ? TipText(target) : null);
+        else { hoverPoint = point; RefreshHover(); }
     }
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
@@ -191,6 +227,36 @@ public sealed class TimelineControl : Control
         else if (Hit(point) is { } target) { SelectInterval(target.Id); IntervalSelected?.Invoke(target.Id); }
         InvalidateVisual(); e.Handled = true;
     }
+    private void RefreshHover()
+    {
+        if (hoverPoint is not { } point || dragOrigin is not null || Hit(point) is not { } target)
+        { hoverPopup.IsOpen = false; return; }
+        hoverText.Text = TipText(target);
+        hoverPopup.PlacementRect = new Rect(point, new Size(1, 1));
+        hoverPopup.IsOpen = true;
+    }
+    private void HideHover() { hoverPoint = null; hoverPopup.IsOpen = false; }
+    protected override void OnPointerExited(PointerEventArgs e) { HideHover(); base.OnPointerExited(e); }
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        owner = TopLevel.GetTopLevel(this) as Window;
+        if (owner is not null) { owner.Deactivated += OwnerDeactivated; owner.PropertyChanged += OwnerPropertyChanged; }
+    }
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        HideHover();
+        if (owner is not null) { owner.Deactivated -= OwnerDeactivated; owner.PropertyChanged -= OwnerPropertyChanged; owner = null; }
+        base.OnDetachedFromVisualTree(e);
+    }
+    private void OwnerDeactivated(object? sender, EventArgs e) => HideHover();
+    private void OwnerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    { if (e.Property == IsVisibleProperty && owner?.IsVisible != true) HideHover(); }
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == IsVisibleProperty && !IsVisible) HideHover();
+    }
     private void CancelDrag() { dragOrigin = null; var pointer = captured; captured = null; pointer?.Capture(null); }
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e) { dragOrigin = null; captured = null; base.OnPointerCaptureLost(e); InvalidateVisual(); }
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
@@ -199,6 +265,7 @@ public sealed class TimelineControl : Control
         if (day is null || e.GetPosition(this).X < LabelWidth) return;
         var span = (visibleEnd - visibleStart).Ticks;
         SetViewport(TimeAt(e.GetPosition(this).X), e.Delta.Y > 0 ? span / 2 : span * 2); e.Handled = true;
+        hoverPoint = e.GetPosition(this); RefreshHover();
     }
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -225,6 +292,6 @@ public sealed class TimelineControl : Control
     {
         var selected = intervals.FirstOrDefault(x => x.Id == selectedId);
         AutomationProperties.SetName(this, selected is null ? Localizer.Get("使用时间线。方向键选择，Shift 加方向键选择范围，加减键缩放，Escape 取消范围。") : Localizer.Get("已选：{0}", TipText(selected)));
-        ToolTip.SetTip(this, null); InvalidateVisual();
+        RefreshHover(); InvalidateVisual();
     }
 }
