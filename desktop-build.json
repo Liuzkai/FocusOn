@@ -1,0 +1,115 @@
+{
+  "sourceCommit": "0d6aefa927dfe2543b801f69bf76586592776049",
+  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313",
+  "validationResult": "failure",
+  "jobs": [
+    {
+      "name": "Native linux-arm64",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981471"
+    },
+    {
+      "name": "Native osx-arm64",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981695"
+    },
+    {
+      "name": "Native linux-x64",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981745"
+    },
+    {
+      "name": "Native win-arm64",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981771"
+    },
+    {
+      "name": "Native win-x64",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981801"
+    },
+    {
+      "name": "Native osx-x64",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114694981940"
+    },
+    {
+      "name": "receipt",
+      "status": "in_progress",
+      "conclusion": null,
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38214196313/job/114695683397"
+    }
+  ],
+  "evidence": {
+    "linux-x64": {
+      "verification.json": {
+        "runtime": "linux-x64",
+        "sourceCommit": "0d6aefa927dfe2543b801f69bf76586592776049",
+        "files": 257,
+        "archiveBytes": 47753193,
+        "archiveSha256": "DF96A5447C83B3263B92A93D8A4DF59DE78081F01610178D4012A621DB32A9B5",
+        "nativeFilesChecked": [
+          "FocusOn",
+          "libcoreclr.so",
+          "libe_sqlite3.so",
+          "libSkiaSharp.so"
+        ],
+        "result": "PASS"
+      }
+    },
+    "linux-arm64": {
+      "verification.json": {
+        "runtime": "linux-arm64",
+        "sourceCommit": "0d6aefa927dfe2543b801f69bf76586592776049",
+        "files": 257,
+        "archiveBytes": 45112875,
+        "archiveSha256": "4490AB1FC703B6971818E1BB9A401A0A6867ECBB4845E4D3D9C3B6BBE222018D",
+        "nativeFilesChecked": [
+          "FocusOn",
+          "libcoreclr.so",
+          "libe_sqlite3.so",
+          "libSkiaSharp.so"
+        ],
+        "result": "PASS"
+      }
+    },
+    "win-x64": {
+      "verification.json": {
+        "runtime": "win-x64",
+        "sourceCommit": "0d6aefa927dfe2543b801f69bf76586592776049",
+        "files": 245,
+        "archiveBytes": 49592061,
+        "archiveSha256": "243DAB0AEB2F69B5B205477D1AA86C3613B5C8ED68E89B1EBD81317FFAAD50E1",
+        "nativeFilesChecked": [
+          "FocusOn.exe",
+          "coreclr.dll",
+          "e_sqlite3.dll",
+          "libSkiaSharp.dll"
+        ],
+        "result": "PASS"
+      }
+    },
+    "win-arm64": {
+      "verification.json": {
+        "runtime": "win-arm64",
+        "sourceCommit": "0d6aefa927dfe2543b801f69bf76586592776049",
+        "files": 245,
+        "archiveBytes": 47197646,
+        "archiveSha256": "21A4DAC9DE35432C9148C85EC5F2D23C6BA3E552D0F442AC43191578900320EE",
+        "nativeFilesChecked": [
+          "FocusOn.exe",
+          "coreclr.dll",
+          "e_sqlite3.dll",
+          "libSkiaSharp.dll"
+        ],
+        "result": "PASS"
+      }
+    }
+  }
+}
