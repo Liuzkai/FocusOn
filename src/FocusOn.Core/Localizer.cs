@@ -90,6 +90,7 @@ public static class Localizer
         ["删除操作出现异常：{0}"] = "Deletion failed: {0}", [" · 进行中"] = " · Ongoing",
         ["进行中；尾段可能尚未保存。"] = "Ongoing; the latest segment may not have been saved yet.",
         ["打开时间线"] = "Open timeline", ["退出 FocusOn"] = "Exit FocusOn",
+        ["系统托盘不可用，关闭按钮会保留窗口。记录和计时继续运行；请使用“退出”保存并关闭程序。"] = "The system tray is unavailable, so Close keeps this window open. Recording and timers continue; use Exit to save and quit.",
         ["使用时间线。方向键选择，Shift 加方向键选择范围，加减键缩放，Escape 取消范围。"] =
             "Usage timeline. Arrow keys select; Shift and arrows select a range; plus and minus zoom; Escape clears the range.",
         ["已选：{0}"] = "Selected: {0}", ["使用"] = "Usage", ["计时"] = "Timer",

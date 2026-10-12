@@ -122,3 +122,10 @@ Windows 状态源与手动按钮的真实交互由主代理另行验收；这些
 - 完整 Release：79 passed、0 failed/skipped，构建0警告/错误。TitleTimerTests 11项验证暂停/继续/停止、实时查询不落盘、重开不补算、独立软件汇总、锁屏/睡眠、跨日、删除及重开、重复标题归属、时钟跳变、单活动项、tick分配和真实写锁；TimelineBoundsTests 2项验证记录范围、增长、空数据、短片段和真实日长。
 - 审查发现“删除昨天误暂停今天标题”及“睡眠边界保存失败仍运行”，修复后加入公开会话回归；真实SQLite写锁释放/唤醒后标题保持暂停，不把睡眠补算进去。两轴复核均无遗留。
 - 离屏WPF另验证模式/计时控件/搜索和窄窗口；原生系统通知与真实输入未执行，继续08。
+# 13: Icons, recoverable residency and native release validation (2026-10-12)
+
+- Baseline `12f482c`, implementation commit recorded in ticket 13 after commit. Release build passes with zero warnings/errors; 89 core/platform and 12 UI tests pass, no failures/skips. Two new UI tests exercise same-window close/hide/restore, tray loss fallback, bilingual explanation and explicit close.
+- Linux x64 actual Xvfb: native foreground/title/SQLite and cross-process activation pass. Desktop smoke opens an actual native window and runs the real recording controller, independent timer, preference save and SQLite reopen. No session tray keeps the window visible; an isolated real session D-Bus watcher confirms this process's icon registration, hide/restore, host disappearance and automatic restoration. The timer continues while resident, and explicit exit saves/pauses it and releases the writer lock.
+- Container has no real logind/GNOME/KDE session; those warnings remain truthful. Actual GNOME AppIndicator/KDE menus, sleep, lock/display, Windows Explorer and physical Mac Dock/Accessibility/power checks remain in 08/manual acceptance. Native six-architecture runner outcomes are pending; cross-compiled output is not native validation.
+- Apple secret names are absent in this cloud process; repository Secrets API is network-blocked, so account membership/credentials are not inferred. Developer ID/hardened runtime/notary/staple/Gatekeeper pipeline is configured but not claimed successful. Mac without all credentials produces ad-hoc validation artifacts excluded from Release. New version selection is pending; v0.1.0 tag/attachments and original MIT/third-party notices are preserved.
+

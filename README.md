@@ -1,5 +1,7 @@
 # FocusOn
 
+<img src="src/FocusOn/Assets/focuson.png" width="72" height="72" alt="FocusOn clock icon">
+
 An offline desktop app for **Windows, Linux, and macOS** that records foreground app usage and provides independent titled timers. Records stay on your computer in a local SQLite database.
 
 FocusOn measures how long an app's window stays active, including reading or watching without keyboard input. It does not measure attention or count background apps.
@@ -23,6 +25,7 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 - Manual recording pause and platform session observation for lock, sleep, and display state.
 - Confirmation before deleting a day's records; records on other dates are preserved.
 - Local storage, login startup, and activation of the existing instance when launched again.
+- Close to the system tray / Mac menu bar, with restore and explicit Exit. If Linux has no usable tray, the window stays visible; losing the tray restores a hidden window.
 
 ## Download and run
 
@@ -32,15 +35,17 @@ Download the complete package from [GitHub Releases](https://github.com/Liuzkai/
 | --- | --- | --- |
 | Windows | x64, ARM64 | Extract the complete ZIP and run `FocusOn.exe`. |
 | Linux with glibc | x64, ARM64 | Extract the complete `.tar.gz` and run `./FocusOn` in a graphical desktop session. |
-| macOS 15+ | Intel x64, Apple Silicon ARM64 | Move the complete `FocusOn.app` to a stable location, then open it. |
+| macOS 15+ | Intel x64, Apple Silicon ARM64 | Extract the ZIP and move the complete `FocusOn.app` to `/Applications`. Availability and trust status are recorded per build. |
 
 Packages listed here describe the supported build targets. Availability depends on the assets attached to each release. Linux assets appended to the existing Windows `v0.1.0` release use the cross-platform source commit recorded in their `manifest.json` and release notes; the original Windows tag and assets remain unchanged.
 
 Linux X11 foreground capture requires a desktop session with X11 and systemd-logind. Debian/Ubuntu graphical dependencies commonly include `libx11-6 libxext6 libice6 libsm6 libfontconfig1 libgl1`. GNOME Wayland requires the bundled extension in `gnome/focuson@focuson.local/`; see the [platform guide](docs/platforms.md) for installation. Other Wayland desktops can use history and titled timers, but foreground capture is unavailable.
 
-macOS requires permission in **System Settings → Privacy & Security → Accessibility**, followed by a restart. Screen Recording permission is not requested. Native macOS packaging uses ad-hoc signing; developer signing and notarization are not included.
+macOS requires permission in **System Settings → Privacy & Security → Accessibility**, followed by a restart. Screen Recording permission is not requested. The native backend uses NSWorkspace, Accessibility, IOKit power notifications and CoreGraphics session/display queries. History and independent timers remain available when foreground permission is denied. See the [Mac installation, permissions and signing guide](docs/macos.md).
 
-An ordinary first launch registers login startup for the current user. Closing the window keeps recording: Windows/macOS use the tray or menu bar; Linux keeps a minimized taskbar entry. Choose **Exit** in the window or tray to save and stop the process.
+An ordinary first launch registers login startup for the current user. Closing the window keeps recording and timers alive. Restore it from the tray/menu bar, the Mac Dock, or by launching the same data directory again. Choose **Exit FocusOn** in the tray/menu bar, **Exit** in the window, or native Mac **Quit** to save and stop. Only one writer and tray icon are created per data directory.
+
+Linux uses StatusNotifierItem. GNOME requires a tray host such as an AppIndicator extension, independently of the foreground capture extension. Without a confirmed host and registered icon, Close keeps the window visible with an explanation; it also reappears if the host disappears. Legacy XEmbed alone is unsupported by the current Avalonia backend. Run `python3 install-desktop.py` from a fixed extracted package location to register the supplied icons and application-menu entry for your user.
 
 For detailed operation and platform requirements, see the [usage guide](docs/usage.md), [platform guide](docs/platforms.md), and [manual acceptance checklist](docs/manual-acceptance.md). These supporting documents currently use Chinese.
 
@@ -94,7 +99,13 @@ For uncommitted development checks, use `./build.sh package-check <runtime>` or 
 
 ## GitHub release automation
 
-The Windows release workflow builds, tests, packages, and verifies version tags before creating a release draft. The Linux release workflow builds and verifies x64/ARM64 packages, then appends them to the selected existing release without replacing Windows assets. It uses GitHub's built-in workflow token, without requiring a personal token for uploading release assets.
+The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-hosted public-repository runners: Windows x64/ARM64, Ubuntu x64/ARM64, Intel Mac and Apple Silicon. It restores locked dependencies, runs regressions and native desktop checks, then verifies self-contained archives, icons and SHA256. Its **Actions artifacts expire after seven days**; they are validation downloads, not Release attachments. Mac builds without Apple credentials are ad-hoc validation bundles and are not formally ready.
+
+The [desktop release workflow](.github/workflows/release.yml) accepts an explicit version tag or manual dispatch with an existing tag. Build/test/package verification must all succeed before it uploads anything. The tag, application version and every attached package source must agree. Releases stay **drafts**, and assets are never silently overwritten. Ordinary code pushes do not publish releases. See [release instructions](docs/releases.md) for exact steps, runner scope and Apple Secrets.
+
+The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version is proposed as `v0.1.1`; no old tag is rewritten.
+
+Developer ID signing, hardened runtime, minimal .NET JIT entitlements, Apple notarization, app stapling and Gatekeeper checks are configured for native Mac runners. They require an existing Apple Developer Program membership and securely configured Actions Secrets. Missing credentials exclude Mac assets from Release uploads. Successful signing and notarization still require physical desktop, Accessibility and power acceptance; see [Mac validation](docs/macos.md).
 
 Linux release notes record the exact source commit and validation scope. Cross-compilation and automated tests do not replace real-device checks for permissions, sleep, lock, tray behavior, DPI, or ARM64 startup.
 

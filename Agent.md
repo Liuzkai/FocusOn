@@ -125,7 +125,9 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 12 票（2026-10-12）：**Linux x64/ARM64 已追加并公开发布 [v0.1.0](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.0)，Linux 源 409cb51、run 38203441571 成功；旧 Windows 附件/标签保持。99 项回归（89 核心/平台、10 UI）、真实 X11、两语窗口与偏好重启通过；公开下载后的 244 文件/归档/架构/权限再次核验及公开包实际计时保存通过。英文 README、双语源码已推送。About 真正更新被 GitHub 403 管理权限拒绝，已准备 `.github/about.json` 和独立 About 工作流并请求用户安全配置 ABOUT_TOKEN；12 保持 needs-info，只剩此权限依赖。详细链接/哈希见 delivery.md，硬件验收仍保持开放。
+**最新 13 票（2026-10-12）：**继续同一项目，接入三平台正式图标、Mac 模板菜单栏与窗口恢复、Linux StatusNotifier 注册确认/无宿主保留窗口/宿主消失恢复，明确退出保持保存和资源清理。101 回归（89 核心/平台 + 12 UI）与本地真实 X11、无托盘及隔离真实 D-Bus 托盘宿主/消失验证通过。六架构原生标准 runner、七天 Actions 产物、手动/版本标签草稿与 Apple Secrets 签名公证流程已配置；当前 Mac 签名公证与物理设备验收未执行，新 v0.1.1 草稿方案待用户选择，不改写 v0.1.0。以 13 票、docs/releases.md、docs/macos.md 和最新验收记录为准。
+
+**最新 12 票（2026-10-12）：**Linux x64/ARM64 已追加并公开发布 [v0.1.0](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.0)，Linux 源 409cb51、run 38203441571 成功；旧 Windows 附件/标签保持。99 项回归（89 核心/平台、10 UI）、真实 X11、两语窗口与偏好重启通过；公开下载后的 244 文件/归档/架构/权限再次核验及公开包实际计时保存通过。英文 README、双语源码已推送。About 更新曾被 GitHub 403 拒绝，用户现已选择手动填写，12 改为 ready-for-human，仅外部 About 交用户，不再请求 ABOUT_TOKEN。详细链接/哈希见 delivery.md，硬件验收仍开放。
 
 **最新 11 票（2026-10-11）：**用户扩展全平台；统一 Avalonia 界面及 Windows/Linux/macOS 平台层已接入，无桌面依赖核心保留旧库兼容。87 项核心/平台及 7 项界面测试通过；真实虚拟 X11 窗口/标题/SQLite 与跨进程单实例验证通过，Linux 桌面按钮输入与保存验证通过。六架构开发验证产物在 `artifacts/validation/`。当前验证与剩余限制以 11 票及 tests/FocusOn.Tests/Verification.md 跨平台章节为准；下列 Windows 版本结果为历史证据。工作区未提交，原生 Windows/macOS/GNOME 与电源、DPI 等待人工验收。
 

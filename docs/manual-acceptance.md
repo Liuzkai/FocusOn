@@ -197,6 +197,8 @@ New-Item -ItemType Directory -Path $testData -Force | Out-Null
 
 ## 11 跨平台补充（2026-10-11）
 
+13 票新增人工项：Windows 托盘隐藏/恢复/明确退出及 Explorer 重启；GNOME AppIndicator/KDE 的实际 StatusNotifier 图标、菜单和宿主卸载/重启恢复；无托盘关闭保持窗口；Mac Dock Reopen/菜单栏/原生 Quit/LaunchAgent，以及固定签名 app 的 TCC 授权和撤销。原生 runner/隔离协议宿主结果不能代替这些物理桌面项。Mac 公证/签名见 docs/macos.md，缺凭据不能标记通过。
+
 以下分项需要对应真实桌面，当前 Linux 云容器的 Xvfb 和自动化通过不替代它们。每项注明 OS/桌面版本、架构、源版本、数据目录和结果。11 票仍待这些验收，不关闭整体规格。
 
 - [ ] Windows x64/ARM64：使用新的 Avalonia 包与隔离目录，重做 W01–W10；核对 WinEvent 前台/标题、WTS 锁屏、睡眠、会话灭屏、托盘与登录自启。先退出旧 WPF 版，再验证原数据目录升级兼容。

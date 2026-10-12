@@ -14,9 +14,9 @@
 
 - Windows：完整解压 `FocusOn-win-x64.zip` 或 `FocusOn-win-arm64.zip`，将文件夹放在固定位置，运行 `FocusOn.exe`。
 - Linux：解压对应 `.tar.gz`，在图形桌面运行文件夹中的 `./FocusOn`。压缩包保留执行权限；若文件由其他方式复制失去权限，运行 `chmod +x FocusOn`。Debian/Ubuntu 常用图形依赖为 `libx11-6 libxext6 libice6 libsm6 libfontconfig1 libgl1`；会话检查使用 `loginctl`、`busctl`（systemd 提供）。
-- macOS：解压对应 `.tar.gz`，将完整 `FocusOn.app` 移至 `/Applications` 或其他固定目录，双击启动。在「系统设置 → 隐私与安全性 → 辅助功能」允许 FocusOn，然后重新启动。程序不申请屏幕录制权限。原生 macOS 发布会执行并验证 ad-hoc 签名；跨平台构建不包含开发者签名或公证，系统阻止首次打开时按 macOS 的「打开」流程处理，不关闭系统安全设置。
+- macOS：新版本使用 ZIP，完整 `FocusOn.app` 移至 `/Applications` 或其他固定目录；授予辅助功能权限后重启，不申请屏幕录制权限。原生 runner 验证和 Developer ID／hardened runtime／公证／stapling 流程见 [Mac guide](macos.md)。缺少 Apple 凭据时仅产出 ad-hoc 待验证 Actions 产物，不作为正式 Mac Release 附件，不关闭系统安全设置。
 
-Windows/macOS 关闭窗口隐藏到托盘或菜单栏。Linux 关闭窗口保留最小化的任务栏入口以便没有托盘宿主的桌面恢复；采集和计时继续。所有平台也可再次启动程序唤回同数据目录实例，或在窗口/托盘明确「退出」保存并结束进程。
+三平台确认托盘/菜单栏可用后，关闭窗口隐藏并继续采集和计时。Linux 检查 StatusNotifier 宿主及本进程图标注册；没有可用托盘时保留可见窗口和双语说明，宿主消失后自动恢复隐藏窗口。当前 Avalonia 不实现旧 XEmbed 托盘；GNOME 的 AppIndicator 托盘宿主与下面的前台采集扩展是独立依赖。所有平台可再次启动唤回同目录实例，Mac 还支持 Dock Reopen；明确「退出」或原生 Mac Quit 保存并清理。固定 Linux 包可运行 `python3 install-desktop.py` 安装图标和当前用户桌面入口。
 
 ## GNOME Wayland 前台授权
 

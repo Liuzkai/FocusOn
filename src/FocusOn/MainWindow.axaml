@@ -29,6 +29,7 @@
         </ComboBox>
       </Grid>
       <TextBlock x:Name="TimerErrorText" Foreground="{DynamicResource ReviewWarningText}" TextWrapping="Wrap" />
+      <TextBlock x:Name="ResidencyText" Foreground="{DynamicResource ReviewMuted}" TextWrapping="Wrap" IsVisible="False" />
       <Border x:Name="WarningPanel" Background="{DynamicResource ReviewWarningBackground}" Padding="10" CornerRadius="5" IsVisible="False">
         <TextBlock x:Name="WarningText" TextWrapping="Wrap" Foreground="{DynamicResource ReviewWarningText}" />
       </Border>

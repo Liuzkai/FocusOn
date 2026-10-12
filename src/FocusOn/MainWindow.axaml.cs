@@ -93,6 +93,13 @@ public partial class MainWindow : Window
     public event Action? LanguageChanged;
     public void SetPauseState(bool paused) { manualPaused = paused; PauseButton.Content = Localizer.Get(paused ? "继续记录" : "暂停记录"); }
     public void StopRefresh() { stopped = true; refreshTimer.Stop(); }
+    private bool trayAvailable = true;
+    public void SetTrayAvailable(bool available)
+    {
+        trayAvailable = available;
+        ResidencyText.IsVisible = !available;
+        ResidencyText.Text = Localizer.Get("系统托盘不可用，关闭按钮会保留窗口。记录和计时继续运行；请使用“退出”保存并关闭程序。");
+    }
     public async Task StartRefreshAsync()
     {
         if (started || stopped) return;
@@ -226,6 +233,7 @@ public partial class MainWindow : Window
 
     private void ApplyLanguage()
     {
+        SetTrayAvailable(trayAvailable);
         applyingLanguage = true;
         try
         {

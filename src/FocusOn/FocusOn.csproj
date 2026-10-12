@@ -7,6 +7,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>FocusOn</AssemblyName>
     <RootNamespace>FocusOn</RootNamespace>
+    <ApplicationIcon>Assets/focuson.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.22" />
@@ -16,6 +17,6 @@
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.13" />
     <ProjectReference Include="../FocusOn.Core/FocusOn.Core.csproj" />
     <ProjectReference Include="../FocusOn.Platforms/FocusOn.Platforms.csproj" />
-    <AvaloniaResource Include="Assets/**" />
+    <AvaloniaResource Include="Assets/focuson.png;Assets/focuson-tray.png;Assets/focuson-template.png" />
   </ItemGroup>
 </Project>

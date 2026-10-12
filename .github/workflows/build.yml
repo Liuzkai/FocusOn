@@ -1,65 +1,144 @@
 name: Desktop build and regression
 on:
   push:
+    branches: [main, codex/desktop-icons]
   pull_request:
   workflow_dispatch:
+    inputs:
+      sign_mac:
+        description: Sign and notarize Mac validation bundles if all Apple Secrets exist
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      source_ref:
+        type: string
+        required: true
+      sign_mac:
+        type: boolean
+        default: false
 permissions:
   contents: read
+concurrency:
+  group: desktop-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.401
-      - name: Build and test
-        shell: pwsh
-        run: |
-          ./build.ps1 build
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ./build.ps1 test
-          exit $LASTEXITCODE
-      - name: Native X11 and process activation
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libx11-6 libxext6
-          xvfb-run -a ./build.sh smoke
-  package:
-    needs: test
+  validate:
+    name: Native ${{ matrix.runtime }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
             runtime: win-x64
-          - os: windows-latest
+          - os: windows-11-arm
             runtime: win-arm64
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             runtime: linux-x64
-          - os: ubuntu-latest
+          - os: ubuntu-24.04-arm
             runtime: linux-arm64
-          - os: macos-latest
+          - os: macos-15-intel
             runtime: osx-x64
-          - os: macos-latest
+          - os: macos-15
             runtime: osx-arm64
     runs-on: ${{ matrix.os }}
+    env:
+      RUNTIME: ${{ matrix.runtime }}
+      APPLE_CREDENTIALS_CONFIGURED: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 != '' && secrets.MACOS_CERTIFICATE_PASSWORD != '' && secrets.MACOS_SIGNING_IDENTITY != '' && secrets.APPLE_TEAM_ID != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.APPLE_API_PRIVATE_KEY != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          dotnet-version: 10.0.401
-      - name: Package clean source
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      - name: Locked build and regressions
         shell: pwsh
         run: |
-          ./build.ps1 publish -Runtime '${{ matrix.runtime }}'
+          ./build.ps1 build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build.ps1 test
           exit $LASTEXITCODE
-      - uses: actions/upload-artifact@v4
+      - name: Native desktop on Windows or Mac
+        if: runner.os != 'Linux'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force "artifacts/evidence/$env:RUNTIME" | Out-Null
+          ./build.ps1 desktop-smoke 2>&1 | Tee-Object "artifacts/evidence/$env:RUNTIME/native-desktop.log"
+          exit $LASTEXITCODE
+      - name: Native X11, residency and StatusNotifier host loss
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libx11-6 libxext6 libfontconfig1 libgl1 python3-dbus python3-gi
+          mkdir -p "artifacts/evidence/$RUNTIME"
+          xvfb-run -a ./build.sh smoke | tee "artifacts/evidence/$RUNTIME/native-x11.log"
+          dbus-run-session -- xvfb-run -a ./build.sh desktop-smoke | tee "artifacts/evidence/$RUNTIME/no-tray.log"
+          dbus-run-session -- xvfb-run -a /usr/bin/python3 scripts/linux_tray_smoke.py | tee "artifacts/evidence/$RUNTIME/tray-host-loss.log"
+      - name: Publish self-contained package from clean source
+        shell: pwsh
+        env:
+          FOCUSON_MAC_SIGN: ${{ inputs.sign_mac && github.event_name != 'pull_request' && 'developer-id' || 'validation' }}
+          MACOS_CERTIFICATE_P12_BASE64: ${{ github.event_name != 'pull_request' && secrets.MACOS_CERTIFICATE_P12_BASE64 || '' }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ github.event_name != 'pull_request' && secrets.MACOS_CERTIFICATE_PASSWORD || '' }}
+          MACOS_SIGNING_IDENTITY: ${{ github.event_name != 'pull_request' && secrets.MACOS_SIGNING_IDENTITY || '' }}
+          APPLE_TEAM_ID: ${{ github.event_name != 'pull_request' && secrets.APPLE_TEAM_ID || '' }}
+          APPLE_API_KEY_ID: ${{ github.event_name != 'pull_request' && secrets.APPLE_API_KEY_ID || '' }}
+          APPLE_API_ISSUER_ID: ${{ github.event_name != 'pull_request' && secrets.APPLE_API_ISSUER_ID || '' }}
+          APPLE_API_PRIVATE_KEY: ${{ github.event_name != 'pull_request' && secrets.APPLE_API_PRIVATE_KEY || '' }}
+        run: |
+          if ($IsMacOS -and $env:APPLE_CREDENTIALS_CONFIGURED -ne 'true') { $env:FOCUSON_MAC_SIGN = 'validation' }
+          ./build.ps1 publish -Runtime $env:RUNTIME
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/verify_delivery.py $env:RUNTIME
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force "artifacts/evidence/$env:RUNTIME" | Out-Null
+          Copy-Item "artifacts/delivery-verification-$env:RUNTIME.json" "artifacts/evidence/$env:RUNTIME/verification.json"
+          Copy-Item "artifacts/release/FocusOn-$env:RUNTIME/manifest.json" "artifacts/evidence/$env:RUNTIME/manifest.json"
+          if ($IsMacOS) {
+            Copy-Item "artifacts/release/FocusOn-$env:RUNTIME/mac-signing.json" "artifacts/evidence/$env:RUNTIME/mac-signing.json"
+            python scripts/check_packaged_macos.py $env:RUNTIME
+            exit $LASTEXITCODE
+          }
+      - name: Seven-day validation archives (not Release attachments)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: FocusOn-${{ matrix.runtime }}
-          path: artifacts/release/*
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            artifacts/release/FocusOn-${{ matrix.runtime }}.zip*
+            artifacts/release/FocusOn-${{ matrix.runtime }}.tar.gz*
+      - name: Validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: evidence-${{ matrix.runtime }}
+          retention-days: 7
+          path: artifacts/evidence/${{ matrix.runtime }}
+  receipt:
+    needs: validate
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: evidence-*
+          path: artifacts/evidence
+      - name: Record results for Git-only clients
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          VALIDATION_RESULT: ${{ needs.validate.result }}
+        run: python3 scripts/write_desktop_report.py

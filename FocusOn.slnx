@@ -5,5 +5,6 @@
   <Project Path="tests/FocusOn.Tests/FocusOn.Tests.csproj" />
   <Project Path="tests/FocusOn.UiTests/FocusOn.UiTests.csproj" />
   <Project Path="tests/FocusOn.NativeSmoke/FocusOn.NativeSmoke.csproj" />
+  <Project Path="tests/FocusOn.DesktopSmoke/FocusOn.DesktopSmoke.csproj" />
   <Project Path="tools/FocusOn.Build/FocusOn.Build.csproj" />
 </Solution>

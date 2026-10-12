@@ -3,7 +3,6 @@ using System.Formats.Tar;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 try
@@ -22,6 +21,7 @@ try
             Run(sdk, "test", "tests/FocusOn.UiTests/FocusOn.UiTests.csproj", "-c", "Release", "--nologo");
             break;
         case "smoke": Run(sdk, "run", "--project", "tests/FocusOn.NativeSmoke/FocusOn.NativeSmoke.csproj", "-c", "Release"); break;
+        case "desktop-smoke": Run(sdk, "run", "--project", "tests/FocusOn.DesktopSmoke/FocusOn.DesktopSmoke.csproj", "-c", "Release"); break;
         case "publish": case "package-check":
             if (!new[] { "win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64" }.Contains(runtime))
                 throw new ArgumentException("Runtime must be win-x64, win-arm64, linux-x64, linux-arm64, osx-x64 or osx-arm64.");
@@ -57,7 +57,8 @@ try
                 {
                     var contents = Path.GetDirectoryName(destination)!;
                     Directory.CreateDirectory(Path.Combine(contents, "Resources"));
-                    File.WriteAllText(Path.Combine(contents, "Info.plist"), """
+                    var version = System.Xml.Linq.XDocument.Load(Path.Combine(root, "Directory.Build.props")).Descendants("Version").Single().Value.Split('-')[0];
+                    File.WriteAllText(Path.Combine(contents, "Info.plist"), $$"""
                         <?xml version="1.0" encoding="UTF-8"?>
                         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
                         <plist version="1.0"><dict>
@@ -66,30 +67,34 @@ try
                         <key>CFBundleName</key><string>FocusOn</string>
                         <key>CFBundleDisplayName</key><string>FocusOn</string>
                         <key>CFBundlePackageType</key><string>APPL</string>
-                        <key>CFBundleVersion</key><string>1.0.0</string>
-                        <key>CFBundleShortVersionString</key><string>1.0.0</string>
+                        <key>CFBundleVersion</key><string>{{version}}</string>
+                        <key>CFBundleShortVersionString</key><string>{{version}}</string>
                         <key>LSMinimumSystemVersion</key><string>15.0</string>
                         <key>NSHighResolutionCapable</key><true/>
                         <key>CFBundleIconFile</key><string>focuson.icns</string>
                         </dict></plist>
                         """);
-                    var png = File.ReadAllBytes(Path.Combine(root, "src", "FocusOn", "Assets", "focuson.png"));
-                    using var icon = File.Create(Path.Combine(contents, "Resources", "focuson.icns"));
-                    icon.Write(Encoding.ASCII.GetBytes("icns")); WriteBigEndian(icon, png.Length + 16);
-                    icon.Write(Encoding.ASCII.GetBytes("icp6")); WriteBigEndian(icon, png.Length + 8); icon.Write(png);
-                    icon.Close();
+                    File.Copy(Path.Combine(root, "src", "FocusOn", "Assets", "focuson.icns"), Path.Combine(contents, "Resources", "focuson.icns"));
                     if (OperatingSystem.IsMacOS())
                     {
-                        Run("codesign", "--force", "--deep", "--sign", "-", Path.Combine(staging, "FocusOn.app"));
-                        Run("codesign", "--verify", "--deep", "--strict", Path.Combine(staging, "FocusOn.app"));
+                        Run("python3", Path.Combine(root, "scripts", "sign_macos.py"), Path.Combine(staging, "FocusOn.app"));
                     }
+                    else File.WriteAllText(Path.Combine(staging, "mac-signing.json"), "{\"status\":\"cross-compiled-unverified\",\"notarized\":false,\"stapled\":false,\"formalReady\":false}");
                 }
                 File.Copy(Path.Combine(root, "docs", "usage.md"), Path.Combine(staging, "使用说明.md"));
                 File.Copy(Path.Combine(root, "docs", "platforms.md"), Path.Combine(staging, "平台说明.md"));
                 File.Copy(Path.Combine(root, "README.md"), Path.Combine(staging, "README.md"));
                 File.Copy(Path.Combine(root, "LICENSE"), Path.Combine(staging, "LICENSE"));
                 CopyDirectory(Path.Combine(root, "docs", "licenses"), Path.Combine(staging, "licenses"));
-                if (runtime.StartsWith("linux-")) CopyDirectory(Path.Combine(root, "platforms", "gnome"), Path.Combine(staging, "gnome"));
+                Directory.CreateDirectory(Path.Combine(staging, "docs"));
+                File.Copy(Path.Combine(root, "docs", "macos.md"), Path.Combine(staging, "docs", "macos.md"));
+                File.Copy(Path.Combine(root, "docs", "releases.md"), Path.Combine(staging, "docs", "releases.md"));
+                if (runtime.StartsWith("linux-"))
+                {
+                    CopyDirectory(Path.Combine(root, "platforms", "gnome"), Path.Combine(staging, "gnome"));
+                    CopyDirectory(Path.Combine(root, "platforms", "linux"), staging);
+                    CopyDirectory(Path.Combine(root, "src", "FocusOn", "Assets", "hicolor"), Path.Combine(staging, "icons", "hicolor"));
+                }
                 var records = Directory.EnumerateFiles(staging, "*", SearchOption.AllDirectories).OrderBy(x => x, StringComparer.Ordinal).Select(path => new
                 {
                     path = Path.GetRelativePath(staging, path).Replace('\\', '/'), bytes = new FileInfo(path).Length,
@@ -100,9 +105,10 @@ try
                 File.WriteAllText(Path.Combine(staging, "manifest.json"), JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
                 if (Directory.Exists(package)) Directory.Delete(package, true);
                 Directory.Move(staging, package);
-                var archive = package + (runtime.StartsWith("win-") ? ".zip" : ".tar.gz");
+                var archive = package + (runtime.StartsWith("win-") || runtime.StartsWith("osx-") ? ".zip" : ".tar.gz");
                 if (File.Exists(archive)) File.Delete(archive);
-                if (runtime.StartsWith("win-")) ZipFile.CreateFromDirectory(package, archive, CompressionLevel.Optimal, includeBaseDirectory: true);
+                if (runtime.StartsWith("osx-") && OperatingSystem.IsMacOS()) Run("ditto", "-c", "-k", "--keepParent", package, archive);
+                else if (runtime.StartsWith("win-") || runtime.StartsWith("osx-")) ZipFile.CreateFromDirectory(package, archive, CompressionLevel.Optimal, includeBaseDirectory: true);
                 else
                 {
                     using var output = File.Create(archive); using var gzip = new GZipStream(output, CompressionLevel.Optimal);
@@ -135,10 +141,6 @@ static ProcessStartInfo Start(string command, string[] arguments)
 {
     var start = new ProcessStartInfo(command) { UseShellExecute = false };
     foreach (var argument in arguments) start.ArgumentList.Add(argument); return start;
-}
-static void WriteBigEndian(Stream stream, int value)
-{
-    Span<byte> bytes = stackalloc byte[4]; System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(bytes, value); stream.Write(bytes);
 }
 static void CopyDirectory(string source, string destination)
 {

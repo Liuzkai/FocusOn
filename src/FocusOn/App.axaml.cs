@@ -13,6 +13,8 @@ public partial class App : Application
     private RecordingController? controller;
     private SingleInstance? singleInstance;
     private TrayController? tray;
+    private WindowResidency? residency;
+    private IActivatableLifetime? activation;
     private MainWindow? window;
     private IClassicDesktopStyleApplicationLifetime? desktop;
     private readonly DispatcherTimer checkpoint = new() { Interval = TimeSpan.FromSeconds(5) };
@@ -28,6 +30,8 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
         if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime lifetime) return;
         desktop = lifetime; desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        activation = this.TryGetFeature<IActivatableLifetime>();
+        if (activation is not null) activation.Activated += OnActivated;
         desktop.ShutdownRequested += async (_, e) => { if (exiting) return; e.Cancel = true; await ExitAsync(); };
         _ = StartAsync(lifetime.Args ?? []);
     }
@@ -49,14 +53,11 @@ public partial class App : Application
             window.PauseRequested += async (_, _) => await SetPausedAsync(!controller.ManualPaused);
             window.ExitRequested += async (_, _) => await ExitAsync();
             window.DayRefreshed += view => tray?.Update(view.Status, controller.ManualPaused);
-            window.Closing += (_, e) =>
-            {
-                if (exiting) return;
-                e.Cancel = true;
-                if (OperatingSystem.IsLinux()) window.WindowState = WindowState.Minimized;
-                else window.Hide();
-            };
+            residency = new WindowResidency(window, window.SetTrayAvailable);
             tray = new TrayController(ShowMainWindow, () => _ = SetPausedAsync(true), () => _ = SetPausedAsync(false), () => _ = ExitAsync());
+            tray.AvailabilityChanged += residency.SetTrayAvailable;
+            await tray.CheckAvailabilityAsync();
+            residency.SetTrayAvailable(tray.IsAvailable);
             await controller.StartAsync();
             checkpoint.Tick += (_, _) => controller.Poll(); checkpoint.Start();
             if (!isolated && !startup)
@@ -65,10 +66,7 @@ public partial class App : Application
                 catch (Exception error) { window.Show(); await MessageDialog.ShowAsync(window, "记录已启动，但未能设置登录自启：" + error.Message); }
             }
             await window.StartRefreshAsync();
-            if (startup && !pendingOpen)
-            {
-                if (OperatingSystem.IsLinux()) { window.WindowState = WindowState.Minimized; window.Show(); }
-            }
+            if (startup && !pendingOpen && tray.IsAvailable) window.Hide();
             else ShowMainWindow();
         }
         catch (Exception error)
@@ -80,11 +78,18 @@ public partial class App : Application
         }
     }
 
+    private void OnActivated(object? sender, ActivatedEventArgs args)
+    {
+        if (args.Kind == ActivationKind.Reopen) ShowMainWindow();
+    }
+
     private void ShowMainWindow()
     {
         if (exiting) return;
         if (window is null) { pendingOpen = true; return; }
-        pendingOpen = false; window.Show(); window.WindowState = WindowState.Normal; window.Activate();
+        pendingOpen = false; activation?.TryLeaveBackground();
+        if (residency is not null) residency.Restore();
+        else { window.Show(); window.WindowState = WindowState.Normal; window.Activate(); }
     }
     private async Task SetPausedAsync(bool paused)
     {
@@ -95,9 +100,13 @@ public partial class App : Application
     private async Task ExitAsync()
     {
         if (exiting) return;
-        exiting = true; checkpoint.Stop(); window?.StopRefresh();
+        exiting = true; residency?.BeginExit(); checkpoint.Stop(); window?.StopRefresh();
         try { if (controller is not null) await controller.DisposeAsync(); }
         catch (Exception error) { if (window is not null) { window.Show(); await MessageDialog.ShowAsync(window, "退出前记录未能可靠保存：" + error.Message); } }
-        tray?.Dispose(); singleInstance?.Dispose(); desktop?.Shutdown();
+        finally
+        {
+            if (activation is not null) activation.Activated -= OnActivated;
+            tray?.Dispose(); residency?.Dispose(); singleInstance?.Dispose(); desktop?.Shutdown();
+        }
     }
 }

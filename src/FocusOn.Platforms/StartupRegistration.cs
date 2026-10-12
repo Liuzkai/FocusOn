@@ -51,11 +51,12 @@ public static class StartupRegistration
         return command;
     }
 
-    public static string LinuxDesktopEntry(string path)
+    public static string LinuxDesktopEntry(string path, bool startup = true)
     {
         ValidateUnixExecutable(path);
         var escaped = path.Replace("\\", "\\\\\\\\").Replace("\"", "\\\\\"").Replace("`", "\\\\`").Replace("$", "\\\\$").Replace("%", "%%");
-        return $"[Desktop Entry]\nType=Application\nName=FocusOn\nExec=\"{escaped}\" --startup\nTerminal=false\nX-GNOME-Autostart-enabled=true\n";
+        var icon = Path.Combine(Path.GetDirectoryName(path)!, "icons", "hicolor", "256x256", "apps", "focuson.png").Replace("\\", "\\\\");
+        return $"[Desktop Entry]\nType=Application\nName=FocusOn\nComment=Offline foreground app usage and titled timers\nExec=\"{escaped}\"{(startup ? " --startup" : string.Empty)}\nIcon={icon}\nTerminal=false\nCategories=Utility;Office;\nStartupWMClass=FocusOn\n" + (startup ? "X-GNOME-Autostart-enabled=true\n" : string.Empty);
     }
 
     public static string MacLaunchAgent(string path)

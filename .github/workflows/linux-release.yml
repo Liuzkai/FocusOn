@@ -1,8 +1,6 @@
 name: Linux Release
 
 on:
-  push:
-    branches: [codex/linux-release]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -10,8 +8,9 @@ on:
         required: true
         default: v0.1.0
       source_ref:
-        description: Committed cross-platform source ref (empty uses the selected workflow ref)
+        description: Historical v0.1.0 Linux source (new versions use the desktop draft workflow)
         required: false
+        default: 409cb51ed57f79637cfbca6691480aa5bb6a3a69
 
 permissions:
   contents: read
@@ -27,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ inputs.source_ref || github.sha }}
+          ref: ${{ inputs.source_ref || '409cb51ed57f79637cfbca6691480aa5bb6a3a69' }}
           persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
@@ -72,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ inputs.source_ref || github.sha }}
+          ref: ${{ inputs.source_ref || '409cb51ed57f79637cfbca6691480aa5bb6a3a69' }}
           persist-credentials: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         if: needs.package.result == 'success'
@@ -84,11 +83,6 @@ jobs:
         run: chmod +x artifacts/release/FocusOn-linux-*/FocusOn
       - name: Append verified Linux assets and publish existing release
         run: python3 scripts/publish_linux_release.py
-      - name: Apply English About metadata when permitted
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.ABOUT_TOKEN || github.token }}
-        run: python3 scripts/update_repository_about.py
       - name: Save publication receipt for Git-only clients
         if: always()
         run: python3 scripts/write_release_report.py

@@ -4,7 +4,7 @@
 
 **Blocked by:** None
 
-**Status:** needs-info
+**Status:** ready-for-human
 
 ## Acceptance criteria
 
@@ -16,6 +16,8 @@
 - 回归、两种语言的真实窗口与持久偏好验证完成；外部发布/设置的权限限制与未执行设备验收如实记录。
 
 ## Comments
+
+- 2026-10-12: User chose to fill About manually. The remaining external metadata action is user-owned; do not request ABOUT_TOKEN again. Linux release, English README and saved bilingual interface are complete as recorded below. About has not been changed by this agent.
 
 - 2026-10-12：用户明确选择追加现有 v0.1.0。远端 Windows 发布提交 43d6dfd 和记录 6095dbb 已合并，跨平台代码提交 2321305，合并提交 48264ea。本环境 GitHub API 返回 Forbidden，Git HTTPS 读写可用；将使用仓库 Actions 的内置令牌执行发布。About 设置需要仓库管理权限，不能用配置文件存在代替实际设置成功。
 - 2026-10-12：英文 README、集中显示翻译、首行语言选择、数据目录内偏好与错误回滚已实现；89 核心/平台 + 10 UI 回归通过，真实 X11 smoke 与中英文窗口/退出重启偏好验证通过。README 已使用新的实际英文截图，并链接中文版本。Linux 发布工作流及 About 元数据已准备，actionlint 与 Python 语法通过；外部上传/设置结果待回读。

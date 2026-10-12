@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=FocusOn
+Comment=Offline foreground app usage and titled timers
+Exec=FocusOn
+Icon=focuson
+Terminal=false
+Categories=Utility;Office;
+StartupWMClass=FocusOn

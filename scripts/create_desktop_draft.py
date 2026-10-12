@@ -1,0 +1,101 @@
+"""Create a draft only after native validation; never clobber any release asset."""
+import hashlib
+import json
+import os
+import pathlib
+import re
+import stat
+import subprocess
+import tarfile
+import tempfile
+import zipfile
+from github_api import api, error_summary
+
+root = pathlib.Path(__file__).resolve().parent.parent
+repo, tag = os.environ['GH_REPO'], os.environ['RELEASE_TAG']
+assert repo == 'Liuzkai/FocusOn' and tag != 'v0.1.0'
+assert re.fullmatch(r'v\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?', tag)
+source = subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+reference = api(f'repos/{repo}/git/ref/tags/{tag}')['object']
+while reference['type'] == 'tag': reference = api(f'repos/{repo}/git/tags/{reference["sha"]}')['object']
+assert reference['type'] == 'commit' and reference['sha'] == source, 'Tag must point to every package source'
+report = {'sourceCommit':source,'releaseTag':tag,'status':'failed','macExcluded':[]}
+result_path = root / 'artifacts/desktop-release-result.json'
+
+def find(tag_name):
+    for page in range(1, 11):
+        releases = api(f'repos/{repo}/releases?per_page=100&page={page}')
+        for release in releases:
+            if release['tag_name'] == tag_name: return release
+        if len(releases) < 100: return None
+    raise RuntimeError('Release pagination limit reached')
+
+def snapshot(release):
+    return {a['name']:{k:a.get(k) for k in ['id','size','digest']} for a in release['assets']}
+
+def extract(archive, package):
+    with (zipfile.ZipFile(archive) if archive.suffix == '.zip' else tarfile.open(archive)) as stream:
+        if archive.suffix == '.zip':
+            for member in stream.infolist():
+                path = pathlib.PurePosixPath(member.filename)
+                if package.name.startswith('FocusOn-osx-') and path.parts[0] == '__MACOSX':
+                    assert '..' not in path.parts and not path.is_absolute()
+                    continue
+                assert path.parts[0] == package.name and '..' not in path.parts and not path.is_absolute()
+                mode = member.external_attr >> 16
+                assert not stat.S_ISLNK(mode), 'Unexpected ZIP symlink'
+            stream.extractall(package.parent)
+            for member in stream.infolist():
+                mode = member.external_attr >> 16
+                if mode: (package.parent / member.filename).chmod(stat.S_IMODE(mode))
+        else: stream.extractall(package.parent, filter='data')
+
+try:
+    historical = find('v0.1.0'); assert historical, 'Original release is missing'
+    before = snapshot(historical)
+    assets = []
+    for rid in ['win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64']:
+        package = root / 'artifacts/release' / ('FocusOn-' + rid)
+        archive = pathlib.Path(str(package) + ('.tar.gz' if rid.startswith('linux-') else '.zip'))
+        extract(archive, package)
+        subprocess.run(['python3','scripts/verify_delivery.py',rid],check=True)
+        if rid.startswith('osx-'):
+            signing = json.loads((package / 'mac-signing.json').read_text())
+            if signing['status'] != 'developer-id-notarized' or not signing['notarized'] or not signing['stapled']:
+                report['macExcluded'].append(rid); continue
+        assets += [archive, pathlib.Path(str(archive) + '.sha256')]
+    release = find(tag)
+    if release is not None:
+        assert release['draft'], 'Published releases are immutable; use a new version'
+        assert release['target_commitish'] == source, 'Existing draft is from a different commit'
+    else:
+        body = f'''Native Windows and Linux builds from `{source}`, matching immutable tag `{tag}`.
+
+Includes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.
+
+Validation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.
+
+macOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.
+
+Build: https://github.com/{repo}/actions/runs/{os.environ['RUN_ID']}
+The existing v0.1.0 tag and all Windows/Linux attachments are preserved; their historical source difference remains documented there.
+'''
+        release = api(f'repos/{repo}/releases','POST',{'tag_name':tag,'target_commitish':source,'name':'FocusOn ' + tag,'body':body,'draft':True,'prerelease':'-' in tag})
+    existing = {a['name']:a for a in release['assets']}
+    for asset in assets:
+        digest = 'sha256:' + hashlib.sha256(asset.read_bytes()).hexdigest()
+        if asset.name in existing:
+            assert existing[asset.name].get('digest') == digest, f'{asset.name} already exists with different bytes; not replaced'
+        else: subprocess.run(['gh','release','upload',tag,str(asset),'--repo',repo],check=True)
+    updated = api(f'repos/{repo}/releases/{release["id"]}'); assert updated['draft']
+    with tempfile.TemporaryDirectory(prefix='focuson-download-check-') as temporary:
+        for asset in assets:
+            subprocess.run(['gh','release','download',tag,'--repo',repo,'--pattern',asset.name,'--dir',temporary],check=True)
+            assert hashlib.sha256((pathlib.Path(temporary) / asset.name).read_bytes()).digest() == hashlib.sha256(asset.read_bytes()).digest()
+    assert snapshot(api(f'repos/{repo}/releases/{historical["id"]}')) == before, 'Historical release assets changed'
+    report.update(status='draft',releaseUrl=updated['html_url'],assets=[{'name':a['name'],'size':a['size'],'digest':a.get('digest'),'url':a['browser_download_url']} for a in updated['assets']])
+    print('Verified draft: ' + updated['html_url'])
+except Exception as error:
+    report['error'] = error_summary(error); raise
+finally:
+    result_path.write_text(json.dumps(report,indent=2) + '\n')

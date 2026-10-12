@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('build', 'test', 'publish', 'package-check', 'smoke')][string]$Action = 'build',
+    [ValidateSet('build', 'test', 'publish', 'package-check', 'smoke', 'desktop-smoke')][string]$Action = 'build',
     [ValidateSet('', 'win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64')][string]$Runtime = '',
     [ValidatePattern('^FocusOn-[A-Za-z0-9-]+$')][string]$PackageName = 'FocusOn-win-x64'
 )
