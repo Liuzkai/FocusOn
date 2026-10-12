@@ -63,7 +63,7 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - 合成 WPF 预览在 artifacts/ui-timer/，检查两模式、增长、缩放保持、计时控制状态及搜索；没有运行真实采集或操作用户库。旧目录的源18d499f仍以 PID11676 运行，保持旧目录不覆盖；新版尚未替换旧实例，升级先从旧托盘退出。
 - 10 工程票关闭，真实鼠标/键盘、DPI、高对比度、锁屏/睡眠及离线无 SDK 运行仍交08，未执行不记通过。上节未推送/未启动为当时阶段事实；09后已按用户要求正常启动旧包，并推送 main 至5e1876e。
 
-## 当前发布：最新 main 重新编译（2026-10-12）
+## 本地发布：最新 main 重新编译（2026-10-12）
 
 - 发布源 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad`，发布前工作树干净，与 origin/main 同步。使用仓库 SDK 10.0.401；没有修改程序源码，本节和 Agent.md 更新在发布后追加。
 - 实际执行 `./build.ps1 build`：Release 构建成功，0 警告、0 错误；`./build.ps1 test`：79 passed、0 failed、0 skipped。
@@ -77,4 +77,8 @@ Modern Standby在历史机器固件上不支持，不能声称兼容测试通过
 - 用户授权配置仓库端发布。新增 `.github/workflows/release.yml` 和跟踪的 `scripts/verify_delivery.py`，复用现有 build.ps1，标签 `v*` 触发 Windows 构建、测试、发布、文件校验及草稿附件上传；允许选择已有标签手动重跑。分支运行跳过发布，公开 Release 不覆盖。
 - 通过 GitHub API 核对仓库 Actions 已启用、允许官方 Actions；默认令牌为只读，发布 job 显式申请 contents: write，使用内置 GITHUB_TOKEN，无需保存新的 Secrets。
 - 官方 checkout v7、setup-dotnet v6 均固定当前对应提交。实际执行 actionlint 1.7.12：无错误；`python scripts/verify_delivery.py FocusOn-win-x64-20261012-3e1d78f`：源提交、479 文件、ZIP CRC/集合/逐项内容、SHA256、运行时与 AMD64 校验通过。
-- 本节配置将提交推送并用首个 v0.1.0 标签验证；GitHub 执行结果另追加实际证据。人工验收与整体规格状态不因此关闭。
+- 配置提交 `43d6dfd901d708ce27d13fcfb691e3061f66c405` 已推送 origin/main；首个注释标签 `v0.1.0` 已推送并触发 [GitHub run 38198854147](https://github.com/Liuzkai/FocusOn/actions/runs/38198854147)，release job 用时 1m24s，全部步骤通过。
+- 云端 Release 构建：0 Warning(s)、0 Error(s)；测试 79 passed、0 failed、0 skipped。云端跟踪的校验脚本对 479 文件、ZIP CRC/集合/逐项内容、SHA256、运行时与 AMD64 检查通过。
+- [v0.1.0 Release 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1f0e09351dfa32edc5eb) 已创建并补充中文功能、下载、升级和验证说明，包含 `FocusOn-win-x64.zip`（77,388,363 字节）和 `.zip.sha256`。API 核对 isDraft=true、tagName=v0.1.0，两个附件均 uploaded。
+- 草稿 ZIP SHA256：`ABF032649026E773D96DD530E0D427B26703181A4D83800D1A5D3185E328F803`，与 GitHub 资产 digest 和旁置 SHA256 一致；下载后再次核对 manifest 源提交、479 文件集合/逐文件大小与哈希、ZIP CRC、运行时及三个 AMD64 文件，全部通过。
+- 本地云端日志 `.tools/github-release-v0.1.0.log`，下载附件 `.tools/release-v0.1.0/`，均被忽略。草稿尚未公开，后续由用户检查后 Publish release；人工验收与整体规格状态不因此关闭。

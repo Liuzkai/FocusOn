@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-12。原始整理基线：`main` / `f02d28e`；最新重新构建与发布源：`3e1d78f`，记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-12。原始整理基线：`main` / `f02d28e`；最新 GitHub Release 草稿构建源：`43d6dfd` / `v0.1.0`，记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -124,7 +124,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**2026-10-12 GitHub 发布配置：**新增 `.github/workflows/release.yml`，推送 `v*` 标签后执行 Windows Release 构建、测试、自包含发布和 `scripts/verify_delivery.py` 独立校验，上传 ZIP 与 SHA256 到 Release 草稿。工作流显式申请 contents: write，使用内置令牌；Actions 已启用，不需要个人 Token Secrets。固定官方 Actions 的提交版本；重跑只更新草稿附件，已发布版本要求新标签。README.md 已记录操作。actionlint 1.7.12 检查通过，跟踪的校验脚本对本轮源 `3e1d78f` 的发布包执行通过；GitHub 首次构建结果待标签推送后核验。
+**2026-10-12 GitHub 发布配置：**新增 `.github/workflows/release.yml`，推送 `v*` 标签后执行 Windows Release 构建、测试、自包含发布和 `scripts/verify_delivery.py` 独立校验，上传 ZIP 与 SHA256 到 Release 草稿。工作流显式申请 contents: write，使用内置令牌；Actions 已启用，不需要个人 Token Secrets。固定官方 Actions 的提交版本；重跑只更新草稿附件，已发布版本要求新标签。README.md 已记录操作。actionlint 1.7.12 检查通过；配置提交 `43d6dfd` 已推送 main 并标记 `v0.1.0`。GitHub run 38198854147 全部通过，构建零警告/错误、79 项测试通过；首个草稿含 ZIP 和 SHA256，已补中文说明，下载附件后的独立完整性校验通过。详细源提交、链接及哈希见 delivery.md；草稿等待用户检查并公开发布，真实设备验收仍按 08 继续。
 
 **2026-10-12 最新构建：**按用户要求重新编译已与 origin/main 同步的 `3e1d78f`，仓库 SDK 10.0.401；Release 构建零警告/错误，79 项测试通过、0 失败/跳过。干净工作树发布至 `artifacts/FocusOn-win-x64-20261012-3e1d78f/` 及对应 ZIP，自包含 Windows x64；480 个文件（含 manifest）、逐文件大小/哈希、ZIP 内容/哈希及三个关键 AMD64 文件核验通过，详情见 delivery.md 的 2026-10-12 章节。旧路径程序 PID 11676 仍在运行；新包尚未启动，升级先从旧托盘退出。人工验收状态保持原样。
 
