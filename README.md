@@ -106,3 +106,9 @@ Linux release notes record the exact source commit and validation scope. Cross-c
 - `tests/`: core/platform regressions, headless UI tests, and native X11 smoke checks.
 
 Product rules and work items are maintained in the [specification](.scratch/focuson/spec.md) and [local issue tracker](.scratch/focuson/issues). See [ADR 0003](docs/adr/0003-cross-platform-desktop.md) for platform boundaries and the [verification record](tests/FocusOn.Tests/Verification.md) for actual results and remaining device checks.
+
+## License
+
+Original FocusOn code and accompanying original documentation are licensed under the [MIT License](LICENSE), copyright 2026 Zhongkai Lau (Liuzkai). Copies or substantial portions must retain the copyright and full license notice. Attribution in the application interface is not required.
+
+Third-party components and content retain their own licenses and notices. The .NET runtime, Avalonia, SkiaSharp, Inter fonts, Microsoft.Data.Sqlite, SQLite, and test dependencies are not relicensed by this project's MIT license.

@@ -29,6 +29,7 @@ manifest_data = (package / 'manifest.json').read_bytes()
 expected['manifest.json'] = (len(manifest_data), digest(manifest_data))
 actual = {p.relative_to(package).as_posix() for p in package.rglob('*') if p.is_file()}
 assert actual == set(expected), 'Unexpected or missing files'
+assert {'README.md', 'LICENSE', 'licenses/README.md', 'licenses/Avalonia-MIT.txt', 'licenses/Inter-OFL.txt'} <= actual, 'Missing documentation or license notices'
 for name, (size, sha) in expected.items():
     data = (package / name).read_bytes()
     assert len(data) == size and digest(data) == sha, f'File mismatch: {name}'

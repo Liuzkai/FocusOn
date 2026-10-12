@@ -86,6 +86,9 @@ try
                 }
                 File.Copy(Path.Combine(root, "docs", "usage.md"), Path.Combine(staging, "使用说明.md"));
                 File.Copy(Path.Combine(root, "docs", "platforms.md"), Path.Combine(staging, "平台说明.md"));
+                File.Copy(Path.Combine(root, "README.md"), Path.Combine(staging, "README.md"));
+                File.Copy(Path.Combine(root, "LICENSE"), Path.Combine(staging, "LICENSE"));
+                CopyDirectory(Path.Combine(root, "docs", "licenses"), Path.Combine(staging, "licenses"));
                 if (runtime.StartsWith("linux-")) CopyDirectory(Path.Combine(root, "platforms", "gnome"), Path.Combine(staging, "gnome"));
                 var records = Directory.EnumerateFiles(staging, "*", SearchOption.AllDirectories).OrderBy(x => x, StringComparer.Ordinal).Select(path => new
                 {
