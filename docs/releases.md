@@ -28,3 +28,9 @@ Each job restores committed lockfiles, builds, runs core/platform and UI regress
 Windows archives are ZIP; Linux archives are tar.gz preserving executable modes; Mac archives are ZIP containing `FocusOn.app`, the notarization status, README and license notices. No DMG is needed. Each archive has an adjacent SHA256. Release notes link the exact build source/run. Existing `v0.1.0` assets are snapshotted before/after a new draft upload.
 
 The legacy Linux append workflow is manual, defaults to the already published `409cb51` source, and refuses to replace differing attachments. New feature versions use the unified desktop draft workflow. Repository About is managed manually by the user.
+
+## Explicitly approved publication
+
+Publishing an existing verified draft requires explicit user authorization recorded in `.github/release-publication/<version>.json`, with its immutable source, successful native build run and exact attachment sizes/SHA256 digests. The publication job checks the tag, all six native jobs, downloads the existing attachments, verifies every archive's source and checksum, and then changes only the release's visibility/notes. It does not rebuild or overwrite packages. The existing v0.1.0 tag/assets are checked before and after.
+
+The v0.1.1 authorization record was added on the user's request to publish that draft. Only changes to authorization records trigger the publication job on main; ordinary code pushes do not publish. A maintainer can also manually select `publish_existing` with an existing approved `version_tag`. New version builds still create drafts by default, and unnotarized Mac validation packages remain excluded.

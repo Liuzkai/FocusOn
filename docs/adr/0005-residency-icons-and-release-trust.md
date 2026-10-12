@@ -10,4 +10,6 @@ Generated FocusOn clock artwork supplies the Windows executable/window/tray, Lin
 
 Preserve v0.1.0 and its differing Windows/Linux source commits. New ordinary pushes only create seven-day Actions artifacts. Native six-architecture builds and tests gate manual/version-tag releases, which stay drafts. No asset clobbering or old tag rewriting. A new release verifies its tag resolves to the exact source of every attached package.
 
+An existing verified draft may be made public on explicit user instruction, recorded with the exact tag/source/build run/asset digests. Publication checks the existing attachments and preserves them; it does not silently rebuild or change tags. This does not change the draft default for new versions.
+
 Mac Developer ID signing is opt-in when all required Actions Secrets exist. Sign nested Mach-O code then the app, use hardened runtime with JIT entitlements, submit to Apple, staple the app, validate and assess it, and only then inventory/archive/checksum the final bundle. Missing credentials produce clearly marked ad-hoc validation artifacts, excluded from Release attachments. Successful notarization is separate from permission, sleep and physical desktop acceptance; drafts remain pending those checks.
