@@ -132,6 +132,13 @@ internal sealed class TitleTimerStore
         }
     }
 
+    public void Interrupt(string reason)
+    {
+        segmentStart = trustedEnd = null;
+        segmentId = null;
+        Warning = reason;
+    }
+
     private RecordedInterval? Live(RecordingTime? now)
     {
         if (segmentStart is not RecordingTime start || now is not RecordingTime at || !Reliable(at) ||

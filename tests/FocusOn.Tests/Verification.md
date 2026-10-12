@@ -2,6 +2,27 @@
 
 测试边界是公开 `RecordingSession` 输入和 `GetDay` 回看结果，使用可控 UTC/单调时间与真实临时 SQLite。测试不读取表字段或私有状态。
 
+## 11：跨平台验证（2026-10-11）
+
+环境：Debian 13 Linux x64 云容器、官方 SHA512 校验的 SDK 10.0.401。源为基准 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加当前未提交工作区；以下结果属于本轮，后续章节保留历史 Windows 证据。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| 完整云安装脚本：SDK 版本、`dotnet restore FocusOn.slnx --locked-mode`、`bash build.sh build` | 通过，Release 零警告/错误；原有 WindowsDesktop 限制已由核心/桌面拆分解除 |
+| `bash build.sh test` | 87 项核心/平台 + 7 项 Avalonia 界面，0 失败/跳过；保留原有 79 项记录/旧库/删除/计时回归 |
+| 最终首行布局调整后的 UI 回归 | 7 passed，0 failed/skipped；TRX 在忽略的 `.tools/test-results/ui-final.trx` |
+| `.tools/pwsh/pwsh -NoLogo -NoProfile -NonInteractive -File build.ps1 build` | 通过，PowerShell 7.6.6 在 Linux 执行，Release 零警告/错误 |
+| 新建 Xvfb displayfd，`xdpyinfo` 就绪，`bash build.sh smoke` | 通过：真实第二进程写锁排他/激活；真实 X11 活动窗口、Unicode 标题变化、可执行文件身份、失效窗口拒绝；SQLite 保存并重开得到 3 条 Usage |
+| 六架构 `bash build.sh package-check <runtime>` | 通过；逐文件与归档内容/大小/SHA256、PE/ELF/Mach-O 目标架构、.NET 自包含运行时、macOS app/图标、Unix 执行权限独立核验 |
+| Linux x64 开发包实际 GUI | 通过：隔离数据启动、首行标题输入/开始/停止、正常退出（0）；重开 SQLite 只读核对 `Native desktop final` 已结束，持久计时 35.3765402 秒 |
+| `bash build.sh publish linux-x64` | 预期拒绝未提交工作区（退出码 1）；没有绕过正式源版本检查 |
+
+新增平台回归覆盖原生路径、隔离参数、Linux/macOS 自启文件转义、GNOME 桥接锁屏不泄漏前台元数据、可信采样缺口和文件系统大小写边界。实际慢窗口查询回归保证两秒以上不可观测范围不累计软件或独立计时。界面回归覆盖搜索不改变全天汇总、选择/缩放保持、计时按钮、缺权限历史回看、范围/键盘/全天总计、删除确认/取消和高对比度文字。
+
+Linux 实际窗口截图：忽略的 `/tmp/focuson-cross-platform-final.png`、`/tmp/focuson-cross-platform-timer.png`、`/tmp/focuson-cross-platform-stopped.png`。核心与界面测试用独立真实 SQLite；桌面输入用 `.tools/qa-final-fm5mri/`，没有操作正式数据或注册登录自启。
+
+未执行：真实 logind 会话与硬件锁屏/休眠/灭屏；Windows/macOS 原生观测、托盘、自启、DPI 与 ARM64 启动；GNOME Wayland 扩展实机执行；macOS 原生签名/公证；GitHub Actions 运行。本容器没有 logind，主程序正确提示无法确认会话状态，软件汇总为空，独立计时和回看可用。六包是工作区开发验证产物（sourceCommit 为 null），不是正式已提交发布。真实桌面验收见 `docs/manual-acceptance.md`，其他 Wayland 桌面的前台采集不在本实现支持范围。
+
 - 2026-10-09 T01 red：`Short_foreground_switch_is_saved_and_reopened_with_daily_totals` 实际失败于 `Observe` 的 `NotImplementedException`，1 failed，0 passed。
 - 默认沙箱内 VSTest 无法完成 testhost 的本机回环握手；本地沙箱外测试执行已获自动批准，不需要联网。
 - T01 首次 green 运行暂被并行主窗口文件尚未就绪阻止（`MainWindow` CS0246），不是测试通过。

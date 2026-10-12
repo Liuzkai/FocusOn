@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -14,6 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <ProjectReference Include="../../src/FocusOn/FocusOn.csproj" />
+    <ProjectReference Include="../../src/FocusOn.Core/FocusOn.Core.csproj" />
+    <ProjectReference Include="../../src/FocusOn.Platforms/FocusOn.Platforms.csproj" />
   </ItemGroup>
 </Project>

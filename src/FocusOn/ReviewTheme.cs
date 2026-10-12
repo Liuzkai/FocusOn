@@ -1,43 +1,33 @@
-using System.Windows;
-using System.Windows.Media;
+using Avalonia.Media;
+using Avalonia.Controls;
 
 namespace FocusOn;
 
 public static class ReviewTheme
 {
-    private static readonly Brush DarkBackground = Brush(0x22, 0x22, 0x22);
-    private static readonly Brush DarkSurface = Brush(0x29, 0x29, 0x29);
-    private static readonly Brush DarkHover = Brush(0x36, 0x36, 0x36);
-    private static readonly Brush DarkBorder = Brush(0x3A, 0x3A, 0x3A);
-    private static readonly Brush LightText = Brush(0xE5, 0xE5, 0xE5);
-    private static readonly Brush MutedText = Brush(0xA0, 0xA2, 0xA8);
-    private static readonly Brush BlueAccent = Brush(0x78, 0xA4, 0xEF);
-    public static Brush Background => SystemParameters.HighContrast ? SystemColors.WindowBrush : DarkBackground;
-    public static Brush Surface => SystemParameters.HighContrast ? SystemColors.WindowBrush : DarkSurface;
-    public static Brush Hover => SystemParameters.HighContrast ? SystemColors.WindowBrush : DarkHover;
-    public static Brush Border => SystemParameters.HighContrast ? SystemColors.WindowTextBrush : DarkBorder;
-    public static Brush Foreground => SystemParameters.HighContrast ? SystemColors.WindowTextBrush : LightText;
-    public static Brush Muted => SystemParameters.HighContrast ? SystemColors.WindowTextBrush : MutedText;
-    public static Brush Accent => SystemParameters.HighContrast ? SystemColors.WindowTextBrush : BlueAccent;
-
-    public static void Apply(ResourceDictionary resources)
+    public static bool HighContrast { get; private set; }
+    public static IBrush Background => HighContrast ? Brushes.Black : Brush.Parse("#222222");
+    public static IBrush Surface => HighContrast ? Brushes.Black : Brush.Parse("#292929");
+    public static IBrush Border => HighContrast ? Brushes.White : Brush.Parse("#44464B");
+    public static IBrush Foreground => HighContrast ? Brushes.White : Brush.Parse("#E5E5E5");
+    public static IBrush Muted => HighContrast ? Brushes.White : Brush.Parse("#A0A2A8");
+    public static IBrush Accent => HighContrast ? Brushes.Yellow : Brush.Parse("#78A4EF");
+    public static void Apply(IResourceDictionary resources, bool highContrast)
     {
-        resources["ReviewBackground"] = Background;
-        resources["ReviewSurface"] = Surface;
-        resources["ReviewHover"] = Hover;
-        resources["ReviewBorder"] = Border;
-        resources["ReviewText"] = Foreground;
-        resources["ReviewMuted"] = Muted;
-        resources["ReviewAccent"] = Accent;
+        HighContrast = highContrast;
+        resources["ReviewBackground"] = Background; resources["ReviewSurface"] = Surface; resources["ReviewText"] = Foreground;
+        resources["ReviewMuted"] = Muted; resources["ReviewAccent"] = Accent;
+        resources["ReviewWarningBackground"] = highContrast ? Brushes.Black : Brush.Parse("#393029");
+        resources["ReviewWarningText"] = highContrast ? Brushes.Yellow : Brush.Parse("#F2C98C");
+        resources["ReviewBadge"] = highContrast ? Brushes.Black : Brush.Parse("#303034");
     }
-
-    public static SolidColorBrush Brush(byte red, byte green, byte blue, byte alpha = 255)
+    private static readonly IBrush[] Palette = [Brush.Parse("#82A6E3"), Brush.Parse("#68C091"),
+        Brush.Parse("#AC88C4"), Brush.Parse("#D49A48"), Brush.Parse("#D88BAB"), Brush.Parse("#96BB77"), Brush.Parse("#95A0DA"), Brush.Parse("#C4A280")];
+    public static IBrush ApplicationBrush(string? key)
     {
-        var brush = new SolidColorBrush(Color.FromArgb(alpha, red, green, blue));
-        brush.Freeze();
-        return brush;
+        if (HighContrast) return Foreground;
+        uint hash = 2166136261;
+        foreach (var c in key ?? "unknown") hash = unchecked((hash ^ c) * 16777619);
+        return Palette[hash % Palette.Length];
     }
-
-    public static Brush BadgeBackground(Brush color) => SystemParameters.HighContrast ? SystemColors.WindowBrush
-        : color is SolidColorBrush solid ? Brush(solid.Color.R, solid.Color.G, solid.Color.B, 42) : Surface;
 }

@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="src/FocusOn.Core/FocusOn.Core.csproj" />
+  <Project Path="src/FocusOn.Platforms/FocusOn.Platforms.csproj" />
+  <Project Path="src/FocusOn/FocusOn.csproj" />
+  <Project Path="tests/FocusOn.Tests/FocusOn.Tests.csproj" />
+  <Project Path="tests/FocusOn.UiTests/FocusOn.UiTests.csproj" />
+  <Project Path="tests/FocusOn.NativeSmoke/FocusOn.NativeSmoke.csproj" />
+  <Project Path="tools/FocusOn.Build/FocusOn.Build.csproj" />
+</Solution>

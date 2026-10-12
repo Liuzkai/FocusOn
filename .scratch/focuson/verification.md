@@ -1,6 +1,18 @@
 # FocusOn 实施与验收记录
 
-记录自动化、真实 Windows 采集和人工硬件验证各自的证据；待验收项不代表通过。
+记录自动化、各平台原生采集和人工硬件验证各自的证据；待验收项不代表通过。
+
+## 11：当前跨平台工作区（2026-10-11）
+
+基准 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加未提交修改，Debian 13 Linux x64 / .NET SDK 10.0.401。统一 Avalonia 界面、net10.0 无桌面依赖核心和 Windows/Linux/macOS 适配已接入。
+
+- 通过：锁定依赖恢复、Release 零警告构建、87 项核心/平台及 7 项界面回归；最终布局 UI 7 项再次通过。保留原有 79 项旧库/计时/停止/删除规则回归。
+- 通过：隔离虚拟 X11 的真实窗口、中文标题变化、PID/可执行文件身份、失效窗口拒绝、SQLite 保存/重开；真正第二进程排他及激活。
+- 通过：Linux x64 自包含开发包实际窗口和鼠标/键盘输入，标题计时从首行开始/停止，正常退出 0，持久化已结束的 35.3765402 秒计时。缺 logind 的提示符合预期，不能当作真实 Linux 锁屏/睡眠通过。
+- 通过：六架构包、清单/归档哈希、原生架构、执行权限及 macOS app 结构独立验证；脏源正式 publish 拒绝符合预期。产物见 delivery.md。
+- 未执行：Windows/macOS 和 GNOME Wayland 的实机交互、真实电源/锁屏/多屏/DPI/托盘、自启、原生 macOS 签名、无 SDK 离线硬件启动及 GitHub Actions。步骤见 docs/manual-acceptance.md 的跨平台清单。
+
+详细证据和命令见 `tests/FocusOn.Tests/Verification.md` 的 11 章节。11 保持 `ready-for-human` 且尚未提交，08 和整体规格保持开放。以下环境和 WPF 结果是原 Windows 版本的历史记录。
 
 ## 环境
 

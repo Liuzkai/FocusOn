@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FocusOn;
 
-public sealed class WindowsForegroundObserver : IDisposable
+public sealed class WindowsForegroundObserver : IForegroundObserver
 {
     private const uint ForegroundEvent = 0x0003;
     private const uint NameChangeEvent = 0x800c;

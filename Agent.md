@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-10。原始整理基线：`main` / `f02d28e`；最新记录范围/标题计时构建与发布源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-12。原始整理基线：`main` / `f02d28e`；最新记录范围/标题计时构建与发布源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -59,7 +59,7 @@
 
 - 2026-10-10 用户新增截图版要求优先：按 DeepSeek Harness 的深色紧凑工具栏、三行总览和软件标签日志改 UI，详情默认隐藏、选择展开；当前日期软件/标题搜索仅筛选回看，全天汇总不变。时段分隔、时长总览和详情可开合，支持滚轮缩放与右键平移/清范围。详见 09 票和 docs/ui/focuson-review.md，后面的最初布局/搜索范围以此补充为准。
 
-- 单页顺序为日期/当前记录状态、全天软件汇总、横向比例时间线、日志及详情。时间线按真实比例绘制，短片段靠缩放或日志查看，不人为扩大宽度。
+- 单页首行为标题计时，后续为日期/当前记录状态、全天软件汇总、横向比例时间线、日志及详情。时间线按真实比例绘制，短片段靠缩放或日志查看，不人为扩大宽度。
 - 同软件颜色稳定，状态同时有文字；日志虚拟化，主要操作可用键盘。刷新应保留选择、筛选及滚动；默认今天随午夜更新，主动选择历史日期后保持所选日。
 - 登录自启到托盘，关窗继续采集，托盘明确退出才停止；同用户、同数据目录只能有一个采集写入者。
 - 数据长期本地保留，不自动清理。只记录必要的软件/窗口元信息；不另读截图、正文、地址栏或输入内容，标题本身可能包含私人信息。
@@ -67,20 +67,21 @@
 
 ## 4. 当前工程与代码入口
 
-工程基线为 C#、.NET 10、WPF、WinForms NotifyIcon 和 Microsoft.Data.Sqlite；一个生产项目、一个桌面进程，另有 xUnit 测试项目。保持直接的职责分工，不为扩展预先引入服务端、Windows 服务、ORM、WebView 或通用框架。
+2026-10-11 用户要求 Windows/Linux/macOS，当前工程为 C#、.NET 10、Avalonia 和 Microsoft.Data.Sqlite；核心/平台/桌面三个项目、一个桌面进程，另有核心/平台与界面测试。原 Windows-only 范围由 ADR 0003 扩展。保持直接的职责分工，不为扩展预先引入服务端、Windows 服务、ORM、WebView 或通用框架。
 
 | 入口 | 职责 |
 | --- | --- |
-| [App.xaml.cs](src/FocusOn/App.xaml.cs) | 启动参数、组件生命周期、控制状态版本、五秒补查、删除后恢复和固定退出边界 |
-| [WindowsForegroundObserver.cs](src/FocusOn/WindowsForegroundObserver.cs) | 前台/当前窗口标题事件、消息循环、身份读取及补查 |
-| [WindowsSessionObserver.cs](src/FocusOn/WindowsSessionObserver.cs) | 会话、锁屏、睡眠和会话显示状态 |
-| [RecordingClock.cs](src/FocusOn/RecordingClock.cs)、[RecordingModels.cs](src/FocusOn/RecordingModels.cs) | UTC/单调时间、观测、停止条件、片段、日视图及范围筛选契约 |
-| [RecordingRuntime.cs](src/FocusOn/RecordingRuntime.cs) | 后台队列串行执行观测、控制、查询和数据库操作 |
-| [RecordingSession.cs](src/FocusOn/RecordingSession.cs) | 核心状态、SQLite 事务、可信终点、故障恢复、每日查询与删除 |
-| [DailyProjection.cs](src/FocusOn/DailyProjection.cs) | 本地日期有效边界、DST 午夜与精确时长分配 |
-| [MainWindow.xaml](src/FocusOn/MainWindow.xaml)、[MainWindow.xaml.cs](src/FocusOn/MainWindow.xaml.cs) | 日期、状态、日志、详情、删除确认和一秒界面刷新 |
-| [TimelineControl.cs](src/FocusOn/TimelineControl.cs)、[DisplayText.cs](src/FocusOn/DisplayText.cs) | 时间线绘制/缩放/选择及显示文案 |
-| [TrayController.cs](src/FocusOn/TrayController.cs)、[SingleInstance.cs](src/FocusOn/SingleInstance.cs)、[StartupRegistration.cs](src/FocusOn/StartupRegistration.cs) | 托盘、同用户同目录单实例与 HKCU 登录自启 |
+| [App.axaml.cs](src/FocusOn/App.axaml.cs) | 启动参数、组件生命周期、控制状态版本、五秒补查、删除后恢复和固定退出边界 |
+| [WindowsForegroundObserver.cs](src/FocusOn.Platforms/WindowsForegroundObserver.cs) | 前台/当前窗口标题事件、消息循环、身份读取及补查 |
+| [WindowsSessionObserver.cs](src/FocusOn.Platforms/WindowsSessionObserver.cs) | 会话、锁屏、睡眠和会话显示状态 |
+| [RecordingClock.cs](src/FocusOn.Core/RecordingClock.cs)、[RecordingModels.cs](src/FocusOn.Core/RecordingModels.cs) | UTC/单调时间、观测、停止条件、片段、日视图及范围筛选契约 |
+| [RecordingRuntime.cs](src/FocusOn.Core/RecordingRuntime.cs) | 后台队列串行执行观测、控制、查询和数据库操作 |
+| [RecordingSession.cs](src/FocusOn.Core/RecordingSession.cs) | 核心状态、SQLite 事务、可信终点、故障恢复、每日查询与删除 |
+| [DailyProjection.cs](src/FocusOn.Core/DailyProjection.cs) | 本地日期有效边界、DST 午夜与精确时长分配 |
+| [MainWindow.axaml](src/FocusOn/MainWindow.axaml)、[MainWindow.axaml.cs](src/FocusOn/MainWindow.axaml.cs) | 日期、状态、日志、详情、删除确认和一秒界面刷新 |
+| [TimelineControl.cs](src/FocusOn/TimelineControl.cs)、[DisplayText.cs](src/FocusOn.Core/DisplayText.cs) | 时间线绘制/缩放/选择及显示文案 |
+| [RecordingController.cs](src/FocusOn.Platforms/RecordingController.cs) | 平台观测与暂停、删除、退出边界的协调；防止过期系统快照回写 |
+| [TrayController.cs](src/FocusOn/TrayController.cs)、[SingleInstance.cs](src/FocusOn.Platforms/SingleInstance.cs)、[StartupRegistration.cs](src/FocusOn.Platforms/StartupRegistration.cs) | 托盘、同用户同目录单实例与 HKCU 登录自启 |
 
 实际持久化已经超出设计阶段的“一个区间表”示意：SQLite 使用 WAL，包含 `intervals`、`deleted_ranges`、`interval_allocations`；后两者保留删除空洞和裁切分配基准，避免删后复活及重复裁切的时长误差。时长存为 ticks，不是设计示意中的 `DurationMs`。修改存储要兼顾已有数据库，使用 [旧库合成测试夹具](tests/FocusOn.Tests/Fixtures/README.md) 验证，不能拿个人活动库做故障或迁移试验。
 
@@ -88,7 +89,7 @@
 
 ## 5. 构建、运行与数据
 
-仓库 [global.json](global.json) 指定 SDK `10.0.401`，`rollForward: latestPatch`；生产目标为 `net10.0-windows`，启用 nullable 和 warnings-as-errors，Microsoft.Data.Sqlite 当前固定为 `10.0.12`。依赖版本以项目文件为准，不因本机缺 SDK 降级目标框架。
+仓库 [global.json](global.json) 指定 SDK `10.0.401`，`rollForward: latestPatch`；生产目标为 `net10.0`，启用 nullable 和 warnings-as-errors，Microsoft.Data.Sqlite 当前固定为 `10.0.12`。依赖版本以项目文件为准，不因本机缺 SDK 降级目标框架。
 
 在仓库根目录的 PowerShell 中执行：
 
@@ -99,19 +100,19 @@ dotnet --list-sdks
 ./build.ps1 publish
 ```
 
-- `build.ps1` 优先使用 `.tools/dotnet/dotnet.exe`，否则使用 PATH 中的 `dotnet`；构建和测试均为 Release。首次恢复依赖需要联网，运行程序不依赖网络。
-- `publish` 要求干净且已提交的工作树；成功后生成 `artifacts/FocusOn-win-x64/`、ZIP、逐文件 `manifest.json` 和 ZIP SHA256。发布清单包含源提交，不能绕过脏工作树检查，也不能把历史包的哈希用于新包。
+- `build.ps1` / `build.sh` 优先使用仓库 SDK，再使用 PATH 中的 dotnet；均为 Release，安装遵守 packages.lock.json。`test` 执行核心/平台和 Avalonia 界面测试，Linux 可运行；`smoke` 需要隔离 X11 显示。
+- `publish` 要求干净且已提交的工作树；成功后生成 `artifacts/release/FocusOn-<runtime>/`、归档、逐文件 `manifest.json` 和归档 SHA256。`package-check` 是单独的开发验证产物，写 artifacts/validation/，脏工作区不标记正式 sourceCommit。发布清单包含源提交，不能绕过脏工作树检查，也不能把历史包的哈希用于新包。
 - `.tools/`、`bin/`、`obj/`、`artifacts/`、测试输出和用户 SQLite 文件被忽略；仅明确列出的合成旧库夹具纳入 Git。克隆代码不会带回历史 SDK、缓存或发布产物。
-- 当前工作副本于 2026-10-10 接续：系统 SDK 仍为 `6.0.300`、`6.0.407`、`7.0.406`；已按微软官方 SHA512 校验 SDK 10.0.401 ZIP 并解压到 `.tools/dotnet/`，没有替换系统 SDK。`build.ps1` 可直接使用仓库 SDK；裸 `dotnet` 仍可能解析到系统旧 SDK。源 `1629462` 已完成 Release 构建、66 项测试和自包含发布，产物现位于 `artifacts/FocusOn-win-x64/` 及 ZIP；详情见 delivery.md 当前副本章节。
+- 当前副本（2026-10-11）为 `/workspace/FocusOn`，Linux x64 云容器，基准源 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加未提交的 11 票修改。官方 SHA512 校验的 SDK 10.0.401 在 `.tools/dotnet/`，没有替换系统 SDK。`.tools/system/` 提供隔离 Xvfb 工具，`.tools/pwsh/` 提供可选 PowerShell 7.6.6；新终端需重设 SDK/缓存变量。2026-10-10 Windows 的 SDK、66 项测试与旧包信息是历史记录，详见 delivery.md。
 
-正式数据位置为 `%LOCALAPPDATA%\FocusOn\focuson.db`，运行时可能伴随 `-wal`、`-shm`。备份前从托盘退出，再复制完整数据目录。开发/验收使用隔离目录，例如构建后：
+Windows 正式数据仍为 `%LOCALAPPDATA%\FocusOn\focuson.db`，Linux/macOS 默认目录见 [平台说明](docs/platforms.md)。运行时可能伴随 `-wal`、`-shm`，备份前明确退出程序，再复制完整数据目录。开发/验收使用隔离目录，例如构建后：
 
 ```powershell
 $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
-& '.\src\FocusOn\bin\Release\net10.0-windows\FocusOn.exe' --data-dir $focusOnQaData
+& '.\src\FocusOn\bin\Release\net10.0\FocusOn.exe' --data-dir $focusOnQaData
 ```
 
-开发构建运行需要相应桌面运行时；发布目录包含运行时。`--data-dir <目录>` 跳过正式自启注册，隐藏隔离启动的参数顺序为 `--startup --data-dir <目录>`。普通无参数启动会写当前用户 Run 键的 `FocusOn` 值，指向固定程序路径并加 `--startup`；没有应用内自启开关。验收时核对目标数据目录和实例。
+开发构建需要对应 .NET 10 运行时与平台图形依赖；发布目录包含 .NET 运行时。macOS 需辅助功能权限，Wayland GNOME 需随附桥接；见 docs/platforms.md。`--data-dir <目录>` 跳过正式自启注册，隐藏隔离启动的参数顺序为 `--startup --data-dir <目录>`。普通无参数启动按平台注册当前用户 Run 键、XDG autostart 或 macOS LaunchAgent，指向固定程序路径并加 `--startup`；没有应用内自启开关。验收时核对目标数据目录和实例。
 
 ## 6. 开发与验证约定
 
@@ -123,6 +124,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 - 按现有 tracker，代码票需实现、必需检查、审查和提交后，在 Comments 追加结果和提交引用才能关闭；移交 08 的人工项仍属待验收。08 与整体规格不能仅凭代码完成或历史测试数关闭。
 
 ## 7. 当前进度与接续事项
+
+**最新 11 票（2026-10-11）：**用户扩展全平台；统一 Avalonia 界面及 Windows/Linux/macOS 平台层已接入，无桌面依赖核心保留旧库兼容。87 项核心/平台及 7 项界面测试通过；真实虚拟 X11 窗口/标题/SQLite 与跨进程单实例验证通过，Linux 桌面按钮输入与保存验证通过。六架构开发验证产物在 `artifacts/validation/`。当前验证与剩余限制以 11 票及 tests/FocusOn.Tests/Verification.md 跨平台章节为准；下列 Windows 版本结果为历史证据。工作区未提交，原生 Windows/macOS/GNOME 与电源、DPI 等待人工验收。
 
 **最新 10 票：**用户要求记录范围/24h 双模式、首行标题计时与使用/停止/计时三行；实现 `7d7dc34`、审查修复/发布源 `c8cbd8a`。Release 零警告/错误，79 项真实 SQLite 等回归通过，两轴复核无遗留；离屏 WPF 两种模式、增长、缩放保持、按钮状态、搜索和窄窗口检查通过。10 工程票关闭，真实输入、DPI、高对比度及睡眠/锁屏规则交 08，整体规格保持开放。
 
@@ -160,6 +163,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 | 日期 | 变更与验证 | 后续 |
 | --- | --- | --- |
+| 2026-10-12 | 按用户要求将 Linux 实际界面截图保存到 `docs/images/focuson-ui.png` 并嵌入 README，注明演示数据与云环境会话提示。图片内容与原预览一致，相对链接及非忽略路径核对通过；仅文档/图片修改，未重跑程序测试。 | 后续更新截图时替换仓库内图片，保留平台和数据来源说明。 |
+| 2026-10-11 | 全平台 11 票：net10.0 核心、Avalonia 桌面、Windows/Linux/macOS 适配与六架构打包。87 核心/平台 + 7 UI 通过，真实虚拟 X11/单实例及 Linux 包标题计时保存通过，六包独立哈希/架构/权限验证通过；云安装/启动配置草稿已保存。基准 3e1d78f 加未提交修改。 | 11 保持 ready-for-human；Windows/macOS/GNOME、真实 logind/电源/托盘/DPI/ARM64 与原生签名待验收，08/规格开放。环境设置需用户保存并发布；配置保存不等于已应用。 |
 | 2026-10-10 | 根据原始设计过程和 `f02d28e` 仓库创建本交接记录，关联现有任务与证据；核对源码入口、SDK 要求及本地缺项。仅文档整理，未重跑 66 项历史测试。 | 准备匹配 SDK；按 08 与人工清单接续验收并记录实际结果。 |
 | 2026-10-10 | 源 `1629462`；准备并校验仓库 SDK 10.0.401，Release 构建零警告/错误，66 项测试全部通过；重新发布并独立验证 479 文件、ZIP 和关键 AMD64 架构。仅新增验收记录，程序源码未变。 | 界面工具 native pipe 缺失，W01–W10 交互仍待验收；恢复连接或按隔离清单人工执行。08 与整体规格保持开放。 |
 | 2026-10-10 | 用户 Harness 截图版 UI：实现 be5d7d4、修复 8ebd151、发布源 18d499f；三行总览/软件标签/当前日期搜索/按需详情/深色滚动条。最终构建和 66 项回归通过，WPF 合成离屏图通过，两轴复核无遗留问题，发布包独立核验通过。 | 09 工程票关闭；真实输入/DPI/高对比度仍交 08。当前本地提交未推送，最新使用与验收步骤已更新。 |

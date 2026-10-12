@@ -1,37 +1,67 @@
 # FocusOn
 
-Windows 11 个人前台软件使用记录。以激活窗口为时间归属，保留窗口与标题切换；没有键鼠输入仍计时。数据仅在当前 Windows 用户本机保存。
+Windows、Linux、macOS 的个人前台软件使用记录工具。以当前激活窗口为时间归属，保留窗口与标题切换；没有键鼠输入仍计时。数据仅保存在当前用户本机，标题计时独立保存，不计入软件使用汇总。
+
+## 界面预览
+
+![FocusOn 界面：标题计时、全天软件汇总、三行时间线与日志](docs/images/focuson-ui.png)
+
+Linux 实际截图，记录为演示数据；黄色提示来自云环境缺少真实桌面会话。
 
 ## 使用
 
-2026-10-10 最新标题计时版本：`artifacts/FocusOn-win-x64-timer/FocusOn.exe`，完整 ZIP 为 `artifacts/FocusOn-win-x64-timer.zip`。旧版正在运行，因此使用独立交付路径；从旧托盘退出后，再启动新版。
+统一桌面界面支持每日软件汇总、使用/停止/计时三行时间线、日期回看、搜索/拖选/缩放/详情、按天删除和标题计时。
 
-自包含交付目录为 `artifacts/FocusOn-win-x64`，压缩包为 `artifacts/FocusOn-win-x64.zip`。完整解压到固定位置，再运行 `FocusOn.exe`；首次普通启动会配置当前用户登录自启。关闭窗口后仍在托盘记录，停止程序请从托盘明确退出。
+- Windows：完整解压后运行 `FocusOn.exe`。
+- Linux：在桌面会话运行 `./FocusOn`；支持 X11，GNOME Wayland 需要启用随附扩展。
+- macOS：打开完整 `FocusOn.app`，授予辅助功能权限后重新启动。
 
-详细操作和本地数据位置见[使用说明](docs/usage.md)。[人工验收清单](docs/manual-acceptance.md)记录发布程序的 Windows 操作步骤；本轮未执行的硬件／界面检查仍是待验收。
+普通首次启动配置当前用户登录自启；关闭窗口继续记录，使用窗口或托盘的「退出」停止。重复启动唤回已有实例。Linux 保留最小化的任务栏入口。
+
+平台版本、依赖、权限、数据路径、Wayland 桥接和迁移步骤见[平台说明](docs/platforms.md)，详细操作见[使用说明](docs/usage.md)。Windows 原有 `%LOCALAPPDATA%\FocusOn` 数据与 SQLite 格式保持兼容。
 
 ## 开发
 
-需要 `global.json` 指定的 .NET 10 SDK（当前为 10.0.401）。可从[微软官方下载](https://dotnet.microsoft.com/download/dotnet/10.0)获取 Windows x64 SDK，安装到系统，或将 SDK zip 解压到 `.tools/dotnet/`。仓库内 SDK 与 NuGet 缓存不进入 Git。
+需要 `global.json` 指定的 .NET SDK 10.0.401。工程使用 .NET 10、Avalonia 11.3 和 Microsoft.Data.Sqlite；安装与首次恢复需要联网，应用运行不需要联网。SDK 可安装到系统，或解压到忽略的 `.tools/dotnet/`。
 
-在仓库 PowerShell 中运行：
+Windows PowerShell：
 
 ```powershell
 ./build.ps1 build
 ./build.ps1 test
-./build.ps1 publish
+./build.ps1 publish -Runtime win-x64
 ```
 
-开发环境第一次恢复依赖需要联网；运行程序不需要联网。测试用真实临时 SQLite，经公开记录会话验证结果。测试主机需要本地回环通信，受限沙箱可能阻止 VSTest 启动。
+Linux / macOS：
 
-publish 会检查桌面运行时与 SQLite 必需文件，生成逐文件 SHA256 清单、ZIP 和 ZIP 校验文件。文件完整性检查不替代在没有开发工具的机器上断网启动验收。
+```bash
+./build.sh build
+./build.sh test
+./build.sh publish linux-x64   # macOS 使用 osx-x64 或 osx-arm64
+```
 
-旧包正在运行时，可用 `./build.ps1 publish -PackageName FocusOn-win-x64-timer` 发布到独立目录，避免覆盖运行文件。升级时先从旧版托盘退出，再从新目录普通启动；相同数据目录的重复启动会定位旧实例。
+`test` 执行真实临时 SQLite 的核心/平台回归和 Avalonia 无显示器界面测试，不需要 Windows 桌面运行时。Linux 原生前台检查可在隔离的 X11 桌面执行：
 
-隔离实机测试数据，可运行构建程序并传入 `--data-dir <测试目录>`；默认数据目录为 `%LOCALAPPDATA%\FocusOn`。开发运行需对应桌面运行时，最终交付使用包含运行时的 x64 文件夹。
+```bash
+xvfb-run -a ./build.sh smoke
+```
 
-`--startup --data-dir <测试目录>` 可隔离验证隐藏托盘启动；这两种隔离入口都不修改正式自启项。
+`publish` 要求干净且已提交的工作区，生成 `artifacts/release/FocusOn-<runtime>/`、完整归档、逐文件 SHA256 清单与归档校验值。支持 `win-x64`、`win-arm64`、`linux-x64`、`linux-arm64`、`osx-x64`、`osx-arm64`。macOS 交付为 app bundle；Unix tar 包保留执行权限。
 
-## 规格与任务
+开发时用 `./build.sh package-check <runtime>` 或 `./build.ps1 package-check -Runtime <runtime>` 检查未提交的实际工作区，产物写入 `artifacts/validation/`，清单明确标为开发验证，不冒充正式发布源版本。发布名称可指定第三个 shell 参数或 PowerShell 的 `-PackageName`。
 
-完整行为见[开发规格](.scratch/focuson/spec.md)，依赖与验收条件见[独立任务](.scratch/focuson/issues)。测试证据区分可控事件逻辑与真实 Windows/界面行为，不把模拟事件通过当作硬件兼容性通过。
+隔离运行避免写正式数据和自启：
+
+```bash
+dotnet run --project src/FocusOn/FocusOn.csproj -- --data-dir /tmp/focuson-qa
+```
+
+仓库 SDK 需将 `.tools/dotnet/` 加入 PATH 或直接使用其中的 `dotnet`。Windows 隔离目录可使用 `$env:TEMP` 下的测试路径。
+
+## 工程与验收
+
+- `src/FocusOn.Core/`：记录会话、真实 SQLite、每日投影、标题计时；与桌面平台无关。
+- `src/FocusOn.Platforms/`：各系统前台与会话观测、数据路径、单实例和自启。
+- `src/FocusOn/`：统一 Avalonia 界面、时间线与托盘。
+
+规格与任务保存在 [.scratch/focuson/spec.md](.scratch/focuson/spec.md) 和 [11 全平台票](.scratch/focuson/issues/11-cross-platform.md)。平台边界见 [ADR 0003](docs/adr/0003-cross-platform-desktop.md)。实际测试证据见[验证记录](tests/FocusOn.Tests/Verification.md)，Windows/macOS/Wayland 的真实窗口、权限、锁屏、睡眠、托盘和 DPI 等操作仍须[人工验收](docs/manual-acceptance.md)。

@@ -3,16 +3,14 @@ using System.Runtime.InteropServices;
 
 namespace FocusOn;
 
-public sealed record WindowsSessionState(bool Sleeping, bool Locked, bool DisplayOff, bool Available);
-
-public sealed class WindowsSessionObserver : IDisposable
+public sealed class WindowsSessionObserver : ISessionObserver
 {
     private static readonly Guid SessionDisplayStatus = new("2B84C20E-AD23-4DDF-93DB-05FFBD7EFCA5");
-    private readonly Action<WindowsSessionState> onState;
+    private readonly Action<SessionState> onState;
     private readonly WindowProcedure windowProcedure;
     private readonly ManualResetEventSlim started = new();
     private readonly object gate = new();
-    private WindowsSessionState state = new(false, false, false, false);
+    private SessionState state = new(false, false, false, false);
     private Thread? thread;
     private Exception? startupError;
     private uint threadId;
@@ -25,7 +23,7 @@ public sealed class WindowsSessionObserver : IDisposable
     private bool notificationsReady;
     private volatile bool disposed;
 
-    public WindowsSessionObserver(Action<WindowsSessionState> onState)
+    public WindowsSessionObserver(Action<SessionState> onState)
     {
         this.onState = onState;
         windowProcedure = HandleMessage;
@@ -41,7 +39,7 @@ public sealed class WindowsSessionObserver : IDisposable
         if (startupError is not null) throw new InvalidOperationException("无法启动系统状态观测。", startupError);
     }
 
-    public WindowsSessionState ReadCurrentState()
+    public SessionState ReadCurrentState()
     {
         lock (gate) return state;
     }
@@ -185,7 +183,7 @@ public sealed class WindowsSessionObserver : IDisposable
 
     private void Publish(bool force = false)
     {
-        var next = new WindowsSessionState(sleeping, locked, displayOff,
+        var next = new SessionState(sleeping, locked, displayOff,
             notificationsReady && lockKnown && displayKnown && sessionConnected);
         lock (gate)
         {

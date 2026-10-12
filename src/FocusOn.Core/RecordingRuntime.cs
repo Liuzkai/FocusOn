@@ -22,6 +22,13 @@ public sealed class RecordingRuntime : IDisposable
 
     public Task Initialized => initialized.Task;
 
+    public void Interrupt(RecordingTime at, string reason) => Submit(session =>
+    {
+        session.Interrupt(at, reason);
+        observationFailure = reason;
+        observationFailureAt = at.MonotonicTicks;
+    });
+
     public void MarkUnreliable(RecordingTime at, string reason) => Submit(session =>
     {
         session.MarkUnreliable(at, reason);

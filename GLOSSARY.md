@@ -1,6 +1,6 @@
 # FocusOn 使用记录
 
-记录个人在 Windows 11 上的前台软件使用过程，并通过每天的时间线回看。
+记录个人在 Windows、Linux、macOS 上的前台软件使用过程，并通过每天的时间线回看。
 
 ## Language
 

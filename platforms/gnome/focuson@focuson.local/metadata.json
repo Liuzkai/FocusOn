@@ -1,0 +1,7 @@
+{
+  "uuid": "focuson@focuson.local",
+  "name": "FocusOn Foreground Bridge",
+  "description": "Allows the local FocusOn desktop app to read only the current foreground window metadata on GNOME Wayland.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "version": 1
+}

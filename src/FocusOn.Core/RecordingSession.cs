@@ -147,6 +147,13 @@ public sealed class RecordingSession : IDisposable
         DiscardTail(at, reason);
     }
 
+    public void Interrupt(RecordingTime at, string reason)
+    {
+        if (!AcceptTime(at)) return;
+        titleTimer.Interrupt(reason);
+        DiscardTail(at, reason);
+    }
+
     private void DiscardTail(RecordingTime at, string reason)
     {
         gapStart = committedEnd ?? current?.StartUtc ?? gapStart ?? at.Utc.ToUniversalTime();

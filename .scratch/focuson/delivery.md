@@ -1,5 +1,28 @@
 # FocusOn 第一版工程交付
 
+## 11：跨平台开发验证交付（2026-10-11）
+
+当前基准 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加未提交工作区，Linux x64 云环境 / SDK 10.0.401。Windows 原数据目录及 SQLite 兼容；统一 Avalonia 桌面和三平台观测/自启/单实例已经接入。使用与平台要求见 `docs/usage.md`、`docs/platforms.md`。
+
+六架构使用 `bash build.sh package-check <runtime>` 生成在忽略的 `artifacts/validation/`，逐文件清单标记 `buildKind: development-validation`、`sourceCommit: null`。每包有完整目录、归档、SHA256 校验；它们不属于正式已提交发布。
+
+| 归档 | 清单文件数 | 归档字节 | SHA256 |
+| --- | --- | --- | --- |
+| FocusOn-win-x64.zip | 232 | 49292456 | 170EDC3B4906CAA316080F5B1D1A1B23811B1AE326528BC00136BA665B3E43A6 |
+| FocusOn-win-arm64.zip | 232 | 46898057 | 718BA1A55DF77E921160511382FF420A52A0A1B9FD148E96DBDEDCEF14279DBB |
+| FocusOn-linux-x64.tar.gz | 233 | 46797500 | 8BC072594B6DFEF8D9B3FE4D74B6FE01351E49E7626268601C66118CC1DD1192 |
+| FocusOn-linux-arm64.tar.gz | 233 | 44125204 | D75E88BCDD7EDCD10A07F0E5F65B6D559388F4AE85D24957487DE3EDE2E39B3A |
+| FocusOn-osx-x64.tar.gz | 233 | 49452541 | 3A839C2848E09547B4ADB6AFC2E47D6A66FAF058B19FDD98EC5D85B60FDCCF8D |
+| FocusOn-osx-arm64.tar.gz | 233 | 47045287 | 5233F1213D43E4EF07CF2E2D2C44DE17660DE3253F4A2A09A9E2A9F04703F775 |
+
+清单不含自身，归档额外包含 `manifest.json`。独立重算文件和归档内容、大小、SHA256，检查入口/CoreCLR/SQLite/Skia（macOS 另含 Avalonia native）的目标 PE/ELF/Mach-O 架构、自包含 runtimeconfig/deps、Unix 入口执行权限、macOS app 的 Info.plist 和图标，六包全部通过。报告在忽略的 `.tools/package-verification.json`。
+
+Release 构建零警告/错误，87 项核心/平台 + 7 项界面回归通过；Linux 原生虚拟 X11、真实第二进程和最终包的鼠标/键盘标题计时/退出保存验证通过。安装脚本与可选 PowerShell 入口在此机器执行成功。正式 `publish` 仍拒绝未提交源，不能将上述归档冒充正式发布。提交并复核后可用 `./build.sh publish <runtime>` 或 `./build.ps1 publish -Runtime <runtime>` 正式生成 `artifacts/release/`。
+
+macOS 包为 FocusOn.app，Linux 包附 GNOME bridge，Windows 为完整 EXE 目录；无需另行安装 .NET 运行时，但仍需要各平台图形库/桌面权限。Linux 跨构建未执行 macOS codesign；原生 macOS 发布步骤会 ad-hoc 签名并验证，不含开发者签名或公证。
+
+GitHub Actions 三系统回归/六架构打包定义已添加，本轮没有运行 CI。Windows/macOS、GNOME Wayland、实际 logind 和 ARM64 启动/硬件行为待按人工清单验收。11/08 与规格未关闭，代码未提交或推送。后续段落保留历史 Windows 交付记录。
+
 2026-10-10，Windows 11 Pro x64。01–07工程票已关闭；08为 `ready-for-human`，整体规格尚未通过完整实机验收。
 
 ## 本地文件（历史发布 7f2ec0e）

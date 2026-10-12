@@ -1,5 +1,7 @@
 # FocusOn 第一版设计
 
+2026-10-11 平台补充（优先于下文原 Windows-only 工程边界）：用户要求 Windows、Linux、macOS。统一界面改用 Avalonia，核心/平台/桌面分离，保留旧记录口径与 SQLite 格式。平台授权、Linux Wayland 与实机限制见 [平台说明](platforms.md) 和 ADR 0003；原 WPF/Windows 设计与历史证据不代表新平台已验收。
+
 状态：已确认。用户于 2026-10-09 确认完整设计可作为第一版开发依据。本文是设计与验收依据，尚未实现采集程序。
 
 ## 目标与范围

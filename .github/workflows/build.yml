@@ -1,0 +1,65 @@
+name: Desktop build and regression
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.401
+      - name: Build and test
+        shell: pwsh
+        run: |
+          ./build.ps1 build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build.ps1 test
+          exit $LASTEXITCODE
+      - name: Native X11 and process activation
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libx11-6 libxext6
+          xvfb-run -a ./build.sh smoke
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            runtime: win-x64
+          - os: windows-latest
+            runtime: win-arm64
+          - os: ubuntu-latest
+            runtime: linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
+          - os: macos-latest
+            runtime: osx-x64
+          - os: macos-latest
+            runtime: osx-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.401
+      - name: Package clean source
+        shell: pwsh
+        run: |
+          ./build.ps1 publish -Runtime '${{ matrix.runtime }}'
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FocusOn-${{ matrix.runtime }}
+          path: artifacts/release/*

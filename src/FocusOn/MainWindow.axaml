@@ -1,0 +1,110 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:FocusOn"
+        x:Class="FocusOn.MainWindow" Title="FocusOn" Width="1100" Height="720" MinWidth="740" MinHeight="500"
+        Background="{DynamicResource ReviewBackground}" Foreground="{DynamicResource ReviewText}">
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="18" RowSpacing="10">
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="6">
+      <Button x:Name="PreviousDayButton" Content="‹" AutomationProperties.Name="前一天" />
+      <CalendarDatePicker x:Name="ViewDatePicker" Grid.Column="1" Width="150" AutomationProperties.Name="回看日期" />
+      <Button x:Name="NextDayButton" Grid.Column="2" Content="›" AutomationProperties.Name="后一天" />
+      <Button x:Name="TodayButton" Grid.Column="3" Content="今天" />
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
+        <TextBlock x:Name="DateText" />
+        <TextBlock x:Name="StatusText" Text="正在启动…" Foreground="{DynamicResource ReviewAccent}" />
+      </StackPanel>
+      <Button x:Name="PauseButton" Grid.Column="5" Content="暂停记录" />
+      <Button x:Name="ExitButton" Grid.Column="6" Content="退出" />
+    </Grid>
+    <StackPanel Grid.Row="0" Spacing="5">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+        <TextBox x:Name="TimerTitleBox" Watermark="输入标题，开始独立计时" MaxLength="200" AutomationProperties.Name="计时标题" />
+        <TextBlock x:Name="TimerElapsedText" Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource ReviewAccent}" />
+        <Button x:Name="StartTimerButton" Grid.Column="2" Content="开始计时" />
+        <Button x:Name="PauseTimerButton" Grid.Column="3" Content="暂停" IsVisible="False" />
+        <Button x:Name="StopTimerButton" Grid.Column="4" Content="停止" IsVisible="False" />
+      </Grid>
+      <TextBlock x:Name="TimerErrorText" Foreground="{DynamicResource ReviewWarningText}" TextWrapping="Wrap" />
+      <Border x:Name="WarningPanel" Background="{DynamicResource ReviewWarningBackground}" Padding="10" CornerRadius="5" IsVisible="False">
+        <TextBlock x:Name="WarningText" TextWrapping="Wrap" Foreground="{DynamicResource ReviewWarningText}" />
+      </Border>
+    </StackPanel>
+    <StackPanel Grid.Row="2" Spacing="6">
+      <TextBlock Text="全天软件汇总" FontWeight="SemiBold" />
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <ItemsControl x:Name="TotalsList">
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Padding="10,6" Background="{DynamicResource ReviewBadge}" CornerRadius="5">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="{Binding AppName}" Foreground="{Binding Color}" />
+                  <TextBlock Text="{Binding Duration}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+      <TextBlock x:Name="TotalsEmptyText" Foreground="{DynamicResource ReviewMuted}" />
+    </StackPanel>
+    <StackPanel Grid.Row="3" Spacing="6">
+      <WrapPanel>
+        <Button x:Name="DurationButton" Content="时长" Margin="0,0,6,4" />
+        <Button x:Name="GroupsButton" Content="时段 ⊟" Margin="0,0,6,4" />
+        <Button x:Name="DetailsButton" Content="详情 ⊞" Margin="0,0,6,4" />
+        <Button x:Name="RecordedModeButton" Content="记录范围" Margin="0,0,6,4" />
+        <Button x:Name="FullDayModeButton" Content="24h" Margin="0,0,6,4" />
+        <Button x:Name="ZoomInButton" Content="＋" Margin="0,0,6,4" AutomationProperties.Name="放大时间线" />
+        <Button x:Name="ZoomOutButton" Content="－" Margin="0,0,6,4" AutomationProperties.Name="缩小时间线" />
+        <Button x:Name="ResetDayButton" Content="重置" Margin="0,0,6,4" />
+        <Button x:Name="ClearRangeButton" Content="清除范围" Margin="0,0,6,4" />
+        <Button x:Name="DeleteDayButton" Content="删除所选日期" Margin="0,0,6,4" />
+      </WrapPanel>
+      <TextBox x:Name="SearchBox" Watermark="搜索当天软件或窗口标题" AutomationProperties.Name="搜索当天软件或窗口标题" />
+      <local:TimelineControl x:Name="TimelineView" />
+      <TextBlock x:Name="RangeText" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" FontSize="12" />
+    </StackPanel>
+    <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <Grid>
+        <DataGrid x:Name="LogGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single"
+                  GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="48" Background="{DynamicResource ReviewSurface}">
+          <DataGrid.Columns>
+            <DataGridTemplateColumn Header="开始时间" Width="125">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding GroupLabel}" FontSize="10" Foreground="{DynamicResource ReviewMuted}" /><TextBlock Text="{Binding StartTime}" /></StackPanel></DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTemplateColumn Header="软件 / 状态" Width="180">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <Border Background="{Binding BadgeBackground}" Padding="7,4" CornerRadius="4" VerticalAlignment="Center" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding Application}" Foreground="{Binding Color}" />
+                  </Border>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTextColumn Header="窗口标题 / 说明" Binding="{Binding Title}" Width="*" />
+            <DataGridTextColumn Header="时长" Binding="{Binding Duration}" Width="140" />
+          </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock x:Name="LogEmptyText" Text="正在读取记录…" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource ReviewMuted}" IsHitTestVisible="False" />
+      </Grid>
+      <Border x:Name="InspectorPane" Grid.Column="1" Width="265" Padding="12" Background="{DynamicResource ReviewSurface}" CornerRadius="5" IsVisible="False">
+        <ScrollViewer><StackPanel Spacing="8">
+          <TextBlock Text="记录详情" FontWeight="SemiBold" />
+          <TextBlock x:Name="DetailsEmptyText" Text="选择一条记录查看详情。" Foreground="{DynamicResource ReviewMuted}" />
+          <StackPanel x:Name="DetailsPanel" IsVisible="False" Spacing="8">
+            <TextBlock Text="{Binding Application}" FontSize="16" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Kind}" Foreground="{DynamicResource ReviewMuted}" />
+            <TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding StartFull}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding EndFull}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding PreciseDuration}" />
+            <TextBlock Text="{Binding CurrentNote}" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          </StackPanel>
+        </StackPanel></ScrollViewer>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
