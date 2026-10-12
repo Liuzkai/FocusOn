@@ -11,6 +11,8 @@
 - 真实虚拟 X11 `bash build.sh smoke`：跨进程写锁排他/激活、Unicode 标题切换、失效窗口拒绝、3 条 Usage 保存和 SQLite 重开通过。
 - 实际 Linux 窗口：默认英文、下拉切中文再切英文、settings.json 持久化、正常退出并重启后保持英文通过；截图在 `docs/images/focuson-ui.png` 和 `focuson-ui.zh-CN.png`。使用隔离演示数据库，无真实用户记录或自启操作。
 - actionlint 1.7.12 对现有及新增工作流检查通过；Python 发布/校验脚本语法通过；README 英文与本地链接检查通过。外部发布和 About 的实际结果记录在 12 票及交付文件，不能把工作流定义或 about.json 当作上传/设置成功。
+- 最终 Linux 云端源 409cb51：run 38203441571 成功。v0.1.0 两架构归档与校验已公开；公开下载再核验每包 244 个清单文件、归档内容/大小/SHA256、ELF 架构、执行权限、运行时与源提交通过。实际公开包的中英文切换、计时继续/暂停、偏好保存和退出 0 通过；SQLite 演示计时从 600 秒保存到 603.3514426 秒。Windows 资产及旧 tag SHA 保持，详细 digest 见 delivery.md。
+- About API 真正尝试返回 GitHub 403 Resource not accessible by integration，尚未设置成功；需要仅授权本仓库的 ABOUT_TOKEN（Administration 写权限）。独立元数据工作流已准备，不能以 Linux 发布成功代替 About 完成。
 
 原生 Windows/macOS、GNOME、实际 logind 与硬件验收仍未在本机执行；ARM64 包为交叉构建。界面翻译仅在显示边界进行，原有 SQLite 数据和核心状态文本约定保持。
 

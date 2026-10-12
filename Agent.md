@@ -125,7 +125,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 12 票（2026-10-12）：**用户要求 Linux 追加现有 v0.1.0，并补英文 About/README 和中英文界面。跨平台代码已提交 2321305，并合并远端 Windows 发布历史为 48264ea。99 项回归通过（89 核心/平台、10 UI），真实 X11 与中英文窗口切换/持久偏好/重启通过，截图已更新。英文 README、`.github/about.json`、语言目录配置与 Linux 发布工作流已准备。外部发布/权限结果以 12 票和交付文件后续回读为准；不要把 About JSON 或工作流存在当作外部操作成功。
+**最新 12 票（2026-10-12）：**Linux x64/ARM64 已追加并公开发布 [v0.1.0](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.0)，Linux 源 409cb51、run 38203441571 成功；旧 Windows 附件/标签保持。99 项回归（89 核心/平台、10 UI）、真实 X11、两语窗口与偏好重启通过；公开下载后的 244 文件/归档/架构/权限再次核验及公开包实际计时保存通过。英文 README、双语源码已推送。About 真正更新被 GitHub 403 管理权限拒绝，已准备 `.github/about.json` 和独立 About 工作流并请求用户安全配置 ABOUT_TOKEN；12 保持 needs-info，只剩此权限依赖。详细链接/哈希见 delivery.md，硬件验收仍保持开放。
 
 **最新 11 票（2026-10-11）：**用户扩展全平台；统一 Avalonia 界面及 Windows/Linux/macOS 平台层已接入，无桌面依赖核心保留旧库兼容。87 项核心/平台及 7 项界面测试通过；真实虚拟 X11 窗口/标题/SQLite 与跨进程单实例验证通过，Linux 桌面按钮输入与保存验证通过。六架构开发验证产物在 `artifacts/validation/`。当前验证与剩余限制以 11 票及 tests/FocusOn.Tests/Verification.md 跨平台章节为准；下列 Windows 版本结果为历史证据。工作区未提交，原生 Windows/macOS/GNOME 与电源、DPI 等待人工验收。
 
@@ -169,6 +169,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 | 日期 | 变更与验证 | 后续 |
 | --- | --- | --- |
+| 2026-10-12 | Linux 云端源 409cb51 已公开追加 v0.1.0，run 38203441571 成功；99 回归/原生 X11/公开下载 244 文件和归档再核验/公开包双语计时保存通过。英文 README 与双语源码推送，保留上游 MIT 和第三方声明，Windows 资产/旧标签保持。 | About 403 管理权限缺失，12 needs-info；用户配置 ABOUT_TOKEN 后触发独立 Repository About 工作流并回读。勿重传或替换已公开 Linux/Windows 资产；设备项继续 08。 |
 | 2026-10-12 | 12 票：英文 README、中英文界面与偏好保存，99 回归、真实 X11、两语实际窗口及英文偏好重启通过；发布脚本/工作流准备，actionlint 通过。合并 Windows 发布历史并保留 v0.1.0 标签及附件。 | 正式 Linux 包核验并经 Actions 追加 v0.1.0；回读实际发布及 About 权限结果。设备验收继续保持开放。 |
 | 2026-10-12 | 按用户要求将 Linux 实际界面截图保存到 `docs/images/focuson-ui.png` 并嵌入 README，注明演示数据与云环境会话提示。图片内容与原预览一致，相对链接及非忽略路径核对通过；仅文档/图片修改，未重跑程序测试。 | 后续更新截图时替换仓库内图片，保留平台和数据来源说明。 |
 | 2026-10-11 | 全平台 11 票：net10.0 核心、Avalonia 桌面、Windows/Linux/macOS 适配与六架构打包。87 核心/平台 + 7 UI 通过，真实虚拟 X11/单实例及 Linux 包标题计时保存通过，六包独立哈希/架构/权限验证通过；云安装/启动配置草稿已保存。基准 3e1d78f 加未提交修改。 | 11 保持 ready-for-human；Windows/macOS/GNOME、真实 logind/电源/托盘/DPI/ARM64 与原生签名待验收，08/规格开放。环境设置需用户保存并发布；配置保存不等于已应用。 |

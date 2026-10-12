@@ -1,5 +1,24 @@
 # FocusOn 第一版工程交付
 
+## 当前 GitHub Linux 发布（2026-10-12）
+
+[v0.1.0](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.0) 已公开发布，按用户选择追加 Linux x64/ARM64，原 Windows 附件保留。Linux 源提交为 `409cb51ed57f79637cfbca6691480aa5bb6a3a69`，与旧 Windows 标签指向的 `43d6dfd901d708ce27d13fcfb691e3061f66c405` 不同；标签没有移动，发布说明及包内 manifest 均记录 Linux 源提交。
+
+[Linux Release run 38203441571](https://github.com/Liuzkai/FocusOn/actions/runs/38203441571) 全部成功，用时 1m57s，包含 Release 构建、99 项核心/平台/界面回归、原生虚拟 X11/跨进程验证、两架构正式打包、独立校验、上传与回传下载核对。初次运行 38202692331 在查询草稿的 tag endpoint 遇到 404；改为列表定位 Release ID 后本次成功，没有覆盖 Windows 资产。
+
+| 公开 Linux 附件 | 清单文件数 | 归档字节 | SHA256 |
+| --- | --- | --- | --- |
+| FocusOn-linux-x64.tar.gz | 244 | 46835098 | 36DC66BF3EC12A2E459047AF0D18C3194393A812D9381C0F7DC2B471AA5E8D2B |
+| FocusOn-linux-arm64.tar.gz | 244 | 44169273 | 5A81564DEA6F212DCD0F6C7F12FEFD0A9A3E7997DDBFB2694D6E3C22ABC8E1AB |
+
+每个归档均有公开的 `.sha256` 附件，包含自有 MIT LICENSE、英文 README、平台说明、第三方声明与 GNOME bridge。清单不含自身，归档另含 manifest。客户端从公开链接重新下载四个附件，与 GitHub 资产 digest/大小一致；逐文件大小/哈希、文件集合、归档内容/SHA256、入口/CoreCLR/SQLite/Skia ELF 架构、执行权限和自包含运行时独立验证再次全部通过。下载保存在忽略的 `.tools/github-linux-v0.1.0/`，回执在 `.tools/github-linux-release-result.json`。
+
+Windows ZIP 保持资产 ID `632512486`、大小 `77388363`、SHA256 `ABF032649026E773D96DD530E0D427B26703181A4D83800D1A5D3185E328F803`；校验附件 ID `632512487`、87 字节、digest `50b809bb2fa52e558a365e95b42b3e4e863a13d231392e6c754dd8233360a392`。上传前后快照与已知 Windows 验证记录一致，没有替换旧 Windows 二进制。
+
+公开下载的 Linux x64 包实际启动、中英文即时切换、独立计时继续/暂停、偏好保存及正常退出 0 通过；设置 DOTNET_ROOT 为不存在的 SDK 路径仍可运行，实际使用随包运行时。隔离 SQLite 重开得到演示计时 603.3514426 秒。ARM64 为交叉构建，未在 ARM64 机器执行；真实 logind、GNOME Wayland、电源、DPI、Windows/macOS 硬件与离线无 SDK 设备验收仍待人工完成。
+
+英文 README 与双语源码已推送。About 设置实际被 GitHub 403 拒绝，默认工作流令牌缺少 Administration 写权限；英文配置在 `.github/about.json`，待用户在 Actions Secrets 配置 ABOUT_TOKEN。独立 Repository About 工作流可只更新并回读元数据，保留已成功发布的 Linux 回执。外部 About 尚未完成，12 保持 needs-info；08 与整体规格不因此关闭。
+
 ## 11：跨平台开发验证交付（2026-10-11）
 
 当前基准 `3e1d78f2bc05cd22cb9329ec2c0c06e9664268ad` 加未提交工作区，Linux x64 云环境 / SDK 10.0.401。Windows 原数据目录及 SQLite 兼容；统一 Avalonia 桌面和三平台观测/自启/单实例已经接入。使用与平台要求见 `docs/usage.md`、`docs/platforms.md`。

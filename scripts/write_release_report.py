@@ -11,9 +11,15 @@ root = pathlib.Path(__file__).resolve().parent.parent
 repo = os.environ['GH_REPO']
 assert repo == 'Liuzkai/FocusOn'
 report = {'sourceCommit': subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(), 'runUrl':os.environ.get('RUN_URL')}
+try:
+    previous_file = api(f'repos/{repo}/contents/linux-release.json?ref=codex%2Frelease-status')
+    previous = json.loads(base64.b64decode(previous_file['content']))
+except urllib.error.HTTPError as error:
+    if error.code != 404: raise
+    previous = {}
 for name, filename in [('release','linux-release-result.json'),('about','repository-about-result.json')]:
     path = root / 'artifacts' / filename
-    report[name] = json.loads(path.read_text()) if path.exists() else {'status':'failed', 'error':'Stage did not complete; see workflow run.'}
+    report[name] = json.loads(path.read_text()) if path.exists() else previous.get(name, {'status':'failed', 'error':'Stage did not complete; see workflow run.'})
 branch = 'heads/codex/release-status'
 try:
     parent = api(f'repos/{repo}/git/ref/{branch}')['object']['sha']

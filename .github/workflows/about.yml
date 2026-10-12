@@ -1,0 +1,35 @@
+name: Repository About
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/about-update]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repository-about
+  cancel-in-progress: false
+
+jobs:
+  about:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Apply and verify English About
+        env:
+          GH_TOKEN: ${{ secrets.ABOUT_TOKEN || github.token }}
+        run: |
+          python3 scripts/update_repository_about.py
+          python3 -c 'import json; assert json.load(open("artifacts/repository-about-result.json"))["status"] == "updated", "ABOUT_TOKEN needs repository Administration write permission"'
+      - name: Record actual metadata result and preserve the Linux publication receipt
+        if: always()
+        run: python3 scripts/write_release_report.py
