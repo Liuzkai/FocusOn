@@ -91,13 +91,21 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: false
+      - name: Check publication guards
+        run: python3 -m unittest discover -s scripts/tests -p 'test_publication*.py'
+      - name: Select the explicitly approved version
+        id: approved_tag
+        env:
+          REQUESTED_TAG: ${{ inputs.version_tag }}
+        run: python3 scripts/select_publication_tag.py >> "$GITHUB_OUTPUT"
       - name: Verify and publish the explicitly approved existing draft
         id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ inputs.version_tag || 'v0.1.1' }}
+          RELEASE_TAG: ${{ steps.approved_tag.outputs.tag }}
         run: python3 scripts/publish_approved_release.py
       - name: Record public release result
         if: always()

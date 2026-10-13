@@ -42,10 +42,26 @@ def find(name):
 def snapshot(release):
     return {a['name']: {k: a.get(k) for k in ['id', 'size', 'digest']} for a in release['assets']}
 
+def all_releases():
+    for page in range(1, 11):
+        batch = api(f'repos/{repo}/releases?per_page=100&page={page}')
+        yield from batch
+        if len(batch) < 100: return
+    raise RuntimeError('Release pagination limit reached')
+
+def historical_snapshot(release):
+    return {**{k: release.get(k) for k in ['tag_name', 'target_commitish', 'name', 'body', 'draft', 'prerelease']},
+            'assets': snapshot(release), 'tagObject': api(f'repos/{repo}/git/ref/tags/{release["tag_name"]}')['object']}
+
+def check_history(older):
+    for release_id, before_release in older.items():
+        assert historical_snapshot(api(f'repos/{repo}/releases/{release_id}')) == before_release, 'An older release or tag changed'
+
 try:
     assert tag_commit(tag) == source, 'Immutable tag no longer matches the approved package source'
     historical = find('v0.1.0')
     historical_assets, historical_tag = snapshot(historical), tag_commit('v0.1.0')
+    older = {release['id']: historical_snapshot(release) for release in all_releases() if release['tag_name'] != tag}
     run = api(f'repos/{repo}/actions/runs/{approval["buildRunId"]}')
     assert run['head_sha'] == source and run['status'] == 'completed' and run['conclusion'] == 'success', 'Native release validation did not succeed at this source'
     jobs = api(f'repos/{repo}/actions/runs/{approval["buildRunId"]}/jobs?per_page=100')['jobs']
@@ -78,25 +94,20 @@ try:
     # Re-read after download checks to catch a concurrent attachment change.
     assert snapshot(api(f'repos/{repo}/releases/{release["id"]}')) == before
     assert tag_commit(tag) == source
+    check_history(older)
     if release['draft']:
-        body = f'''Windows and Linux x64 / ARM64 packages from `{source}`, matching immutable tag `{tag}`.
-
-Includes the FocusOn executable/window/tray icons, close-to-tray with restore and explicit Exit, recoverable Linux tray fallback, English / Simplified Chinese with a saved language preference, and the .NET runtime. Existing local records remain compatible. Archives retain MIT and third-party notices; adjacent SHA256 files verify downloads.
-
-Validation: six standard native GitHub-hosted targets passed their core/platform and UI regressions, native desktop lifecycle checks, and self-contained file/archive/architecture/runtime verification. Mac native foreground recording and actual .app startup / Quit passed. Linux checks include X11 capture and isolated StatusNotifier registration / host loss. Physical power, DPI, desktop tray panels and permission acceptance remain pending.
-
-macOS is not included in this release. Apple credentials are not configured; Mac outputs are ad-hoc validation artifacts, not Developer ID-signed or notarized distributions. Signing, hardened runtime, notarization, stapling and Gatekeeper verification are configured but have not completed. See the repository's docs/macos.md for secure Secrets and permission setup.
-
-Build: {result['buildRunUrl']}
-The existing v0.1.0 tag and all Windows/Linux attachments are preserved, including their documented historical source differences.
-'''
+        body = (release.get('body') or '').replace('This release stays a draft.',
+            'Published on explicit user approval after verification of the existing attachments.')
+        body += f'''\n\n## Publication\n\nPublished the existing Windows/Linux x64 and ARM64 archives without rebuilding or replacing attachments. Source `{source}` matches immutable tag `{tag}`. Eight downloads, SHA256 files, manifests and the successful six-target native build were rechecked before publication. Daily records remain compatible; archives retain MIT and third-party notices.\n\nmacOS is excluded: current bundles are ad-hoc validation only, without Developer ID signing, notarization or stapling. Physical desktop permissions, power and DPI acceptance remains pending. See docs/macos.md for securely configuring Apple Secrets.\n\nVerified build: {result['buildRunUrl']}\nAll earlier releases and tags are preserved.\n'''
         api(f'repos/{repo}/releases/{release["id"]}', 'PATCH', {'draft': False, 'prerelease': False, 'make_latest': 'true', 'body': body})
     published = api(f'repos/{repo}/releases/{release["id"]}')
     assert not published['draft'] and not published['prerelease'] and published['published_at']
     assert published['tag_name'] == tag and published['target_commitish'] == source and snapshot(published) == before
     assert snapshot(api(f'repos/{repo}/releases/{historical["id"]}')) == historical_assets and tag_commit('v0.1.0') == historical_tag
+    check_history(older)
     result.update(status='published', releaseUrl=published['html_url'], publishedAt=published['published_at'],
-                  assets=[{k: a[k] for k in ['name', 'size', 'digest', 'browser_download_url']} for a in published['assets']])
+                  assets=[{k: a[k] for k in ['name', 'size', 'digest', 'browser_download_url']} for a in published['assets']],
+                  preservedReleases=list(older.values()))
     print('Published and verified: ' + published['html_url'])
 except Exception as error:
     result['error'] = error_summary(error)

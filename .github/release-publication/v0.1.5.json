@@ -1,0 +1,49 @@
+{
+  "tag": "v0.1.5",
+  "publishExistingDraft": true,
+  "authorization": "User explicitly requested on 2026-10-13 (Asia/Shanghai): 发布0.1.5",
+  "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+  "buildRunId": 38342256279,
+  "assets": [
+    {
+      "name": "FocusOn-linux-arm64.tar.gz",
+      "size": 45138111,
+      "digest": "sha256:5f16c75f771f54e35c490070cef441362c3b97824e91d6a1a6deb055c2f81c94"
+    },
+    {
+      "name": "FocusOn-linux-arm64.tar.gz.sha256",
+      "size": 93,
+      "digest": "sha256:c6a557fd29dbf3f9f3c7a0ce589880e3e88cfe1cac06ef052cca9800b659a133"
+    },
+    {
+      "name": "FocusOn-linux-x64.tar.gz",
+      "size": 47773611,
+      "digest": "sha256:fa7fbe91021e44eaf3e428fa94163fc105936ad8fa69e1e3594e59a47c3a4819"
+    },
+    {
+      "name": "FocusOn-linux-x64.tar.gz.sha256",
+      "size": 91,
+      "digest": "sha256:b512544dad65e179271912cef90dd2b9f662abc47a627550092b07567ae14a9f"
+    },
+    {
+      "name": "FocusOn-win-arm64.zip",
+      "size": 47222850,
+      "digest": "sha256:9b92ae1fbb1f6a2fc3e71260232a358260d3d4163d9e2c79ecd2e8095e209b9a"
+    },
+    {
+      "name": "FocusOn-win-arm64.zip.sha256",
+      "size": 88,
+      "digest": "sha256:6c1d141773241a3d8e54629f04e8e0ae9a8e8599a1bb25aa20ae333035896282"
+    },
+    {
+      "name": "FocusOn-win-x64.zip",
+      "size": 49617303,
+      "digest": "sha256:cf165ff2cca62d864b45eb6138f75ccfca3a9081dc8c0a62d1a2076532f3210b"
+    },
+    {
+      "name": "FocusOn-win-x64.zip.sha256",
+      "size": 86,
+      "digest": "sha256:57e2670dc1ff5fd5ecf5262e24ac9247a7cb692330e3c9a7df0071d1b1c3288f"
+    }
+  ]
+}
