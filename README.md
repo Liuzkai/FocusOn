@@ -30,7 +30,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 
 ## Statistics preview
 
-The next **v0.1.6 draft** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share the language selector, recording pause and Exit controls. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
+The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share the language selector, recording pause and Exit controls. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
 
 - **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
 - **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.

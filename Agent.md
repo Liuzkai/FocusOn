@@ -78,6 +78,8 @@
 | [RecordingRuntime.cs](src/FocusOn.Core/RecordingRuntime.cs) | 后台队列串行执行观测、控制、查询和数据库操作 |
 | [RecordingSession.cs](src/FocusOn.Core/RecordingSession.cs) | 核心状态、SQLite 事务、可信终点、故障恢复、每日查询与删除 |
 | [DailyProjection.cs](src/FocusOn.Core/DailyProjection.cs) | 本地日期有效边界、DST 午夜与精确时长分配 |
+| [StatisticsProjection.cs](src/FocusOn.Core/StatisticsProjection.cs)、RecordingSession.GetStatistics、RecordingRuntime.ReadStatisticsAsync | 统计范围、本地/DST边界、原始时长分配与单次快照读取；不写入数据 |
+| [StatisticsPage.axaml](src/FocusOn/StatisticsPage.axaml)、[StatisticsChart.cs](src/FocusOn/StatisticsChart.cs) | 多日/单日时段、图表/明细、筛选版本保护、两语/高对比度/窄布局与键盘/指针详情 |
 | [MainWindow.axaml](src/FocusOn/MainWindow.axaml)、[MainWindow.axaml.cs](src/FocusOn/MainWindow.axaml.cs) | 日期、状态、日志、详情、删除确认和一秒界面刷新 |
 | [TimelineControl.cs](src/FocusOn/TimelineControl.cs)、[DisplayText.cs](src/FocusOn.Core/DisplayText.cs) | 时间线绘制/缩放/选择及显示文案 |
 | [RecordingController.cs](src/FocusOn.Platforms/RecordingController.cs) | 平台观测与暂停、删除、退出边界的协调；防止过期系统快照回写 |
@@ -125,7 +127,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 20 票（2026-10-13）：**新增参考深色环形/圆角柱状/折线的统计页：默认近7天、多日首尾包含/快捷30天/最多366天，单日HH:mm时段及24:00日结束。仅前台Usage参与，原始分配端点保证精确裁切/分桶/总和，保留删除与本地DST规则，不迁移数据。两页切换保留回看选中/视窗并继续采集/独立计时；两语、统一ISO日期、窄布局、高对比度、线型/键盘和跟随指针详情。114核心/平台+34UI回归与真实Linux合成记录鼠标检查通过，三张截图加入英文README。已公开v0.1.5原源码/资产保持；统计版本计划为v0.1.6草稿。原生六架构构建及草稿证据完成后追加，设备/Mac信任仍交08。
+**最新 20 票（2026-10-13）：**新增参考深色环形/圆角柱状/折线的统计页：默认近7天、多日首尾包含/快捷30天/最多366天，单日HH:mm时段及24:00日结束。仅前台Usage参与，原始分配端点保证精确裁切/分桶/总和，保留删除与本地DST规则，不迁移数据。两页切换保留回看选中/视窗并继续采集/独立计时；两语、统一ISO日期、窄布局、高对比度、线型/键盘和跟随指针详情。114核心/平台+34UI回归与真实Linux合成记录鼠标检查通过，三张截图加入英文README。已公开v0.1.5原源码/资产保持；统计版本计划为v0.1.6草稿。不可变源码 `161c21f5b48e96701d812b2d80cf918b75acde56` / v0.1.6 标签对象 `d11531a73290673fcd583a3cb328adc2e6dae6e1`；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38378437157) Success，六目标各148测试、原生与包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e) 八个Windows/Linux x64/ARM64附件上传下载校验通过；全部旧Release元数据/附件/标签与v0.1.5公开原资产匹配。Mac两目标为ad-hoc-validation，未Developer ID/公证/staple，临时7天验证产物，不上传正式Release。20工程票关闭，08/整体规格与设备验收仍开放。
 
 **最新 19 票（2026-10-13）：**用户明确要求公开 v0.1.5。[发布核对](https://github.com/Liuzkai/FocusOn/actions/runs/38371850633) Success；[公开/latest Release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5) 含八个原 Windows/Linux x64/ARM64 归档/校验和，云端公开直链全部再次下载核对大小、SHA256、checksum 和 `c0938e72afc53a063fc26e0ecc399e8d37b4e398` manifest 源，通过。发布维护源 `b36e077`，按本次授权记录选择版本，15 项选择/发布/旧版本变更保护测试通过；保留完整功能说明，全部旧 Release 元数据/附件/标签对象与原记录一致。未重建、替换附件或改写标签。19 工程票关闭，08/整体规格与 Mac 信任/实机限制保持开放。用户随后新增 20 统计页面，计划独立 v0.1.6 草稿。
 
