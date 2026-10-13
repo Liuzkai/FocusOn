@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-12。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`45ad974` / `v0.1.1`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-13。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`45ad974` / `v0.1.1`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -125,7 +125,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 18 票（2026-10-13）：**时间范围选择 1h/2h/4h/6h/8h/12h/24h/今天，默认 1h；用户确认滚动小时可跨日、今天为本地午夜至现在，日汇总/日期删除仍单日。ReviewProjection 与 RecordingRuntime 的一次快照读取合并跨日片段、保留精确分配时长；视窗与日志同步，手动视窗在刷新/跨午夜保持，重置跟随。104 核心/平台 + 28 UI 回归、Release 零警告/错误、原生 Linux 鼠标切换全部范围/提示/缩放保持/重置/日志底部检查通过；中英文及下拉截图更新。计划新 v0.1.5 草稿，旧标签、附件、MIT/第三方许可不改写；物理 DPI/权限/电源和 Mac 信任仍交 08。构建/草稿结果将在完成后追加。
+**最新 18 票（2026-10-13）：**时间范围选择 1h/2h/4h/6h/8h/12h/24h/今天，默认 1h；用户确认滚动小时可跨日、今天为本地午夜至现在，日汇总/日期删除仍单日。ReviewProjection 与 RecordingRuntime 的一次快照读取合并跨日片段、保留精确分配时长；视窗与日志同步，手动视窗在刷新/跨午夜保持，重置跟随。104 核心/平台 + 28 UI 回归、Release 零警告/错误、原生 Linux 鼠标切换全部范围/提示/缩放保持/重置/日志底部检查通过；中英文及下拉截图更新。计划新 v0.1.5 草稿，旧标签、附件、MIT/第三方许可不改写；物理 DPI/权限/电源和 Mac 信任仍交 08。不可变源码 `c0938e72afc53a063fc26e0ecc399e8d37b4e398` / v0.1.5；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38342256279) Success，六架构各 132 回归与原生/包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-915e2b6097b83a60c8a3) 含 8 个 Windows/Linux 附件，上传下载校验通过；旧版本快照/哈希与所有标签、许可保持。Mac Intel/Apple Silicon 为 ad-hoc validation，凭据未配置，未 Developer ID/公证/staple，不是正式附件。18 工程票关闭，08/规格保持开放。
 
 **最新 17 票（2026-10-12）：**按用户追加要求，汇总滚动条改为 3 DIP 瞬时细线，空闲约一秒隐藏；直接拖动标签滚动，支持两轴滚轮/键盘，刷新及隐藏清理保持可靠。113 项回归（90 核心/平台、23 UI）、真实 Linux 鼠标和细线显隐像素检查通过。计划 v0.1.4 新草稿，保留 v0.1.3 原标签/附件；不可变源码 `eafc205` / v0.1.4；[run 38254694792](https://github.com/Liuzkai/FocusOn/actions/runs/38254694792) Success，六架构各 113 项回归、原生与包校验通过；[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-2e201aae9575a400ec4c) 含 8 个 Windows/Linux 归档及校验和，下载验证通过。旧 Release/标签/许可及先前附件哈希均保持。17 工程票关闭，Mac 仍仅临时 ad-hoc 验证包，08/整体规格开放。实机仍交 08。
 

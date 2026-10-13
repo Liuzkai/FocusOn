@@ -66,3 +66,23 @@ App totals now scroll by dragging any label, either wheel axis, keyboard arrows/
 | linux-arm64 | 45131114 | `116D801DE74A27330A9A117829CEDB7C781AD94A916997EA6AC3A7A979B5687A` |
 
 Every older Release metadata/asset snapshot remained unchanged; saved v0.1.1/v0.1.2/v0.1.3 attachment sizes/digests also match. Existing remote tags, MIT license and third-party notices remain intact. Mac Intel/Apple Silicon .app bundles pass native tests/package checks but are ad-hoc validation only; excluded from Release without Developer ID signing/notary trust, seven-day Actions retention. Windows/macOS physical DPI, trackpad and input/device/power/permissions acceptance remains with ticket 08. v0.1.4 remains a draft; public v0.1.1 is not republished or replaced.
+
+
+## 2026-10-13: v0.1.5 rolling review draft
+
+Immutable source `c0938e72afc53a063fc26e0ecc399e8d37b4e398`, annotated tag `v0.1.5` (object `36e83a964f4801aa0d47183ec9a9bc3d399d898d`). [Build/draft](https://github.com/Liuzkai/FocusOn/actions/runs/38342256279) Success: six native standard hosted targets each pass 104 core/platform + 28 UI regressions, zero failed/skipped, native desktop and package/source/runtime checks. [Draft and downloads](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-915e2b6097b83a60c8a3) contains eight Windows/Linux archive/checksum attachments, independently uploaded/downloaded SHA256 verified. Source reached main before the tag.
+
+The selector replaces the old Recorded range / full-local-day 24h modes with 1h, 2h, 4h, 6h, 8h, 12h, 24h and Today, default 1h. Hours are elapsed lookbacks across midnight; Today is local midnight to now. Historical dates use their day end, while choosing Today returns to the current date. One existing recorder-queue snapshot reads necessary calendar dates and joins original daily parts without duplicate IDs or lost duration ticks. Visible timeline/log scope follows the preset, manual zoom/pan stays fixed on refresh and across midnight, and Reset restores live following. Daily totals and deletion remain scoped to the date picker. Search/selection preserves recorded durations; previous timers, language preference, hints, gaps, colors, compact label dragging, log following and residency remain.
+
+Native Linux synthetic-record mouse/keyboard checks confirm all seven elapsed-hour spans and Today, unchanged daily total labels, cross-day versus Today logs, pointer hints, frozen manual zoom on append, Reset and log-end following. English/Chinese screenshots and an open selector are in README. No personal database or collector is used in those screenshots.
+
+| Architecture | Archive bytes | SHA256 | Download |
+| --- | ---: | --- | --- |
+| win-x64 | 49617303 | `CF165FF2CCA62D864B45EB6138F75CCFCA3A9081DC8C0A62D1A2076532F3210B` | [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-x64.zip) |
+| win-arm64 | 47222850 | `9B92AE1FBB1F6A2FC3E71260232A358260D3D4163D9E2C79ECD2E8095E209B9A` | [FocusOn-win-arm64.zip](https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-arm64.zip) |
+| linux-x64 | 47773611 | `FA7FBE91021E44EAF3E428FA94163FC105936AD8FA69E1E3594E59A47C3A4819` | [FocusOn-linux-x64.tar.gz](https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-x64.tar.gz) |
+| linux-arm64 | 45138111 | `5F16C75F771F54E35C490070CEF441362C3B97824E91D6A1A6DEB055C2F81C94` | [FocusOn-linux-arm64.tar.gz](https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-arm64.tar.gz) |
+
+Every earlier Release metadata/asset snapshot remains unchanged; cached v0.1.4 archive/checksum digests also match. All old remote tag objects/source commits, latest MIT license and third-party notices remain intact. Public v0.1.1 and all earlier drafts/downloads keep their original source and bytes. v0.1.5 remains a draft.
+
+Both Intel and Apple Silicon Mac targets pass native tests, actual .app startup/Quit and package checks. Current receipts report ad-hoc-validation, credentialsConfigured=false, notarized=false, stapled=false and formalReady=false. Mac ZIP/.app validation artifacts expire after seven days and are excluded from Release attachments; no Developer ID signing/notarization/stapling success is claimed. Existing hardened-runtime/minimal-JIT/sign/notary/staple workflow awaits the securely configured Apple Secrets documented in docs/macos.md. Physical Windows/macOS/Linux DPI, input, trackpad, permissions, power and real-desktop acceptance remains pending with ticket 08.
