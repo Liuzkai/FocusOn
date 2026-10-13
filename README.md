@@ -16,17 +16,17 @@ The interface supports **English and Simplified Chinese**. Use the language sele
 
 [View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
-The **[v0.1.5 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-915e2b6097b83a60c8a3)** adds a time range selector: **1h, 2h, 4h, 6h, 8h, 12h, 24h, Today**. Hour ranges look back from now and can cross midnight; Today shows local midnight to now. The default is 1h. Timeline and logs use the visible range, while daily app totals and deletion stay scoped to the date picker. Historical dates use that day's end as their reference; choosing Today returns to the current date. Zoom/pan stays fixed during refresh; Reset restores the selected range and live following.
+The **[v0.1.5 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5)** adds a time range selector: **1h, 2h, 4h, 6h, 8h, 12h, 24h, Today**. Hour ranges look back from now and can cross midnight; Today shows local midnight to now. The default is 1h. Timeline and logs use the visible range, while daily app totals and deletion stay scoped to the date picker. Historical dates use that day's end as their reference; choosing Today returns to the current date. Zoom/pan stays fixed during refresh; Reset restores the selected range and live following.
 
-This draft retains pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
+This release retains pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
 
-This draft also saves more distinct app colors across restarts and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
+This release also saves more distinct app colors across restarts and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
 
 **Daily app totals** are compact: drag any app label left or right to scroll, or use the wheel, horizontal trackpad or arrow/Home/End/Page keys. A thin position line appears during interaction and hides after about one second idle, without covering labels or shifting the layout.
 
 ![Time range selector and compact daily app totals with demonstration records](docs/images/focuson-ui-interactions.png)
 
-This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. The public v0.1.1 downloads below retain their original build.
+This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. Public v0.1.5 downloads use the verified source described below; earlier releases retain their original builds.
 
 ## Features
 
@@ -41,7 +41,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 
 ## Download and run
 
-Download the latest Windows/Linux **[v0.1.1 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.1)**. Windows x64 users can download [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.1/FocusOn-win-x64.zip) directly; ARM64 and Linux packages are on the release page. The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
+Download the latest Windows/Linux **[v0.1.5 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5)**. Windows x64 users can download [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.5/FocusOn-win-x64.zip) directly; ARM64 and Linux packages are on the release page. The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
 
 | Platform | Architectures | Package and launch |
 | --- | --- | --- |

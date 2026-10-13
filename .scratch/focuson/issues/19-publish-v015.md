@@ -4,7 +4,7 @@
 
 **Blocked by:** 18 (closed)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -16,3 +16,5 @@
 ## Comments
 
 - 2026-10-13: User explicitly requested “发布0.1.5”. Recorded exact c0938e72afc53a063fc26e0ecc399e8d37b4e398 source, successful six-target build and eight verified digests. Source/tag/license baseline checks pass. Publication selector and all-history preservation guard maintenance under verification; no app rebuild or tag rewrite.
+
+- 2026-10-13: Reviewed/committed publication maintenance `b36e077`; 15 offline tests and actionlint pass. https://github.com/Liuzkai/FocusOn/actions/runs/38371850633 Success publishes/public-latest https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5, keeping immutable package source `c0938e72afc53a063fc26e0ecc399e8d37b4e398` and all eight exact original assets. Public direct downloads rechecked for size/SHA256/checksum and all four manifest sources; older Release metadata/assets and cached tag objects match. New builds still default to drafts; Mac ad-hoc validation is excluded, physical acceptance remains with 08/parent specification.

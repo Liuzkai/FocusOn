@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-13。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`45ad974` / `v0.1.1`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-13。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`c0938e7` / `v0.1.5`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -124,6 +124,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 - 按现有 tracker，代码票需实现、必需检查、审查和提交后，在 Comments 追加结果和提交引用才能关闭；移交 08 的人工项仍属待验收。08 与整体规格不能仅凭代码完成或历史测试数关闭。
 
 ## 7. 当前进度与接续事项
+
+**最新 19 票（2026-10-13）：**用户明确要求公开 v0.1.5。[发布核对](https://github.com/Liuzkai/FocusOn/actions/runs/38371850633) Success；[公开/latest Release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5) 含八个原 Windows/Linux x64/ARM64 归档/校验和，云端公开直链全部再次下载核对大小、SHA256、checksum 和 `c0938e72afc53a063fc26e0ecc399e8d37b4e398` manifest 源，通过。发布维护源 `b36e077`，按本次授权记录选择版本，15 项选择/发布/旧版本变更保护测试通过；保留完整功能说明，全部旧 Release 元数据/附件/标签对象与原记录一致。未重建、替换附件或改写标签。19 工程票关闭，08/整体规格与 Mac 信任/实机限制保持开放。用户随后新增 20 统计页面，计划独立 v0.1.6 草稿。
 
 **最新 18 票（2026-10-13）：**时间范围选择 1h/2h/4h/6h/8h/12h/24h/今天，默认 1h；用户确认滚动小时可跨日、今天为本地午夜至现在，日汇总/日期删除仍单日。ReviewProjection 与 RecordingRuntime 的一次快照读取合并跨日片段、保留精确分配时长；视窗与日志同步，手动视窗在刷新/跨午夜保持，重置跟随。104 核心/平台 + 28 UI 回归、Release 零警告/错误、原生 Linux 鼠标切换全部范围/提示/缩放保持/重置/日志底部检查通过；中英文及下拉截图更新。计划新 v0.1.5 草稿，旧标签、附件、MIT/第三方许可不改写；物理 DPI/权限/电源和 Mac 信任仍交 08。不可变源码 `c0938e72afc53a063fc26e0ecc399e8d37b4e398` / v0.1.5；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38342256279) Success，六架构各 132 回归与原生/包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-915e2b6097b83a60c8a3) 含 8 个 Windows/Linux 附件，上传下载校验通过；旧版本快照/哈希与所有标签、许可保持。Mac Intel/Apple Silicon 为 ad-hoc validation，凭据未配置，未 Developer ID/公证/staple，不是正式附件。18 工程票关闭，08/规格保持开放。
 
