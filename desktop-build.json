@@ -1,77 +1,59 @@
 {
-  "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
-  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279",
+  "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
+  "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912",
   "validationResult": "success",
   "jobs": [
     {
-      "name": "source",
+      "name": "Native linux-x64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115648790"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398252"
     },
     {
-      "name": "publish-approved",
-      "status": "completed",
-      "conclusion": "skipped",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115650208"
-    },
-    {
-      "name": "build / Native win-x64",
+      "name": "Native linux-arm64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680105"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398328"
     },
     {
-      "name": "build / Native linux-x64",
+      "name": "Native win-x64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680144"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398337"
     },
     {
-      "name": "build / Native osx-arm64",
+      "name": "Native osx-arm64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680151"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398350"
     },
     {
-      "name": "build / Native linux-arm64",
+      "name": "Native osx-x64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680172"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398403"
     },
     {
-      "name": "build / Native win-arm64",
+      "name": "Native win-arm64",
       "status": "completed",
       "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680178"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117398584"
     },
     {
-      "name": "build / Native osx-x64",
-      "status": "completed",
-      "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115115680186"
-    },
-    {
-      "name": "build / receipt",
-      "status": "completed",
-      "conclusion": "success",
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115116560312"
-    },
-    {
-      "name": "draft",
+      "name": "receipt",
       "status": "in_progress",
       "conclusion": null,
-      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342256279/job/115116612186"
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38342818912/job/115117993420"
     }
   ],
   "evidence": {
     "linux-x64": {
       "verification.json": {
         "runtime": "linux-x64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 257,
-        "archiveBytes": 47773611,
-        "archiveSha256": "FA7FBE91021E44EAF3E428FA94163FC105936AD8FA69E1E3594E59A47C3A4819",
+        "archiveBytes": 47774792,
+        "archiveSha256": "5A1E759629B02F62A19FC13E57D70796001E0946A888916CE0249CE986C61E37",
         "nativeFilesChecked": [
           "FocusOn",
           "libcoreclr.so",
@@ -80,21 +62,21 @@
         ],
         "result": "PASS"
       },
-      "package-check.log": "{\"runtime\": \"linux-x64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 257, \"archiveBytes\": 47773611, \"archiveSha256\": \"FA7FBE91021E44EAF3E428FA94163FC105936AD8FA69E1E3594E59A47C3A4819\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.so\", \"libe_sqlite3.so\", \"libSkiaSharp.so\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/linux-x64/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/linux-x64/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/linux-x64/FocusOn.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/artifacts/release/.staging-ca93c42c8380421fb5fba451e4435c64/\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/home/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-linux-x64.tar.gz\n",
+      "package-check.log": "{\"runtime\": \"linux-x64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 257, \"archiveBytes\": 47774792, \"archiveSha256\": \"5A1E759629B02F62A19FC13E57D70796001E0946A888916CE0249CE986C61E37\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.so\", \"libe_sqlite3.so\", \"libSkiaSharp.so\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/linux-x64/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/linux-x64/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/linux-x64/FocusOn.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/artifacts/release/.staging-157bc944ce534f57aa0d41020e7fd510/\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/home/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-linux-x64.tar.gz\n",
       "no-tray.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"linux-x64\",\"trayConfirmed\":false,\"macAccessibilityTrusted\":null,\"platformWarning\":\"Linux\\uFF1A\\u65E0\\u6CD5\\u786E\\u8BA4\\u9501\\u5C4F\\u548C\\u4F1A\\u8BDD\\u72B6\\u6001\\uFF0C\\u8BF7\\u5728\\u652F\\u6301 logind \\u7684\\u672C\\u5730\\u684C\\u9762\\u4F1A\\u8BDD\\u8FD0\\u884C\\u3002\\u6807\\u9898\\u8BA1\\u65F6\\u548C\\u5386\\u53F2\\u56DE\\u770B\\u4ECD\\u53EF\\u4F7F\\u7528\\u3002\",\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "build.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 2.21 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 2.21 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 2.87 sec).\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:09.75\n",
+      "build.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 1.93 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 1.94 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 2.93 sec).\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:10.76\n",
       "native-x11.log": "PASS: cross-process writer exclusion and activation\nPASS: X11 active windows, Unicode title change, executable identity, stale-window rejection, SQLite save and reopen (3 usage segments)\n",
-      "tests.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.3 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 6 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 954 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 6 s - FocusOn.UiTests.dll (net10.0)\n",
+      "tests.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.45 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 4 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 941 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 6 s - FocusOn.UiTests.dll (net10.0)\n",
       "tray-host-loss.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"linux-x64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":null,\"platformWarning\":\"Linux\\uFF1A\\u65E0\\u6CD5\\u786E\\u8BA4\\u9501\\u5C4F\\u548C\\u4F1A\\u8BDD\\u72B6\\u6001\\uFF0C\\u8BF7\\u5728\\u652F\\u6301 logind \\u7684\\u672C\\u5730\\u684C\\u9762\\u4F1A\\u8BDD\\u8FD0\\u884C\\u3002\\u6807\\u9898\\u8BA1\\u65F6\\u548C\\u5386\\u53F2\\u56DE\\u770B\\u4ECD\\u53EF\\u4F7F\\u7528\\u3002\",\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\nPASS: real StatusNotifier registration, hide/restore, host disappearance and automatic recovery (isolated protocol host)\n"
     },
     "linux-arm64": {
       "verification.json": {
         "runtime": "linux-arm64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 257,
-        "archiveBytes": 45138111,
-        "archiveSha256": "5F16C75F771F54E35C490070CEF441362C3B97824E91D6A1A6DEB055C2F81C94",
+        "archiveBytes": 45138379,
+        "archiveSha256": "FFBC8F3CE6A7BE57483F71781F756BE289A226683811B2A816619B3594736BCD",
         "nativeFilesChecked": [
           "FocusOn",
           "libcoreclr.so",
@@ -103,21 +85,21 @@
         ],
         "result": "PASS"
       },
-      "package-check.log": "{\"runtime\": \"linux-arm64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 257, \"archiveBytes\": 45138111, \"archiveSha256\": \"5F16C75F771F54E35C490070CEF441362C3B97824E91D6A1A6DEB055C2F81C94\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.so\", \"libe_sqlite3.so\", \"libSkiaSharp.so\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/linux-arm64/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/linux-arm64/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/linux-arm64/FocusOn.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/artifacts/release/.staging-9da5300757964cd8b22cc2c2521f038c/\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/home/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-linux-arm64.tar.gz\n",
+      "package-check.log": "{\"runtime\": \"linux-arm64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 257, \"archiveBytes\": 45138379, \"archiveSha256\": \"FFBC8F3CE6A7BE57483F71781F756BE289A226683811B2A816619B3594736BCD\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.so\", \"libe_sqlite3.so\", \"libSkiaSharp.so\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/linux-arm64/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/linux-arm64/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/linux-arm64/FocusOn.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/artifacts/release/.staging-eeaae1705489417999a952d790be9ce9/\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/home/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-linux-arm64.tar.gz\n",
       "no-tray.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"linux-arm64\",\"trayConfirmed\":false,\"macAccessibilityTrusted\":null,\"platformWarning\":\"Linux\\uFF1A\\u65E0\\u6CD5\\u786E\\u8BA4\\u9501\\u5C4F\\u548C\\u4F1A\\u8BDD\\u72B6\\u6001\\uFF0C\\u8BF7\\u5728\\u652F\\u6301 logind \\u7684\\u672C\\u5730\\u684C\\u9762\\u4F1A\\u8BDD\\u8FD0\\u884C\\u3002\\u6807\\u9898\\u8BA1\\u65F6\\u548C\\u5386\\u53F2\\u56DE\\u770B\\u4ECD\\u53EF\\u4F7F\\u7528\\u3002\",\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "build.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 2.44 sec).\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:08.13\n",
+      "build.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 2.92 sec).\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:09.92\n",
       "native-x11.log": "PASS: cross-process writer exclusion and activation\nPASS: X11 active windows, Unicode title change, executable identity, stale-window rejection, SQLite save and reopen (3 usage segments)\n",
-      "tests.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.87 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 4 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 956 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 5 s - FocusOn.UiTests.dll (net10.0)\n",
+      "tests.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.5 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 4 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.04 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 5 s - FocusOn.UiTests.dll (net10.0)\n",
       "tray-host-loss.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"linux-arm64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":null,\"platformWarning\":\"Linux\\uFF1A\\u65E0\\u6CD5\\u786E\\u8BA4\\u9501\\u5C4F\\u548C\\u4F1A\\u8BDD\\u72B6\\u6001\\uFF0C\\u8BF7\\u5728\\u652F\\u6301 logind \\u7684\\u672C\\u5730\\u684C\\u9762\\u4F1A\\u8BDD\\u8FD0\\u884C\\u3002\\u6807\\u9898\\u8BA1\\u65F6\\u548C\\u5386\\u53F2\\u56DE\\u770B\\u4ECD\\u53EF\\u4F7F\\u7528\\u3002\",\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\nPASS: real StatusNotifier registration, hide/restore, host disappearance and automatic recovery (isolated protocol host)\n"
     },
     "win-x64": {
       "verification.json": {
         "runtime": "win-x64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 245,
-        "archiveBytes": 49617303,
-        "archiveSha256": "CF165FF2CCA62D864B45EB6138F75CCFCA3A9081DC8C0A62D1A2076532F3210B",
+        "archiveBytes": 49618581,
+        "archiveSha256": "FBCFCEEE36393614583D66B12C41084A28B752FCE1D93F982F8932C545208597",
         "nativeFilesChecked": [
           "FocusOn.exe",
           "coreclr.dll",
@@ -126,19 +108,19 @@
         ],
         "result": "PASS"
       },
-      "package-check.log": "{\"runtime\": \"win-x64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 245, \"archiveBytes\": 49617303, \"archiveSha256\": \"CF165FF2CCA62D864B45EB6138F75CCFCA3A9081DC8C0A62D1A2076532F3210B\", \"nativeFilesChecked\": [\"FocusOn.exe\", \"coreclr.dll\", \"e_sqlite3.dll\", \"libSkiaSharp.dll\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\win-x64\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\win-x64\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\win-x64\\FocusOn.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\artifacts\\release\\.staging-6933442542f54b448da79d54946459fd\\\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1aD:\\a\\FocusOn\\FocusOn\\artifacts\\release\\FocusOn-win-x64.zip\n",
-      "build.log": "  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\FocusOn.Core.csproj (in 2.66 sec).\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\FocusOn.Platforms.csproj (in 2.66 sec).\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\FocusOn.csproj (in 3.46 sec).\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:12.63\n",
+      "package-check.log": "{\"runtime\": \"win-x64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 245, \"archiveBytes\": 49618581, \"archiveSha256\": \"FBCFCEEE36393614583D66B12C41084A28B752FCE1D93F982F8932C545208597\", \"nativeFilesChecked\": [\"FocusOn.exe\", \"coreclr.dll\", \"e_sqlite3.dll\", \"libSkiaSharp.dll\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\win-x64\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\win-x64\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\win-x64\\FocusOn.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\artifacts\\release\\.staging-a20e8d13a12b488aa3c4ab18296e8cd5\\\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1aD:\\a\\FocusOn\\FocusOn\\artifacts\\release\\FocusOn-win-x64.zip\n",
+      "build.log": "  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\FocusOn.Core.csproj (in 2.61 sec).\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\FocusOn.Platforms.csproj (in 2.61 sec).\n  Restored D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\FocusOn.csproj (in 3.64 sec).\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:10.07\n",
       "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"win-x64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":null,\"platformWarning\":null,\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "tests.log": "  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\FocusOn.Tests.csproj (in 1.58 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn.Tests -> D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll\nTest run for D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 13 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\FocusOn.UiTests.csproj (in 1.04 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n  FocusOn.UiTests -> D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll\nTest run for D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 7 s - FocusOn.UiTests.dll (net10.0)\n"
+      "tests.log": "  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\FocusOn.Tests.csproj (in 1.49 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn.Tests -> D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll\nTest run for D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 12 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\FocusOn.UiTests.csproj (in 948 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> D:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n  FocusOn.UiTests -> D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll\nTest run for D:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 6 s - FocusOn.UiTests.dll (net10.0)\n"
     },
     "win-arm64": {
       "verification.json": {
         "runtime": "win-arm64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 245,
-        "archiveBytes": 47222850,
-        "archiveSha256": "9B92AE1FBB1F6A2FC3E71260232A358260D3D4163D9E2C79ECD2E8095E209B9A",
+        "archiveBytes": 47224153,
+        "archiveSha256": "06F2FE2D26E186B65B786EF68A11EB31F22696D42B842302DB5B6E7F5C4D405F",
         "nativeFilesChecked": [
           "FocusOn.exe",
           "coreclr.dll",
@@ -147,19 +129,19 @@
         ],
         "result": "PASS"
       },
-      "package-check.log": "{\"runtime\": \"win-arm64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 245, \"archiveBytes\": 47222850, \"archiveSha256\": \"9B92AE1FBB1F6A2FC3E71260232A358260D3D4163D9E2C79ECD2E8095E209B9A\", \"nativeFilesChecked\": [\"FocusOn.exe\", \"coreclr.dll\", \"e_sqlite3.dll\", \"libSkiaSharp.dll\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\win-arm64\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\win-arm64\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\win-arm64\\FocusOn.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\artifacts\\release\\.staging-4f4356e1e0fe4e2db3e57fa0905095e4\\\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1aC:\\a\\FocusOn\\FocusOn\\artifacts\\release\\FocusOn-win-arm64.zip\n",
-      "build.log": "  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\FocusOn.Platforms.csproj (in 4.11 sec).\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\FocusOn.Core.csproj (in 4.06 sec).\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\FocusOn.csproj (in 10.99 sec).\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:18.83\n",
+      "package-check.log": "{\"runtime\": \"win-arm64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 245, \"archiveBytes\": 47224153, \"archiveSha256\": \"06F2FE2D26E186B65B786EF68A11EB31F22696D42B842302DB5B6E7F5C4D405F\", \"nativeFilesChecked\": [\"FocusOn.exe\", \"coreclr.dll\", \"e_sqlite3.dll\", \"libSkiaSharp.dll\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\win-arm64\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\win-arm64\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\win-arm64\\FocusOn.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\artifacts\\release\\.staging-145995543218464abbb418aa8f28e6be\\\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1aC:\\a\\FocusOn\\FocusOn\\artifacts\\release\\FocusOn-win-arm64.zip\n",
+      "build.log": "  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\FocusOn.Platforms.csproj (in 3.24 sec).\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\FocusOn.Core.csproj (in 3.29 sec).\n  Restored C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\FocusOn.csproj (in 6.54 sec).\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:12.98\n",
       "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"win-arm64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":null,\"platformWarning\":null,\"macForegroundUsageObserved\":false,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "tests.log": "  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\FocusOn.Tests.csproj (in 4.24 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn.Tests -> C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll\nTest run for C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 13 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\FocusOn.UiTests.csproj (in 1.03 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n  FocusOn.UiTests -> C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll\nTest run for C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 5 s - FocusOn.UiTests.dll (net10.0)\n"
+      "tests.log": "  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\FocusOn.Tests.csproj (in 3.22 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn.Tests -> C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll\nTest run for C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.Tests\\bin\\Release\\net10.0\\FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 10 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\FocusOn.UiTests.csproj (in 939 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Core\\bin\\Release\\net10.0\\FocusOn.Core.dll\n  FocusOn.Platforms -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn.Platforms\\bin\\Release\\net10.0\\FocusOn.Platforms.dll\n  FocusOn -> C:\\a\\FocusOn\\FocusOn\\src\\FocusOn\\bin\\Release\\net10.0\\FocusOn.dll\n  FocusOn.UiTests -> C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll\nTest run for C:\\a\\FocusOn\\FocusOn\\tests\\FocusOn.UiTests\\bin\\Release\\net10.0\\FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 5 s - FocusOn.UiTests.dll (net10.0)\n"
     },
     "osx-x64": {
       "verification.json": {
         "runtime": "osx-x64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 248,
-        "archiveBytes": 49358375,
-        "archiveSha256": "EA93B55EC6A42B2F791B6055035588E112527DEAAEECFF8C3E2B725735A9DC7A",
+        "archiveBytes": 49359674,
+        "archiveSha256": "4D3654249A2C0F8F8BB03F4EE122E7EE058F549A6C43BFE0C3A9EE2CEEB83B37",
         "nativeFilesChecked": [
           "FocusOn",
           "libcoreclr.dylib",
@@ -176,20 +158,20 @@
         "stapled": false,
         "formalReady": false
       },
-      "package-check.log": "{\"runtime\": \"osx-x64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 248, \"archiveBytes\": 49358375, \"archiveSha256\": \"EA93B55EC6A42B2F791B6055035588E112527DEAAEECFF8C3E2B725735A9DC7A\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.dylib\", \"libe_sqlite3.dylib\", \"libSkiaSharp.dylib\", \"libAvaloniaNative.dylib\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/osx-x64/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/osx-x64/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/osx-x64/FocusOn.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/artifacts/release/.staging-c7346c3691c842189f6100b6c29c4d81/FocusOn.app/Contents/Resources/runtime/\nMac validation bundle: ad-hoc only; no Developer ID or notarization claim.\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/Users/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-osx-x64.zip\n",
+      "package-check.log": "{\"runtime\": \"osx-x64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 248, \"archiveBytes\": 49359674, \"archiveSha256\": \"4D3654249A2C0F8F8BB03F4EE122E7EE058F549A6C43BFE0C3A9EE2CEEB83B37\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.dylib\", \"libe_sqlite3.dylib\", \"libSkiaSharp.dylib\", \"libAvaloniaNative.dylib\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/osx-x64/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/osx-x64/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/osx-x64/FocusOn.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/artifacts/release/.staging-36faf85f46ea417fb6df3f4701e41119/FocusOn.app/Contents/Resources/runtime/\nMac validation bundle: ad-hoc only; no Developer ID or notarization claim.\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/Users/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-osx-x64.zip\n",
       "app-bundle.log": "{\"result\": \"PASS\", \"runtime\": \"osx-x64\", \"checks\": [\"actual self-contained .app startup\", \"SQLite initialized\", \"native Quit event\", \"normal exit\"]}\n",
-      "build.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 6.88 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 6.88 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 12.72 sec).\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:31.32\n",
+      "build.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 4.99 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 4.99 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 9.35 sec).\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:16.14\n",
       "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"osx-x64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":true,\"platformWarning\":null,\"macForegroundUsageObserved\":true,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 3.92 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 3 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 3.02 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 11 s - FocusOn.UiTests.dll (net10.0)\n"
+      "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 2.63 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 3 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.39 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 7 s - FocusOn.UiTests.dll (net10.0)\n"
     },
     "osx-arm64": {
       "verification.json": {
         "runtime": "osx-arm64",
-        "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+        "sourceCommit": "2a7275cd963461ec63af8a39e1d5561bdd5c5dba",
         "files": 248,
-        "archiveBytes": 47062806,
-        "archiveSha256": "554A4ADBB4012A83BCD44736ECD6682E5C87B82A0BE9E5B618A125B99A9FEBFD",
+        "archiveBytes": 47064084,
+        "archiveSha256": "DD39E6E7A979719B68034328D071A726187364D421E113B976860F3660E35F23",
         "nativeFilesChecked": [
           "FocusOn",
           "libcoreclr.dylib",
@@ -206,314 +188,12 @@
         "stapled": false,
         "formalReady": false
       },
-      "package-check.log": "{\"runtime\": \"osx-arm64\", \"sourceCommit\": \"c0938e72afc53a063fc26e0ecc399e8d37b4e398\", \"files\": 248, \"archiveBytes\": 47062806, \"archiveSha256\": \"554A4ADBB4012A83BCD44736ECD6682E5C87B82A0BE9E5B618A125B99A9FEBFD\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.dylib\", \"libe_sqlite3.dylib\", \"libSkiaSharp.dylib\", \"libAvaloniaNative.dylib\"], \"result\": \"PASS\"}\n",
-      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/osx-arm64/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/osx-arm64/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/osx-arm64/FocusOn.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/artifacts/release/.staging-13fa6cd8e7c74629b230603f3becb08d/FocusOn.app/Contents/Resources/runtime/\nMac validation bundle: ad-hoc only; no Developer ID or notarization claim.\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/Users/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-osx-arm64.zip\n",
+      "package-check.log": "{\"runtime\": \"osx-arm64\", \"sourceCommit\": \"2a7275cd963461ec63af8a39e1d5561bdd5c5dba\", \"files\": 248, \"archiveBytes\": 47064084, \"archiveSha256\": \"DD39E6E7A979719B68034328D071A726187364D421E113B976860F3660E35F23\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.dylib\", \"libe_sqlite3.dylib\", \"libSkiaSharp.dylib\", \"libAvaloniaNative.dylib\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/osx-arm64/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/osx-arm64/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/osx-arm64/FocusOn.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/artifacts/release/.staging-3389002330784025a10d6da5f5f3ee48/FocusOn.app/Contents/Resources/runtime/\nMac validation bundle: ad-hoc only; no Developer ID or notarization claim.\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/Users/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-osx-arm64.zip\n",
       "app-bundle.log": "{\"result\": \"PASS\", \"runtime\": \"osx-arm64\", \"checks\": [\"actual self-contained .app startup\", \"SQLite initialized\", \"native Quit event\", \"normal exit\"]}\n",
-      "build.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 2.48 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 2.48 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 4.89 sec).\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:12.10\n",
+      "build.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 1.77 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 1.77 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 4.57 sec).\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:10.74\n",
       "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"osx-arm64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":true,\"platformWarning\":null,\"macForegroundUsageObserved\":true,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"single writer\",\"persisted languages\",\"exit/reopen SQLite\",\"resource release\"]}\n",
-      "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.66 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 5 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.05 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 5 s - FocusOn.UiTests.dll (net10.0)\n"
+      "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 1.76 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   104, Skipped:     0, Total:   104, Duration: 5 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.44 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    28, Skipped:     0, Total:    28, Duration: 6 s - FocusOn.UiTests.dll (net10.0)\n"
     }
-  },
-  "release": {
-    "sourceCommit": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
-    "releaseTag": "v0.1.5",
-    "status": "draft",
-    "macExcluded": [
-      "osx-x64",
-      "osx-arm64"
-    ],
-    "preservedReleases": [
-      {
-        "tag_name": "v0.1.4",
-        "target_commitish": "eafc2053e5377dfe52af00013e4d5975c75d2893",
-        "name": "FocusOn v0.1.4",
-        "body": "Native Windows and Linux builds from `eafc2053e5377dfe52af00013e4d5975c75d2893`, matching immutable tag `v0.1.4`.\n\nIncludes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.\n\nTimeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.\n\nDaily app totals can be scrolled by dragging the app labels, using the wheel or horizontal trackpad, or using arrow/Home/End/Page keys. A three-DIP position line appears during interaction and hides after about one second idle, in a small footer that never covers labels. App colors are assigned for perceptual separation and saved across restarts. On the timeline, left-click selects a record, left-drag filters a range, the wheel zooms, right-drag pans, and right-click zooms to the selected range without clearing its filter. Escape or Clear range removes the range filter.\n\nValidation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.\n\nmacOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.\n\nBuild: https://github.com/Liuzkai/FocusOn/actions/runs/38254694792\nThe existing v0.1.0 tag and all Windows/Linux attachments are preserved; their historical source difference remains documented there.\n",
-        "draft": true,
-        "prerelease": false,
-        "assets": {
-          "FocusOn-linux-arm64.tar.gz": {
-            "id": 633855718,
-            "size": 45131114,
-            "digest": "sha256:116d801de74a27330a9a117829cedb7c781ad94a916997ea6ac3a7a979b5687a"
-          },
-          "FocusOn-linux-arm64.tar.gz.sha256": {
-            "id": 633855829,
-            "size": 93,
-            "digest": "sha256:7589631e6924d030bfb5b62827bb1241c7572179260a96c7a755f4d45b4e7df0"
-          },
-          "FocusOn-linux-x64.tar.gz": {
-            "id": 633855497,
-            "size": 47765387,
-            "digest": "sha256:18a8303bce7b19e96e23ed6857844ecd6c94cd0d04e23a8737ccd977e76252d6"
-          },
-          "FocusOn-linux-x64.tar.gz.sha256": {
-            "id": 633855669,
-            "size": 91,
-            "digest": "sha256:b8241c030e08b77df63e626f43f7cf3891890941a377dc7b1b706d1a849c5c6f"
-          },
-          "FocusOn-win-arm64.zip": {
-            "id": 633855302,
-            "size": 47214059,
-            "digest": "sha256:deefc2479dd445666f837958d4d003b6725ffe53b70197a057199f75bea3ef32"
-          },
-          "FocusOn-win-arm64.zip.sha256": {
-            "id": 633855436,
-            "size": 88,
-            "digest": "sha256:eecce1950ba5fa267c9602fdba13184c3160a64fcbb6a387f515d51d2663a21a"
-          },
-          "FocusOn-win-x64.zip": {
-            "id": 633855140,
-            "size": 49608482,
-            "digest": "sha256:aadc30bc768410802d268132ddb243632f55f88ef4625d8fbc958a930430cec7"
-          },
-          "FocusOn-win-x64.zip.sha256": {
-            "id": 633855257,
-            "size": 86,
-            "digest": "sha256:2479aa7b818bed70e1c030dfd6fa7d9b52dffa97d6c21a755326af181f862ed8"
-          }
-        }
-      },
-      {
-        "tag_name": "v0.1.3",
-        "target_commitish": "9c6afdb9febf4793764985bca8b9f91ca53fcf40",
-        "name": "FocusOn v0.1.3",
-        "body": "Native Windows and Linux builds from `9c6afdb9febf4793764985bca8b9f91ca53fcf40`, matching immutable tag `v0.1.3`.\n\nIncludes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.\n\nTimeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.\n\nThe daily totals scrollbar occupies its own row and does not cover app labels. App colors are assigned for perceptual separation and saved across restarts. Left-click selects a record, left-drag filters a range, the wheel zooms, right-drag pans, and right-click zooms to the selected range without clearing its filter. Escape or Clear range removes the range filter.\n\nValidation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.\n\nmacOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.\n\nBuild: https://github.com/Liuzkai/FocusOn/actions/runs/38244571956\nThe existing v0.1.0 tag and all Windows/Linux attachments are preserved; their historical source difference remains documented there.\n",
-        "draft": true,
-        "prerelease": false,
-        "assets": {
-          "FocusOn-linux-arm64.tar.gz": {
-            "id": 633653467,
-            "size": 45126444,
-            "digest": "sha256:fc605f32d864c72cb52994475254fc7054cec2c4e25ce853d381add11fe52c2c"
-          },
-          "FocusOn-linux-arm64.tar.gz.sha256": {
-            "id": 633653566,
-            "size": 93,
-            "digest": "sha256:288e003bc0c53bf54c2da273bcfba0d9eca826bfda9090dc998c388e35bcccff"
-          },
-          "FocusOn-linux-x64.tar.gz": {
-            "id": 633653253,
-            "size": 47761685,
-            "digest": "sha256:87adb56aec304004ccae91fa814064e8b2aea28bfe14fe830eb2e735c1cb2dc3"
-          },
-          "FocusOn-linux-x64.tar.gz.sha256": {
-            "id": 633653406,
-            "size": 91,
-            "digest": "sha256:9c1c5eff7cc0fd1038e7e91399caa6239f34039da87218d149eef60a4b98e143"
-          },
-          "FocusOn-win-arm64.zip": {
-            "id": 633653057,
-            "size": 47209573,
-            "digest": "sha256:9e44ae90b76b1cdc2722a838cc31a16b490ab7810a5ab3f97b832e4b8b21489d"
-          },
-          "FocusOn-win-arm64.zip.sha256": {
-            "id": 633653190,
-            "size": 88,
-            "digest": "sha256:89093d9e9f29e02d489dfacbeee4a529236a16871ea3077a453b51317b6ea78f"
-          },
-          "FocusOn-win-x64.zip": {
-            "id": 633652873,
-            "size": 49603992,
-            "digest": "sha256:a7b00bd9c2c664898e9c85b1c24c7f900164d40d1a939ca0ec76a9a78f87b587"
-          },
-          "FocusOn-win-x64.zip.sha256": {
-            "id": 633652988,
-            "size": 86,
-            "digest": "sha256:133ea7977de3cb81defa85726030b9558f55876726085fa6831be3e4066eaeda"
-          }
-        }
-      },
-      {
-        "tag_name": "v0.1.2",
-        "target_commitish": "8f25193fa09ec7672c197a80c4679eb0d4d5df44",
-        "name": "FocusOn v0.1.2",
-        "body": "Native Windows and Linux builds from `8f25193fa09ec7672c197a80c4679eb0d4d5df44`, matching immutable tag `v0.1.2`.\n\nIncludes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.\n\nTimeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.\n\nValidation: native standard GitHub-hosted x64/ARM64 runners, SQLite and UI regressions, native desktop residency/timer/exit checks, and file/archive/architecture/runtime verification. Linux includes isolated X11 capture and StatusNotifier registration/host-loss checks. Real desktop power, GNOME Wayland and foreground privacy permission acceptance remains pending.\n\nmacOS bundles are attached only after Developer ID signing, hardened runtime, Apple notarization, stapling and Gatekeeper verification succeed on native Intel / Apple Silicon runners. Missing credentials exclude Mac attachments. Even signed Mac bundles remain pending physical desktop and Accessibility permission acceptance. This release stays a draft.\n\nBuild: https://github.com/Liuzkai/FocusOn/actions/runs/38237429087\nThe existing v0.1.0 tag and all Windows/Linux attachments are preserved; their historical source difference remains documented there.\n",
-        "draft": true,
-        "prerelease": false,
-        "assets": {
-          "FocusOn-linux-arm64.tar.gz": {
-            "id": 633481749,
-            "size": 45121775,
-            "digest": "sha256:4e40aed7b97937e50235aa3b3ff3dc0e55008a0eb661b5fb84ca3a48b4a9c17b"
-          },
-          "FocusOn-linux-arm64.tar.gz.sha256": {
-            "id": 633481837,
-            "size": 93,
-            "digest": "sha256:42b530157cfd47dfdc5ef038b2ac9b17f8c2ca6b1ff0f62e3ebabce658cf5fc2"
-          },
-          "FocusOn-linux-x64.tar.gz": {
-            "id": 633481599,
-            "size": 47759063,
-            "digest": "sha256:e432763125d0272e8dc5d813e26d2b1ad259392b1820d3c947ad6aa0d880b387"
-          },
-          "FocusOn-linux-x64.tar.gz.sha256": {
-            "id": 633481697,
-            "size": 91,
-            "digest": "sha256:a55cbb6d2b70b0b08a5168acdd7ba1b9ba802ec7e13a4231e4dc5aafce341a3c"
-          },
-          "FocusOn-win-arm64.zip": {
-            "id": 633481440,
-            "size": 47204990,
-            "digest": "sha256:a413245ee1bc41d944005a0b24fa77208741ea4553dbad2e4e7c74da36f6a075"
-          },
-          "FocusOn-win-arm64.zip.sha256": {
-            "id": 633481556,
-            "size": 88,
-            "digest": "sha256:b21aeeecf2614453bb3738dd3d9acd614e8b0b90bf61fab2d30fbc4cec3017cd"
-          },
-          "FocusOn-win-x64.zip": {
-            "id": 633481265,
-            "size": 49599424,
-            "digest": "sha256:eb4202454e64ca816525ca90d77193d15e0089c6a847c893fcf6efb8cb844803"
-          },
-          "FocusOn-win-x64.zip.sha256": {
-            "id": 633481404,
-            "size": 86,
-            "digest": "sha256:d0de3575e765744215baea281d7a8487b010498c0cda8ab046384974d375b8a1"
-          }
-        }
-      },
-      {
-        "tag_name": "v0.1.1",
-        "target_commitish": "45ad974fc3f86c9721b78da560361a77d1e0809a",
-        "name": "FocusOn v0.1.1",
-        "body": "Windows and Linux x64 / ARM64 packages from `45ad974fc3f86c9721b78da560361a77d1e0809a`, matching immutable tag `v0.1.1`.\n\nIncludes the FocusOn executable/window/tray icons, close-to-tray with restore and explicit Exit, recoverable Linux tray fallback, English / Simplified Chinese with a saved language preference, and the .NET runtime. Existing local records remain compatible. Archives retain MIT and third-party notices; adjacent SHA256 files verify downloads.\n\nValidation: six standard native GitHub-hosted targets passed 102 regressions each, native desktop lifecycle checks, and self-contained file/archive/architecture/runtime verification. Mac native foreground recording and actual .app startup / Quit passed. Linux checks include X11 capture and isolated StatusNotifier registration / host loss. Physical power, DPI, desktop tray panels and permission acceptance remain pending.\n\nmacOS is not included in this release. Apple credentials are not configured; Mac outputs are ad-hoc validation artifacts, not Developer ID-signed or notarized distributions. Signing, hardened runtime, notarization, stapling and Gatekeeper verification are configured but have not completed. See the repository's docs/macos.md for secure Secrets and permission setup.\n\nBuild: https://github.com/Liuzkai/FocusOn/actions/runs/38228221117\nThe existing v0.1.0 tag and all Windows/Linux attachments are preserved, including their documented historical source differences.\n",
-        "draft": false,
-        "prerelease": false,
-        "assets": {
-          "FocusOn-linux-arm64.tar.gz": {
-            "id": 633276389,
-            "size": 45119708,
-            "digest": "sha256:58010fbf7f22c7562cf6e42ff17a67203e77a61406c0eb7dff2bc48eaa5b4de0"
-          },
-          "FocusOn-linux-arm64.tar.gz.sha256": {
-            "id": 633276495,
-            "size": 93,
-            "digest": "sha256:403be57727ace252ea278bee7938d6191b718a51de99aaabc8ac9d9ff7088eb5"
-          },
-          "FocusOn-linux-x64.tar.gz": {
-            "id": 633276222,
-            "size": 47752480,
-            "digest": "sha256:058dd1697cdd3501c2d87d571a41ff08129aa812874c87fb7e070033117b53c5"
-          },
-          "FocusOn-linux-x64.tar.gz.sha256": {
-            "id": 633276339,
-            "size": 91,
-            "digest": "sha256:b1b24e682419796e9d1dccff09e6bb8aa7659cb78b94fe0ca5333a5745b6cca3"
-          },
-          "FocusOn-win-arm64.zip": {
-            "id": 633276036,
-            "size": 47200190,
-            "digest": "sha256:c04617dee6e02924f363d8e25d4ff6ef842aa3cccf1c2d29ecff13a4857ab287"
-          },
-          "FocusOn-win-arm64.zip.sha256": {
-            "id": 633276170,
-            "size": 88,
-            "digest": "sha256:9093e966eb5db982267249b40169300d4e2a2c29800b3ff233578a465d95c696"
-          },
-          "FocusOn-win-x64.zip": {
-            "id": 633275894,
-            "size": 49594605,
-            "digest": "sha256:ee292367de1f232c0910f357ea24ec07dfb1e16b16d3e950d605d37c329b462b"
-          },
-          "FocusOn-win-x64.zip.sha256": {
-            "id": 633276002,
-            "size": 86,
-            "digest": "sha256:d821d724ec29cf73be5e7cdabb127c978416522a7771f5d6a077cd1aaefd79df"
-          }
-        }
-      },
-      {
-        "tag_name": "v0.1.0",
-        "target_commitish": "main",
-        "name": "FocusOn v0.1.0",
-        "body": "FocusOn \u9996\u4e2a Windows x64 \u81ea\u5305\u542b\u53d1\u5e03\u5305\u3002\n\n### \u529f\u80fd\n\n- \u8bb0\u5f55\u6fc0\u6d3b\u7a97\u53e3\u7684\u8f6f\u4ef6\u3001\u6807\u9898\u548c\u524d\u53f0\u4f7f\u7528\u65f6\u957f\uff0c\u6309\u65e5\u671f\u56de\u770b\u8f6f\u4ef6\u6c47\u603b\u3001\u65f6\u95f4\u7ebf\u548c\u65e5\u5fd7\u3002\n- \u652f\u6301\u8bb0\u5f55\u8303\u56f4 / 24h \u65f6\u95f4\u7ebf\u3001\u5f53\u524d\u65e5\u671f\u641c\u7d22\u53ca\u72ec\u7acb\u6807\u9898\u8ba1\u65f6\u3002\n- \u652f\u6301\u6258\u76d8\u9a7b\u7559\u3001\u767b\u5f55\u81ea\u542f\u3001\u6682\u505c/\u7ee7\u7eed\u548c\u6309\u5929\u5220\u9664\u3002\n- \u6570\u636e\u4fdd\u5b58\u5728\u5f53\u524d\u7528\u6237\u672c\u673a\uff0c\u4e0d\u4f9d\u8d56\u5728\u7ebf\u670d\u52a1\u3002\n\n### \u4e0b\u8f7d\u4e0e\u8fd0\u884c\n\n\u4e0b\u8f7d\u9644\u4ef6 `FocusOn-win-x64.zip`\uff0c\u5b8c\u6574\u89e3\u538b\u5230\u56fa\u5b9a\u76ee\u5f55\uff0c\u518d\u8fd0\u884c `FocusOn.exe`\u3002\u5305\u5185\u5305\u542b .NET \u548c Windows \u684c\u9762\u8fd0\u884c\u65f6\uff0c\u65e0\u9700\u53e6\u88c5 SDK\u3002\u9996\u6b21\u666e\u901a\u542f\u52a8\u4f1a\u914d\u7f6e\u5f53\u524d\u7528\u6237\u767b\u5f55\u81ea\u542f\uff1b\u5173\u95ed\u7a97\u53e3\u540e\u4ecd\u5728\u6258\u76d8\u8fd0\u884c\uff0c\u8bf7\u4ece\u6258\u76d8\u9000\u51fa\u7a0b\u5e8f\u3002\n\n\u5347\u7ea7\u524d\u5148\u4ece\u65e7\u7248\u6258\u76d8\u9000\u51fa\uff0c\u518d\u542f\u52a8\u65b0\u7248\u3002\u9ed8\u8ba4\u6570\u636e\u76ee\u5f55\u4e3a `%LOCALAPPDATA%\\FocusOn`\uff0c\u8be6\u7ec6\u64cd\u4f5c\u89c1\u5305\u5185 `\u4f7f\u7528\u8bf4\u660e.md`\u3002\n\n\u9644\u4ef6 `FocusOn-win-x64.zip.sha256` \u63d0\u4f9b\u6821\u9a8c\u503c\u3002GitHub \u81ea\u52a8\u751f\u6210\u7684 Source code \u9644\u4ef6\u662f\u6e90\u7801\uff1b\u8fd0\u884c\u8f6f\u4ef6\u8bf7\u4e0b\u8f7d\u4e0a\u8ff0\u7a0b\u5e8f ZIP\u3002\n\n### \u9a8c\u8bc1\u8303\u56f4\n\nWindows GitHub Actions \u5df2\u6267\u884c Release \u6784\u5efa\u300179 \u9879\u81ea\u52a8\u5316\u6d4b\u8bd5\u53ca\u72ec\u7acb\u6587\u4ef6\u3001ZIP\u3001SHA256\u3001\u8fd0\u884c\u65f6\u548c AMD64 \u67b6\u6784\u6821\u9a8c\u3002\u771f\u5b9e\u9501\u5c4f/\u7761\u7720\u3001\u767b\u5f55\u81ea\u542f\u3001DPI\u3001\u9ad8\u5bf9\u6bd4\u5ea6\u4e0e\u65ad\u7f51\u8fd0\u884c\u7b49\u8bbe\u5907\u9a8c\u6536\u4ecd\u6309\u4ed3\u5e93\u4eba\u5de5\u6e05\u5355\u8fdb\u884c\u3002\n\n\u6784\u5efa\u6e90\uff1a`43d6dfd901d708ce27d13fcfb691e3061f66c405`\u3002\n\n<!-- focuson-linux -->\n## Linux packages\n\n- **x64:** `FocusOn-linux-x64.tar.gz`\n- **ARM64:** `FocusOn-linux-arm64.tar.gz`\n- Each archive includes the .NET runtime, a file manifest, platform instructions, and the GNOME Wayland extension. The adjacent `.sha256` file verifies the archive.\n- Extract the complete folder and run `./FocusOn` in a graphical desktop session. X11 capture requires logind; GNOME Wayland requires enabling the bundled extension. Other Wayland desktops support history and title timers, but foreground capture is unavailable.\n- English and Simplified Chinese can be selected in the top row. The language preference is saved locally; user titles and historical data remain unchanged.\n\n**Source:** Linux assets were built from [409cb51ed57f79637cfbca6691480aa5bb6a3a69](https://github.com/Liuzkai/FocusOn/tree/409cb51ed57f79637cfbca6691480aa5bb6a3a69), the cross-platform implementation. The existing Windows `v0.1.0` tag and Windows assets are unchanged; GitHub's tag source archives therefore refer to the older Windows source. The Linux source commit is also recorded in each `manifest.json`.\n\n**Validation:** core/platform and headless UI regressions, native virtual X11 capture and cross-process activation, and independent archive/file/SHA256/ELF/permission/runtime checks. ARM64 is cross-compiled; real ARM64 startup, GNOME Wayland, logind lock/sleep/display behavior, and hardware acceptance remain unverified.\n<!-- /focuson-linux -->",
-        "draft": false,
-        "prerelease": false,
-        "assets": {
-          "FocusOn-linux-arm64.tar.gz": {
-            "id": 632646381,
-            "size": 44169273,
-            "digest": "sha256:5a81564dea6f212dcd0f6c7f12fefd0a9a3e7997ddbfb2694d6e3c22abc8e1ab"
-          },
-          "FocusOn-linux-arm64.tar.gz.sha256": {
-            "id": 632646447,
-            "size": 93,
-            "digest": "sha256:b481f5e9f07ec6863b18b64b76694a1d5cdf268059b9831747d123629f2fb2c8"
-          },
-          "FocusOn-linux-x64.tar.gz": {
-            "id": 632646253,
-            "size": 46835098,
-            "digest": "sha256:36dc66bf3ec12a2e459047af0d18c3194393a812d9381c0f7dc2b471aa5e8d2b"
-          },
-          "FocusOn-linux-x64.tar.gz.sha256": {
-            "id": 632646349,
-            "size": 91,
-            "digest": "sha256:7096933c79e5c4f11779f63db91736df58789192474c8f8ed06cce5d405ff516"
-          },
-          "FocusOn-win-x64.zip": {
-            "id": 632512486,
-            "size": 77388363,
-            "digest": "sha256:abf032649026e773d96dd530e0d427b26703181a4d83800d1a5d3185e328f803"
-          },
-          "FocusOn-win-x64.zip.sha256": {
-            "id": 632512487,
-            "size": 87,
-            "digest": "sha256:50b809bb2fa52e558a365e95b42b3e4e863a13d231392e6c754dd8233360a392"
-          }
-        }
-      }
-    ],
-    "releaseUrl": "https://github.com/Liuzkai/FocusOn/releases/tag/untagged-915e2b6097b83a60c8a3",
-    "assets": [
-      {
-        "name": "FocusOn-linux-arm64.tar.gz",
-        "size": 45138111,
-        "digest": "sha256:5f16c75f771f54e35c490070cef441362c3b97824e91d6a1a6deb055c2f81c94",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-arm64.tar.gz"
-      },
-      {
-        "name": "FocusOn-linux-arm64.tar.gz.sha256",
-        "size": 93,
-        "digest": "sha256:c6a557fd29dbf3f9f3c7a0ce589880e3e88cfe1cac06ef052cca9800b659a133",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-arm64.tar.gz.sha256"
-      },
-      {
-        "name": "FocusOn-linux-x64.tar.gz",
-        "size": 47773611,
-        "digest": "sha256:fa7fbe91021e44eaf3e428fa94163fc105936ad8fa69e1e3594e59a47c3a4819",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-x64.tar.gz"
-      },
-      {
-        "name": "FocusOn-linux-x64.tar.gz.sha256",
-        "size": 91,
-        "digest": "sha256:b512544dad65e179271912cef90dd2b9f662abc47a627550092b07567ae14a9f",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-linux-x64.tar.gz.sha256"
-      },
-      {
-        "name": "FocusOn-win-arm64.zip",
-        "size": 47222850,
-        "digest": "sha256:9b92ae1fbb1f6a2fc3e71260232a358260d3d4163d9e2c79ecd2e8095e209b9a",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-arm64.zip"
-      },
-      {
-        "name": "FocusOn-win-arm64.zip.sha256",
-        "size": 88,
-        "digest": "sha256:6c1d141773241a3d8e54629f04e8e0ae9a8e8599a1bb25aa20ae333035896282",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-arm64.zip.sha256"
-      },
-      {
-        "name": "FocusOn-win-x64.zip",
-        "size": 49617303,
-        "digest": "sha256:cf165ff2cca62d864b45eb6138f75ccfca3a9081dc8c0a62d1a2076532f3210b",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-x64.zip"
-      },
-      {
-        "name": "FocusOn-win-x64.zip.sha256",
-        "size": 86,
-        "digest": "sha256:57e2670dc1ff5fd5ecf5262e24ac9247a7cb692330e3c9a7df0071d1b1c3288f",
-        "url": "https://github.com/Liuzkai/FocusOn/releases/download/untagged-915e2b6097b83a60c8a3/FocusOn-win-x64.zip.sha256"
-      }
-    ]
   }
 }
