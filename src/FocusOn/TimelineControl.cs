@@ -13,6 +13,7 @@ public sealed class TimelineControl : Control
 {
     private const double LabelWidth = 54, LaneHeight = 22, BarTop = 8, BarHeight = 12;
     private DayView? day;
+    private ReviewView? review;
     private RecordedInterval[] intervals = [];
     private DateTimeOffset boundsStart, boundsEnd, visibleStart, visibleEnd;
     private bool autoViewport = true;
@@ -52,6 +53,7 @@ public sealed class TimelineControl : Control
     public event Action? ViewChanged;
     public (DateTimeOffset StartUtc, DateTimeOffset EndUtc)? Range { get; private set; }
     public bool FullDay { get; private set; }
+    public bool IsFollowingPreset => autoViewport;
     public DateTimeOffset VisibleStart => visibleStart;
     public DateTimeOffset VisibleEnd => visibleEnd;
     public bool CanZoomIn => day is not null && visibleEnd - visibleStart > TimeSpan.FromSeconds(2);
@@ -60,6 +62,7 @@ public sealed class TimelineControl : Control
 
     public void SetDay(DayView value)
     {
+        review = null;
         var newDay = day is null || day.Date != value.Date || day.StartUtc != value.StartUtc || day.EndUtc != value.EndUtc;
         day = value;
         intervals = value.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
@@ -78,9 +81,34 @@ public sealed class TimelineControl : Control
         if (selectedId is { } id && !intervals.Any(x => x.Id == id)) selectedId = null;
         InvalidateVisual(); ViewChanged?.Invoke(); RefreshHover();
     }
+    public void SetReview(ReviewView value, bool reset = false)
+    {
+        var newDay = day is null || day.Date != value.Daily.Date || day.StartUtc != value.Daily.StartUtc || day.EndUtc != value.Daily.EndUtc;
+        var preserveManual = day is not null && !reset && !autoViewport;
+        review = value; day = value.Daily; FullDay = false;
+        intervals = value.Intervals.OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+        gapBefore.Clear(); gapAfter.Clear();
+        RecordedInterval? previous = null;
+        foreach (var usage in intervals.Where(x => x.Kind == IntervalKind.Usage))
+        {
+            if (previous is not null && previous.EndUtc == usage.StartUtc && previous.AppKey != usage.AppKey)
+            { gapAfter.Add(previous.Id); gapBefore.Add(usage.Id); }
+            previous = usage;
+        }
+        boundsStart = value.Plan.NavigationStartUtc; boundsEnd = value.Plan.EndUtc;
+        if ((newDay && !preserveManual) || reset || autoViewport)
+        {
+            autoViewport = true; visibleStart = value.Plan.StartUtc; visibleEnd = value.Plan.EndUtc;
+        }
+        else SetViewport(Middle(visibleStart, visibleEnd), (visibleEnd - visibleStart).Ticks, false);
+        if (newDay && !preserveManual) { selectedId = null; keyboardAnchor = null; }
+        if ((newDay && !preserveManual) || reset) ClearRange();
+        if (selectedId is { } id && !intervals.Any(x => x.Id == id)) selectedId = null;
+        InvalidateVisual(); ViewChanged?.Invoke(); RefreshHover();
+    }
     public void Clear()
     {
-        day = null; intervals = []; gapBefore.Clear(); gapAfter.Clear(); selectedId = null; keyboardAnchor = null; Range = null; CancelDrag(); HideHover();
+        day = null; review = null; intervals = []; gapBefore.Clear(); gapAfter.Clear(); selectedId = null; keyboardAnchor = null; Range = null; CancelDrag(); HideHover();
         InvalidateVisual(); ViewChanged?.Invoke();
     }
     public void SelectInterval(long id)
@@ -88,7 +116,7 @@ public sealed class TimelineControl : Control
         var target = intervals.FirstOrDefault(x => x.Id == id);
         if (target is null) return;
         selectedId = id;
-        if (target.EndUtc <= boundsStart || target.StartUtc >= boundsEnd) SetFullDay(true);
+        if (review is null && (target.EndUtc <= boundsStart || target.StartUtc >= boundsEnd)) SetFullDay(true);
         if (target.EndUtc <= visibleStart || target.StartUtc >= visibleEnd)
             SetViewport(Middle(target.StartUtc, target.EndUtc), (visibleEnd - visibleStart).Ticks);
         AutomationProperties.SetName(this, Localizer.Get("已选：{0}", TipText(target)));
@@ -114,20 +142,27 @@ public sealed class TimelineControl : Control
     public void ResetDay()
     {
         if (day is null) return;
-        autoViewport = true; (boundsStart, boundsEnd) = TimelineBounds.For(day, FullDay);
-        visibleStart = boundsStart; visibleEnd = boundsEnd; ClearRange(); InvalidateVisual(); ViewChanged?.Invoke();
+        autoViewport = true;
+        if (review is null)
+        {
+            (boundsStart, boundsEnd) = TimelineBounds.For(day, FullDay);
+            visibleStart = boundsStart; visibleEnd = boundsEnd;
+        }
+        else { visibleStart = review.Plan.StartUtc; visibleEnd = review.Plan.EndUtc; }
+        ClearRange(); InvalidateVisual(); ViewChanged?.Invoke();
         RefreshHover();
     }
     public void SetFullDay(bool value) { FullDay = value; ResetDay(); }
     public static IBrush ApplicationBrush(string? key) => ReviewTheme.ApplicationBrush(key);
     private static DateTimeOffset Middle(DateTimeOffset start, DateTimeOffset end) => start.AddTicks((end - start).Ticks / 2);
-    private void SetViewport(DateTimeOffset center, long requested)
+    private void SetViewport(DateTimeOffset center, long requested, bool manual = true)
     {
         if (day is null) return;
         var total = (boundsEnd - boundsStart).Ticks;
         var width = Math.Clamp(requested, Math.Min(TimeSpan.FromSeconds(2).Ticks, total), total);
         visibleStart = new(Math.Clamp(center.UtcTicks - width / 2, boundsStart.UtcTicks, boundsEnd.UtcTicks - width), TimeSpan.Zero);
-        visibleEnd = visibleStart.AddTicks(width); autoViewport = width == total;
+        visibleEnd = visibleStart.AddTicks(width);
+        if (manual) autoViewport = review is null && width == total;
         InvalidateVisual(); ViewChanged?.Invoke();
         RefreshHover();
     }
@@ -183,10 +218,12 @@ public sealed class TimelineControl : Control
             using (context.PushOpacity(0.2)) context.DrawRectangle(ReviewTheme.Accent, null, new Rect(X(selected.StartUtc), 0, X(selected.EndUtc) - X(selected.StartUtc), 72));
         }
         var span = visibleEnd - visibleStart;
-        var format = span < TimeSpan.FromHours(1) ? "HH:mm:ss" : "HH:mm";
-        for (var i = 0; i <= 6; i++)
+        var crossesDate = visibleStart.ToLocalTime().Date != visibleEnd.ToLocalTime().Date;
+        var format = crossesDate ? "MM-dd HH:mm" : span < TimeSpan.FromHours(1) ? "HH:mm:ss" : "HH:mm";
+        var ticks = crossesDate ? 4 : 6;
+        for (var i = 0; i <= ticks; i++)
         {
-            var at = visibleStart.AddTicks(span.Ticks * i / 6);
+            var at = visibleStart.AddTicks(span.Ticks * i / ticks);
             var label = Text(at.ToLocalTime().ToString(format), ReviewTheme.Muted);
             context.DrawText(label, new Point(Math.Clamp(X(at) - label.Width / 2, LabelWidth, Math.Max(LabelWidth, Bounds.Width - label.Width)), 77));
         }

@@ -218,3 +218,8 @@ New-Item -ItemType Directory -Path $testData -Force | Out-Null
 ## v0.1.3 totals, colors and range zoom
 
 On physical Windows at 100%, 150% and 200% scale, narrow the window until daily totals overflow. Move/drag the horizontal scrollbar and confirm every label remains unobstructed, the last app can be reached and refresh retains the offset. Compare FocusOn/WorkBuddy and other apps in totals, logs and timeline; refresh, switch dates and restart with the same data directory to confirm stable assignments. Inspect high contrast and keep app names readable. Left-click a segment, left-drag a range, wheel-zoom, right-drag to pan, then right-click a selected range to fit its bounds; verify the range/log filter stays selected and full-day totals stay unchanged. Use Escape or Clear range to cancel. Test a tiny range (minimum viewport two seconds) and all screen edges/monitors. Automated headless and native Linux synthetic-data checks are separate evidence; these physical-device checks remain pending.
+
+
+## v0.1.5 rolling windows
+
+On physical devices, check all eight options, a real midnight transition and DST where applicable. Confirm 24h means elapsed hours and Today means local midnight to now; selecting Today returns from history. Check date labels, exact short segments/durations, log range/search/selection and live log-end following. Zoom/pan before midnight and keep the viewport through refresh, then Reset to live following. Daily totals and deletion must remain scoped to the date picker, even when earlier-date records are visible. Use separate test data; these device/DPI/trackpad checks remain pending, distinct from automated and native Linux synthetic-data evidence.

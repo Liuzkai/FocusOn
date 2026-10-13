@@ -75,7 +75,15 @@ public sealed class RecordingController : IAsyncDisposable
     public void Poll() { if (!stopped) observer?.Poll(); }
     public async Task<DayView> ReadDayAsync(DateOnly day)
     {
-        var view = await runtime.ReadDayAsync(day);
+        return AddPlatformWarning(await runtime.ReadDayAsync(day));
+    }
+    public async Task<ReviewView> ReadReviewAsync(ReviewRequest request)
+    {
+        var view = await runtime.ReadReviewAsync(request);
+        return view with { Daily = AddPlatformWarning(view.Daily) };
+    }
+    private DayView AddPlatformWarning(DayView view)
+    {
         var state = session?.ReadCurrentState();
         var warning = foregroundWarning ?? state?.Warning;
         if (warning is null) return view;

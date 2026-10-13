@@ -1,0 +1,7 @@
+# Rolling review windows and daily totals
+
+2026-10-13: The user confirmed hour presets 1/2/4/6/8/12/24 as elapsed lookback windows, including across midnight; Today means local midnight to now. This extends the original single-date review projection. Daily app totals, date deletion and timer controls retain the date picker's daily scope.
+
+Default 1h ends at the current snapshot. Historical dates use their actual local day end as the reference; choosing Today returns to the current local date. Hour durations use UTC elapsed time, while Today uses the existing timezone/DST daily boundaries. The selector applies to timeline and intersecting logs. Zoom/pan also update the visible log scope; selection filtering intersects that scope without recropping intervals or changing their recorded duration. Reset restores the selected preset and live following. User zoom/pan stays fixed on refresh.
+
+Production queries all necessary daily projections in one existing recorder-queue command at one UTC/monotonic snapshot, with no writes/migrations. Contiguous parts of the same interval ID across daily boundaries are joined with summed allocated duration; conflicting IDs fail visibly rather than silently dropping records. Daily totals come only from the selected date. Dates appear on cross-day axis/log labels, and the range caption states the visible endpoints. Prior timestamp, title/privacy, short-segment, checkpoint, tray, bilingual and release trust rules remain unchanged.

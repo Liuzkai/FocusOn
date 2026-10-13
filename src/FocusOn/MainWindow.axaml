@@ -58,15 +58,19 @@
         <Button x:Name="DurationButton" Content="时长" Margin="0,0,6,4" />
         <Button x:Name="GroupsButton" Content="时段 ⊟" Margin="0,0,6,4" />
         <Button x:Name="DetailsButton" Content="详情 ⊞" Margin="0,0,6,4" />
-        <Button x:Name="RecordedModeButton" Content="记录范围" Margin="0,0,6,4" />
-        <Button x:Name="FullDayModeButton" Content="24h" Margin="0,0,6,4" />
+        <ComboBox x:Name="RangePicker" Width="105" SelectedIndex="0" Margin="0,0,6,4" AutomationProperties.Name="时间范围">
+          <ComboBoxItem Content="1h" Tag="1" /><ComboBoxItem Content="2h" Tag="2" />
+          <ComboBoxItem Content="4h" Tag="4" /><ComboBoxItem Content="6h" Tag="6" />
+          <ComboBoxItem Content="8h" Tag="8" /><ComboBoxItem Content="12h" Tag="12" />
+          <ComboBoxItem Content="24h" Tag="24" /><ComboBoxItem x:Name="TodayRangeItem" Content="今天" Tag="today" />
+        </ComboBox>
         <Button x:Name="ZoomInButton" Content="＋" Margin="0,0,6,4" AutomationProperties.Name="放大时间线" />
         <Button x:Name="ZoomOutButton" Content="－" Margin="0,0,6,4" AutomationProperties.Name="缩小时间线" />
         <Button x:Name="ResetDayButton" Content="重置" Margin="0,0,6,4" />
         <Button x:Name="ClearRangeButton" Content="清除范围" Margin="0,0,6,4" />
         <Button x:Name="DeleteDayButton" Content="删除所选日期" Margin="0,0,6,4" />
       </WrapPanel>
-      <TextBox x:Name="SearchBox" Watermark="搜索当天软件或窗口标题" AutomationProperties.Name="搜索当天软件或窗口标题" />
+      <TextBox x:Name="SearchBox" Watermark="搜索时间范围内的软件或窗口标题" AutomationProperties.Name="搜索时间范围内的软件或窗口标题" />
       <local:TimelineControl x:Name="TimelineView" />
       <TextBlock x:Name="RangeText" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" FontSize="12" />
     </StackPanel>

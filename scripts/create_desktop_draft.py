@@ -77,6 +77,8 @@ try:
 
 Includes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.
 
+The time range selector offers 1h, 2h, 4h, 6h, 8h, 12h, 24h and Today; the default is 1h. Hour ranges are elapsed lookbacks and can cross midnight. Today shows local midnight to now. Timeline and intersecting logs follow the visible range; daily totals and deletion retain the date picker's daily scope. Historical dates use their day end as the reference. Zoom/pan stays fixed during refresh; Reset restores the selected preset and live following. Cross-day projections are joined in one recorder snapshot without duplicate records or duration rounding loss.
+
 Timeline hints follow the pointer and refresh without hover delays. Scrolling to the log end follows appended records; scrolling up or selecting history pauses following. Small separators mark contiguous different-app boundaries without changing recorded times or durations.
 
 Daily app totals can be scrolled by dragging the app labels, using the wheel or horizontal trackpad, or using arrow/Home/End/Page keys. A three-DIP position line appears during interaction and hides after about one second idle, in a small footer that never covers labels. App colors are assigned for perceptual separation and saved across restarts. On the timeline, left-click selects a record, left-drag filters a range, the wheel zooms, right-drag pans, and right-click zooms to the selected range without clearing its filter. Escape or Clear range removes the range filter.

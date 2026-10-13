@@ -174,3 +174,6 @@ flowchart LR
 Windows 提供前台事件与标题接口，但标题可能为空，内容变化也不保证对应标题变化。标题通知、打包应用身份、锁屏／唤醒／灭屏和权限受限窗口均需实施时验证。已保存的窗口标题不保证还原浏览器 URL、网页正文或所有内部页面切换。系统时间回拨和时区切换后的历史裁切不在第一版的正确性承诺内。
 
 官方依据：[WinEvent 事件定义](https://learn.microsoft.com/en-us/windows/win32/winauto/event-constants)、[SetWinEventHook](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwineventhook)、[GetWindowTextW](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextw)、[GetLastInputInfo](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getlastinputinfo)、[会话通知](https://learn.microsoft.com/en-us/windows/win32/termserv/wm-wtssession-change)、[电源通知](https://learn.microsoft.com/en-us/windows/win32/power/wm-powerbroadcast)、[显示状态通知](https://learn.microsoft.com/en-us/windows/win32/power/power-setting-guids)、[登录自启](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)。
+
+
+2026-10-13 最新范围设计（18 票，替代上面的记录范围/本地全天 24h 描述）：下拉选择 1h/2h/4h/6h/8h/12h/24h/今天，默认 1h。小时数表示真实经过时间，可以跨午夜；今天是本地午夜至现在。历史日期以日结束为参考。跨日读取通过原记录队列的一次快照合并每日片段，日汇总和日期删除保持单日范围；手动缩放/平移、跨午夜刷新不改变所选视窗，重置恢复预设跟随。详见 ADR 0006。

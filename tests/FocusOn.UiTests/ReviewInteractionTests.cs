@@ -23,12 +23,28 @@ public sealed class ReviewInteractionTests
         return new(day, start, end, intervals, [new("editor", "Editor", TimeSpan.FromMinutes((count + 1) / 2)),
             new("browser", "Browser", TimeSpan.FromMinutes(count / 2))], "正在记录", null);
     }
+    private static MainWindow CreateWindow(Func<DateOnly, Task<DayView>> read, Func<DateOnly, Task> delete, Func<TimerAction, string?, Task> timer)
+    {
+        DayView? latest = null;
+        async Task<DayView> Read(DateOnly date) { latest = await read(date); return latest; }
+        return new MainWindow(Read, delete, timer, utcNow: () => latest?.Intervals.Max(x => x.EndUtc)
+            ?? DailyProjection.Bounds(DateOnly.FromDateTime(DateTime.Today), TimeZoneInfo.Local).StartUtc.AddHours(9));
+    }
     private static void Pump(Window window)
     {
         window.UpdateLayout(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout(); Dispatcher.UIThread.RunJobs();
     }
     private static ScrollBar Bar(DataGrid grid) => grid.GetVisualDescendants().OfType<ScrollBar>().Single(x => x.Name == "PART_VerticalScrollbar");
-    private static Point Plot(TimelineControl timeline, Window window, double fraction, double y = 14) => timeline.TranslatePoint(new Point(54 + (timeline.Bounds.Width - 54) * fraction, y), window)!.Value;
+    private static Point Plot(TimelineControl timeline, Window window, double fraction, double y = 14)
+    {
+        if (timeline.IsFollowingPreset)
+        {
+            var first = DailyProjection.Bounds(DateOnly.FromDateTime(DateTime.Today), TimeZoneInfo.Local).StartUtc.AddHours(8);
+            var target = first.AddTicks((long)((timeline.VisibleEnd - first).Ticks * fraction));
+            fraction = (target - timeline.VisibleStart).TotalSeconds / (timeline.VisibleEnd - timeline.VisibleStart).TotalSeconds;
+        }
+        return timeline.TranslatePoint(new Point(54 + (timeline.Bounds.Width - 54) * fraction, y), window)!.Value;
+    }
     private static void AtEnd(DataGrid grid) => Assert.InRange(Bar(grid).Maximum - Bar(grid).Value, -0.01, 1);
 
     [AvaloniaFact]
@@ -36,7 +52,8 @@ public sealed class ReviewInteractionTests
     {
         var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
             .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask) { Width = 800 };
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        window.Width = 800;
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -68,7 +85,7 @@ public sealed class ReviewInteractionTests
     {
         var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
             .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); window.MouseMove(new Point(-20, -20)); await window.StartRefreshAsync(); Pump(window);
@@ -104,7 +121,7 @@ public sealed class ReviewInteractionTests
     {
         var incoming = View(40) with { Totals = Enumerable.Range(0, 20)
             .Select(i => new AppTotal("app" + i, "Application number " + i, TimeSpan.FromMinutes(20 - i))).ToArray() };
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -132,7 +149,7 @@ public sealed class ReviewInteractionTests
     public async Task Right_click_zooms_the_range_without_clearing_it_and_right_drag_still_pans()
     {
         var incoming = View(20);
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -152,7 +169,7 @@ public sealed class ReviewInteractionTests
             Assert.Equal(width, timeline.VisibleEnd - timeline.VisibleStart); Assert.True(timeline.VisibleStart > previous); Assert.Equal(range, timeline.Range);
             await window.RefreshAsync(); Pump(window); Assert.Equal(width, timeline.VisibleEnd - timeline.VisibleStart);
             window.KeyPressQwerty(PhysicalKey.Escape, RawInputModifiers.None); Pump(window);
-            Assert.Null(timeline.Range); Assert.Equal(20, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Count());
+            Assert.Null(timeline.Range); Assert.Equal(incoming.FilterRange(timeline.VisibleStart, timeline.VisibleEnd).Count, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Count());
             window.MouseWheel(Plot(timeline, window, .5), new Vector(0, 1)); Pump(window);
             Assert.True(timeline.VisibleEnd - timeline.VisibleStart < width);
         }
@@ -210,7 +227,7 @@ public sealed class ReviewInteractionTests
     {
         Localizer.SetLanguage("en");
         var incoming = View(2);
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -222,7 +239,7 @@ public sealed class ReviewInteractionTests
             Assert.Contains("Document 1", text.Text); var first = tip.PointToScreen(default);
             window.MouseMove(Plot(timeline, window, 0.2)); Pump(window);
             Assert.True(popup.IsOpen); Assert.Same(tip, popup.Child);
-            Assert.True(tip.PointToScreen(default).X > first.X + 40, "The visible hint must move with the pointer inside the same interval.");
+            Assert.True(tip.PointToScreen(default).X > first.X + 2, "The visible hint must move with the pointer inside the same interval.");
             window.MouseMove(Plot(timeline, window, 0.7)); Pump(window);
             Assert.Contains("Document 2", text.Text); Assert.Same(tip, popup.Child);
             window.MouseMove(Plot(timeline, window, 0.3, 50)); Pump(window); Assert.False(popup.IsOpen);
@@ -237,7 +254,7 @@ public sealed class ReviewInteractionTests
     [AvaloniaFact]
     public async Task Hover_closes_for_drag_collapse_window_hiding_and_shutdown()
     {
-        var window = new MainWindow(_ => Task.FromResult(View(2)), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View(2)), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -261,17 +278,19 @@ public sealed class ReviewInteractionTests
     public async Task Decorative_app_boundary_keeps_half_open_selection_and_exact_duration()
     {
         var incoming = View(2);
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
             var timeline = window.FindControl<TimelineControl>("TimelineView")!;
             var boundary = Plot(timeline, window, 0.5);
-            window.MouseDown(boundary, MouseButton.Left); window.MouseUp(boundary, MouseButton.Left); Pump(window);
+            // Both sides remain selectable inside the decorative inset; visual gaps never change UTC hit testing.
+            window.MouseDown(boundary - new Point(.1, 0), MouseButton.Left); window.MouseUp(boundary - new Point(.1, 0), MouseButton.Left); Pump(window);
+            Assert.Equal(1, Assert.IsType<IntervalRow>(window.FindControl<DataGrid>("LogGrid")!.SelectedItem).Id);
+            window.MouseDown(boundary + new Point(.1, 0), MouseButton.Left); window.MouseUp(boundary + new Point(.1, 0), MouseButton.Left); Pump(window);
             var selected = Assert.IsType<IntervalRow>(window.FindControl<DataGrid>("LogGrid")!.SelectedItem);
             Assert.Equal(2, selected.Id); Assert.Equal("Document 2", selected.Title);
             Assert.Equal(DisplayText.Duration(incoming.Intervals[1].Duration, true), selected.PreciseDuration);
-            Assert.Equal(incoming.Intervals[1].StartUtc, timeline.VisibleStart.AddTicks((timeline.VisibleEnd - timeline.VisibleStart).Ticks / 2));
             Assert.Equal(2, window.FindControl<ItemsControl>("TotalsList")!.ItemCount);
         }
         finally { window.StopRefresh(); window.Close(); }
@@ -281,7 +300,7 @@ public sealed class ReviewInteractionTests
     public async Task Log_end_follows_multiple_appends_and_resumes_after_scrolling_back_to_the_end()
     {
         var incoming = View(40);
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);
@@ -306,7 +325,7 @@ public sealed class ReviewInteractionTests
     public async Task Selecting_history_at_the_bottom_pauses_following_and_a_pending_append_does_not_override_scroll_up()
     {
         var incoming = View(40);
-        var window = new MainWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(incoming), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Pump(window);

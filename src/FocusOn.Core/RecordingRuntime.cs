@@ -73,6 +73,19 @@ public sealed class RecordingRuntime : IDisposable
         return warning is null ? view : view with { Status = "记录异常", Warning = warning };
     });
 
+    public Task<ReviewView> ReadReviewAsync(ReviewRequest request) => Query(session =>
+    {
+        var at = clock.Now(); var zone = TimeZoneInfo.Local;
+        var plan = ReviewProjection.Plan(request, at.Utc, zone);
+        var warning = failure ?? observationFailure;
+        var days = plan.Dates.Select(date =>
+        {
+            var view = session.GetDay(date, zone, at);
+            return warning is null ? view : view with { Status = "记录异常", Warning = warning };
+        }).ToArray();
+        return ReviewProjection.Create(plan, days);
+    });
+
     public Task ChangeTimerAsync(TimerAction action, string? title = null) => Query(session =>
     {
         session.ChangeTimer(action, title, clock.Now());

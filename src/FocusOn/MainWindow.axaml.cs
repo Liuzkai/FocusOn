@@ -15,12 +15,17 @@ public partial class MainWindow : Window
     private readonly Func<DateOnly, Task> deleteDay;
     private readonly Func<TimerAction, string?, Task> changeTimer;
     private readonly Action<string>? saveLanguage;
+    private readonly Func<DateTimeOffset> utcNow;
+    private readonly Func<ReviewRequest, Task<ReviewView>>? readReview;
     private readonly ObservableCollection<IntervalRow> rows = [];
     private readonly LogEndFollower logEndFollower;
     private readonly DispatcherTimer refreshTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private bool followToday = true, started, stopped, refreshing, deleting, changingTimer, showGroups = true, applyingLanguage, manualPaused;
-    private long timerVersion;
+    private long timerVersion, rangeVersion;
+    private int? rangeHours = 1;
+    private bool resetRange = true, applyingRows;
+    private ReviewView? review;
     private DayView? view;
     private TitleTimerState? timerState;
     private string search = string.Empty;
@@ -28,9 +33,11 @@ public partial class MainWindow : Window
     public MainWindow() : this(_ => Task.FromException<DayView>(new InvalidOperationException("记录会话尚未初始化。")),
         _ => Task.CompletedTask, (_, _) => Task.CompletedTask) { }
 
-    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay, Func<TimerAction, string?, Task> changeTimer, Action<string>? saveLanguage = null)
+    public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay, Func<TimerAction, string?, Task> changeTimer,
+        Action<string>? saveLanguage = null, Func<DateTimeOffset>? utcNow = null, Func<ReviewRequest, Task<ReviewView>>? readReview = null)
     {
         this.readDay = readDay; this.deleteDay = deleteDay; this.changeTimer = changeTimer; this.saveLanguage = saveLanguage;
+        this.utcNow = utcNow ?? (() => DateTimeOffset.UtcNow); this.readReview = readReview; selectedDate = Today();
         InitializeComponent();
         if (PlatformSettings is { } settings)
         {
@@ -50,7 +57,7 @@ public partial class MainWindow : Window
         logEndFollower = new(LogGrid, () => LogGrid.CollectionView.Cast<object>().LastOrDefault());
         PreviousDayButton.Click += (_, _) => { if (selectedDate.DayNumber > 0) SelectDate(selectedDate.AddDays(-1)); };
         NextDayButton.Click += (_, _) => SelectDate(selectedDate.AddDays(1));
-        TodayButton.Click += (_, _) => SelectDate(DateOnly.FromDateTime(DateTime.Today));
+        TodayButton.Click += (_, _) => SelectDate(Today());
         ViewDatePicker.SelectedDateChanged += (_, _) => { if (ViewDatePicker.SelectedDate is { } date) SelectDate(DateOnly.FromDateTime(date)); };
         PauseButton.Click += (_, _) => PauseRequested?.Invoke(this, EventArgs.Empty);
         ExitButton.Click += (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty);
@@ -62,14 +69,20 @@ public partial class MainWindow : Window
         DurationButton.Click += (_, _) => TimelineView.IsVisible = !TimelineView.IsVisible;
         GroupsButton.Click += (_, _) => { showGroups = !showGroups; GroupsButton.Content = Localizer.Get(showGroups ? "时段 ⊟" : "时段 ⊞"); ApplyRows(); };
         DetailsButton.Click += (_, _) => SetInspector(!InspectorPane.IsVisible);
-        RecordedModeButton.Click += (_, _) => TimelineView.SetFullDay(false);
-        FullDayModeButton.Click += (_, _) => TimelineView.SetFullDay(true);
+        RangePicker.SelectionChanged += (_, _) =>
+        {
+            if (applyingLanguage || RangePicker.SelectedItem is not ComboBoxItem { Tag: string tag }) return;
+            rangeHours = tag == "today" ? null : int.Parse(tag, System.Globalization.CultureInfo.InvariantCulture);
+            rangeVersion++; resetRange = true;
+            if (rangeHours is null) SelectDate(Today());
+            if (started && !stopped) _ = RefreshAsync();
+        };
         ZoomInButton.Click += (_, _) => TimelineView.ZoomIn();
         ZoomOutButton.Click += (_, _) => TimelineView.ZoomOut();
         ResetDayButton.Click += (_, _) => TimelineView.ResetDay();
         ClearRangeButton.Click += (_, _) => TimelineView.ClearRange();
         TimelineView.RangeChanged += _ => ApplyRows();
-        TimelineView.ViewChanged += UpdateTimelineControls;
+        TimelineView.ViewChanged += () => { UpdateTimelineControls(); ApplyRows(); };
         TimelineView.IntervalSelected += SelectInterval;
         LogGrid.SelectionChanged += (_, _) =>
         {
@@ -91,6 +104,7 @@ public partial class MainWindow : Window
     }
 
     public event EventHandler? PauseRequested;
+    private DateOnly Today() => DateOnly.FromDateTime(utcNow().LocalDateTime);
     public event EventHandler? ExitRequested;
     public event Action<DayView>? DayRefreshed;
     public event Action? LanguageChanged;
@@ -113,45 +127,60 @@ public partial class MainWindow : Window
     {
         if (refreshing || stopped || deleting) return;
         refreshing = true;
-        if (followToday && selectedDate != DateOnly.FromDateTime(DateTime.Today)) SelectDate(DateOnly.FromDateTime(DateTime.Today));
-        var requestedDate = selectedDate; var requestedTimerVersion = timerVersion;
+        if (followToday && selectedDate != Today()) SelectDate(Today(), !resetRange && !TimelineView.IsFollowingPreset);
+        var requestedDate = selectedDate; var requestedTimerVersion = timerVersion; var requestedRangeVersion = rangeVersion;
         try
         {
-            var incoming = await readDay(requestedDate);
-            if (stopped || deleting || requestedDate != selectedDate || requestedTimerVersion != timerVersion) return;
-            ReviewTheme.RegisterApplications(incoming.Intervals.Where(x => x.Kind == IntervalKind.Usage).Select(x => x.AppKey)
+            var request = new ReviewRequest(requestedDate, rangeHours, !resetRange && !TimelineView.IsFollowingPreset ? TimelineView.VisibleStart : null);
+            ReviewView snapshot;
+            if (readReview is not null) snapshot = await readReview(request);
+            else
+            {
+                var daily = await readDay(requestedDate);
+                var plan = ReviewProjection.Plan(request, utcNow(), TimeZoneInfo.Local);
+                var days = new List<DayView> { daily };
+                foreach (var date in plan.Dates.Where(date => date != requestedDate)) days.Add(await readDay(date));
+                snapshot = ReviewProjection.Create(plan, days);
+            }
+            if (stopped || deleting || requestedDate != selectedDate || requestedTimerVersion != timerVersion || requestedRangeVersion != rangeVersion) return;
+            var incoming = snapshot.Daily;
+            ReviewTheme.RegisterApplications(snapshot.Intervals.Where(x => x.Kind == IntervalKind.Usage).Select(x => x.AppKey)
                 .Concat(incoming.Totals.Select(x => x.AppKey)));
-            view = incoming; TimelineView.SetDay(incoming); StatusText.Text = Localizer.Translate(incoming.Status);
+            review = snapshot; view = incoming; TimelineView.SetReview(snapshot, resetRange); resetRange = false; StatusText.Text = Localizer.Translate(incoming.Status);
             ShowWarning(incoming.Warning); ShowTimer(incoming.Timer); ApplyRows();
             UpdateTotals(incoming);
             DayRefreshed?.Invoke(incoming);
         }
         catch (Exception error)
         {
-            if (stopped || requestedDate != selectedDate) return;
+            if (stopped || requestedDate != selectedDate || requestedRangeVersion != rangeVersion) return;
             StatusText.Text = Localizer.Get("回看更新失败"); ShowWarning(Localizer.Get("无法更新回看：{0}。已显示的记录可能不是最新。", Localizer.Translate(error.Message)));
         }
         finally
         {
             refreshing = false;
-            if (!stopped && (requestedDate != selectedDate || requestedTimerVersion != timerVersion)) _ = RefreshAsync();
+            if (!stopped && (requestedDate != selectedDate || requestedTimerVersion != timerVersion || requestedRangeVersion != rangeVersion)) _ = RefreshAsync();
         }
     }
 
-    private void SelectDate(DateOnly day)
+    private void SelectDate(DateOnly day, bool preserveViewport = false)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = Today();
         if (day > today) day = today;
         followToday = day == today;
         if (selectedDate == day) { UpdateDateControls(); return; }
-        selectedDate = day; view = null; TimelineView.Clear(); logEndFollower.Reset(); rows.Clear(); TotalsList.ItemsSource = null;
-        LogEmptyText.Text = Localizer.Get("正在读取所选日期…"); LogEmptyText.IsVisible = true;
+        selectedDate = day;
+        if (!preserveViewport)
+        {
+            view = null; review = null; resetRange = true; TimelineView.Clear(); logEndFollower.Reset(); rows.Clear(); TotalsList.ItemsSource = null;
+            LogEmptyText.Text = Localizer.Get("正在读取所选日期…"); LogEmptyText.IsVisible = true;
+        }
         UpdateDateControls(); if (started) _ = RefreshAsync();
     }
     private void UpdateDateControls()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        ViewDatePicker.DisplayDateEnd = DateTime.Today;
+        var today = Today();
+        ViewDatePicker.DisplayDateEnd = today.ToDateTime(TimeOnly.MinValue);
         var date = selectedDate.ToDateTime(TimeOnly.MinValue);
         if (ViewDatePicker.SelectedDate != date) ViewDatePicker.SelectedDate = date;
         PreviousDayButton.IsEnabled = selectedDate.DayNumber > 0; NextDayButton.IsEnabled = selectedDate < today; TodayButton.IsEnabled = selectedDate != today;
@@ -159,12 +188,17 @@ public partial class MainWindow : Window
     }
     private void ApplyRows()
     {
-        if (view is null) return;
+        if (review is null || view is null || applyingRows) return;
+        applyingRows = true;
         logEndFollower.BeginUpdate();
         try
         {
-            var filtered = TimelineView.Range is { } range ? view.FilterRange(range.StartUtc, range.EndUtc) : view.Intervals;
+            var start = TimelineView.VisibleStart; var end = TimelineView.VisibleEnd;
+            if (TimelineView.Range is { } range) { if (range.StartUtc > start) start = range.StartUtc; if (range.EndUtc < end) end = range.EndUtc; }
+            var filtered = review.Intervals.Where(x => x.StartUtc < end && x.EndUtc > start && end > start);
             var incoming = filtered.Where(x => DisplayText.MatchesSearch(x, search)).OrderBy(x => x.StartUtc).ThenBy(x => x.Id).ToArray();
+            var crossDate = TimelineView.VisibleStart.ToLocalTime().Date != TimelineView.VisibleEnd.ToLocalTime().Date;
+            LogGrid.Columns[0].Width = new DataGridLength(crossDate ? 150 : 115);
             var ids = incoming.Select(x => x.Id).ToHashSet();
             for (var i = rows.Count - 1; i >= 0; i--) if (!ids.Contains(rows[i].Id)) rows.RemoveAt(i);
             var existing = rows.ToDictionary(x => x.Id);
@@ -173,14 +207,16 @@ public partial class MainWindow : Window
                 var interval = incoming[i];
                 if (existing.TryGetValue(interval.Id, out var row)) { row.Update(interval); if (rows[i] != row) rows.Move(rows.IndexOf(row), i); }
                 else rows.Insert(i, new IntervalRow(interval));
+                rows[i].SetShowDate(crossDate);
                 var local = interval.StartUtc.ToLocalTime();
                 var previous = i > 0 ? incoming[i - 1].StartUtc.ToLocalTime() : (DateTimeOffset?)null;
-                rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour) ? Localizer.Get("{0:HH}:00 时段", local) : string.Empty);
+                rows[i].SetGroupLabel(showGroups && (previous is null || previous.Value.Date != local.Date || previous.Value.Hour != local.Hour)
+                    ? (crossDate ? local.ToString("MM-dd ") : string.Empty) + Localizer.Get("{0:HH}:00 时段", local) : string.Empty);
             }
-            LogEmptyText.Text = search.Length > 0 ? Localizer.Get("没有匹配的软件或窗口标题。") : TimelineView.Range is not null ? Localizer.Get("所选范围没有可用记录。") : Localizer.Get("{0} 没有可用记录。", view.Date.ToString("yyyy-MM-dd"));
+            LogEmptyText.Text = search.Length > 0 ? Localizer.Get("没有匹配的软件或窗口标题。") : Localizer.Get("所选范围没有可用记录。");
             LogEmptyText.IsVisible = rows.Count == 0; UpdateTimelineControls();
         }
-        finally { logEndFollower.EndUpdate(); }
+        finally { logEndFollower.EndUpdate(); applyingRows = false; }
     }
     private void SelectInterval(long id)
     {
@@ -196,11 +232,12 @@ public partial class MainWindow : Window
     {
         ZoomInButton.IsEnabled = TimelineView.CanZoomIn; ZoomOutButton.IsEnabled = TimelineView.CanZoomOut;
         ResetDayButton.IsEnabled = view is not null; ClearRangeButton.IsEnabled = TimelineView.Range is not null;
-        RecordedModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Normal : FontWeight.Bold;
-        FullDayModeButton.FontWeight = TimelineView.FullDay ? FontWeight.Bold : FontWeight.Normal;
+        var mode = !TimelineView.IsFollowingPreset ? Localizer.Get("自定义视窗") : rangeHours is { } hours ? Localizer.Get(hours == 1 ? "最近 1 小时" : "最近 {0} 小时", hours)
+            : selectedDate == Today() ? Localizer.Get("今天") : selectedDate.ToString("yyyy-MM-dd");
+        mode += " · " + TimelineView.VisibleStart.ToLocalTime().ToString("MM-dd HH:mm") + " — " + TimelineView.VisibleEnd.ToLocalTime().ToString("MM-dd HH:mm");
         RangeText.Text = TimelineView.Range is { } range ? Localizer.Get("日志范围：{0} — {1} · 全天汇总不变 · 右键点击放大选区", DisplayText.Time(range.StartUtc), DisplayText.Time(range.EndUtc))
             : search.Length > 0 ? Localizer.Get("搜索：{0} · {1} 条匹配 · 全天汇总不变", search, rows.Count)
-            : Localizer.Get("{0} · 左键点击或拖选，滚轮缩放，右键拖动平移，右键点击放大选区", Localizer.Get(TimelineView.FullDay ? "本地全天" : "记录范围"));
+            : Localizer.Get("{0} · 左键点击或拖选，滚轮缩放，右键拖动平移，右键点击放大选区", mode);
     }
     private void ShowTimer(TitleTimerState? state)
     {
@@ -251,13 +288,13 @@ public partial class MainWindow : Window
             LanguagePicker.SelectedIndex = Localizer.Language == "en" ? 1 : 0;
             foreach (var pair in new (Button Control, string Text)[] {
                 (TodayButton,"今天"), (ExitButton,"退出"), (StartTimerButton,"开始计时"), (StopTimerButton,"停止"),
-                (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"), (RecordedModeButton,"记录范围"),
+                (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"),
                 (ResetDayButton,"重置"), (ClearRangeButton,"清除范围"), (DeleteDayButton,"删除所选日期") }) pair.Control.Content = Localizer.Get(pair.Text);
             foreach (var pair in new (Control Control, string Text)[] { (PreviousDayButton,"前一天"), (NextDayButton,"后一天"),
-                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"),
-                (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索当天软件或窗口标题") })
+                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
+                (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索时间范围内的软件或窗口标题") })
                 AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
-            TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索当天软件或窗口标题");
+            TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索时间范围内的软件或窗口标题"); TodayRangeItem.Content = Localizer.Get("今天");
             TotalsHeading.Text = Localizer.Get("全天软件汇总"); DetailsHeading.Text = Localizer.Get("记录详情"); DetailsEmptyText.Text = Localizer.Get("选择一条记录查看详情。");
             var headers = new[] { "开始时间", "软件 / 状态", "窗口标题 / 说明", "时长" };
             for (var i = 0; i < headers.Length; i++) LogGrid.Columns[i].Header = Localizer.Get(headers[i]);
@@ -278,7 +315,9 @@ public sealed class IntervalRow(RecordedInterval interval) : INotifyPropertyChan
     private RecordedInterval value = interval;
     public long Id => value.Id;
     public string Application => DisplayText.AppName(value) + (value.IsCurrent ? Localizer.Get(" · 进行中") : string.Empty);
-    public string StartTime => DisplayText.Time(value.StartUtc);
+    private bool showDate;
+    public string StartTime => (showDate ? value.StartUtc.ToLocalTime().ToString("MM-dd ") : string.Empty) + DisplayText.Time(value.StartUtc);
+    public void SetShowDate(bool show) { if (showDate == show) return; showDate = show; PropertyChanged?.Invoke(this, new(nameof(StartTime))); }
     public string Title => DisplayText.Title(value);
     public string Duration => DisplayText.Duration(value.Duration);
     public string PreciseDuration => DisplayText.Duration(value.Duration, true);

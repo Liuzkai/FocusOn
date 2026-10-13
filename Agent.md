@@ -125,6 +125,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
+**最新 18 票（2026-10-13）：**时间范围选择 1h/2h/4h/6h/8h/12h/24h/今天，默认 1h；用户确认滚动小时可跨日、今天为本地午夜至现在，日汇总/日期删除仍单日。ReviewProjection 与 RecordingRuntime 的一次快照读取合并跨日片段、保留精确分配时长；视窗与日志同步，手动视窗在刷新/跨午夜保持，重置跟随。104 核心/平台 + 28 UI 回归、Release 零警告/错误、原生 Linux 鼠标切换全部范围/提示/缩放保持/重置/日志底部检查通过；中英文及下拉截图更新。计划新 v0.1.5 草稿，旧标签、附件、MIT/第三方许可不改写；物理 DPI/权限/电源和 Mac 信任仍交 08。构建/草稿结果将在完成后追加。
+
 **最新 17 票（2026-10-12）：**按用户追加要求，汇总滚动条改为 3 DIP 瞬时细线，空闲约一秒隐藏；直接拖动标签滚动，支持两轴滚轮/键盘，刷新及隐藏清理保持可靠。113 项回归（90 核心/平台、23 UI）、真实 Linux 鼠标和细线显隐像素检查通过。计划 v0.1.4 新草稿，保留 v0.1.3 原标签/附件；不可变源码 `eafc205` / v0.1.4；[run 38254694792](https://github.com/Liuzkai/FocusOn/actions/runs/38254694792) Success，六架构各 113 项回归、原生与包校验通过；[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-2e201aae9575a400ec4c) 含 8 个 Windows/Linux 归档及校验和，下载验证通过。旧 Release/标签/许可及先前附件哈希均保持。17 工程票关闭，Mac 仍仅临时 ad-hoc 验证包，08/整体规格开放。实机仍交 08。
 
 **最新 16 票（2026-10-12）：**继续用户 Windows 截图反馈：汇总滚动条独立占行、右键放大选区并保留筛选、软件颜色感知分离并保存。版本计划为新的 v0.1.3 草稿，旧 v0.1.1 正式版及 v0.1.2 草稿不覆盖。本地 90 核心/平台与 21 UI 回归、真实 Linux 合成记录鼠标/滚动/选区检查通过；物理 Windows DPI 等验收仍交 08。不可变源码 `9c6afdb` / v0.1.3；[run 38244571956](https://github.com/Liuzkai/FocusOn/actions/runs/38244571956) 重试草稿步骤后 Success，六架构各 111 项回归及原生/包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-4ffc94db1f1a690ca41f) 含 8 个 Windows/Linux 附件，下载校验及旧版本保存检查通过。工作流重试维护为 `4ba2fce`；不改变标签源码。Mac 仍仅临时 ad-hoc 验证产物。16 工程票关闭，08/整体规格保持开放。

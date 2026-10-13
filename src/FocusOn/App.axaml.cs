@@ -49,7 +49,8 @@ public partial class App : Application
             ReviewTheme.LoadApplicationColors(directory);
             singleInstance.Listen(() => Dispatcher.UIThread.Post(ShowMainWindow));
             controller = new RecordingController(directory);
-            window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync, language => LanguagePreference.Save(directory, language));
+            window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync,
+                language => LanguagePreference.Save(directory, language), readReview: controller.ReadReviewAsync);
             window.LanguageChanged += () => tray?.RefreshLanguage();
             desktop!.MainWindow = window;
             using (var resource = AssetLoader.Open(new Uri("avares://FocusOn/Assets/focuson.png"))) window.Icon = new WindowIcon(resource);

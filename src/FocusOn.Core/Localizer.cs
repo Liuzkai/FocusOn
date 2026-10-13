@@ -68,6 +68,8 @@ public static class Localizer
         ["时长"] = "Duration", ["时段 ⊟"] = "Hours ⊟", ["时段 ⊞"] = "Hours ⊞",
         ["详情 ⊟"] = "Details ⊟", ["详情 ⊞"] = "Details ⊞", ["记录范围"] = "Recorded range",
         ["放大时间线"] = "Zoom in", ["缩小时间线"] = "Zoom out", ["重置"] = "Reset",
+        ["时间范围"] = "Time range", ["最近 1 小时"] = "Last 1 hour", ["最近 {0} 小时"] = "Last {0} hours", ["自定义视窗"] = "Custom view",
+        ["搜索时间范围内的软件或窗口标题"] = "Search apps or window titles in this time range",
         ["清除范围"] = "Clear range", ["删除所选日期"] = "Delete selected day",
         ["搜索当天软件或窗口标题"] = "Search apps or window titles for this day",
         ["开始时间"] = "Start time", ["软件 / 状态"] = "App / status", ["窗口标题 / 说明"] = "Window title / description",

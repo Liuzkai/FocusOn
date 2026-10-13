@@ -10,19 +10,21 @@ FocusOn measures how long an app's window stays active, including reading or wat
 
 ![FocusOn: titled timer, daily app totals, three timeline lanes, and activity log](docs/images/focuson-ui.png)
 
-An actual Linux screenshot with demonstration records. The session warning appears because the cloud environment has no real desktop login session.
+An actual Linux screenshot with synthetic demonstration records, including a timeline across midnight. It does not show personal activity or establish hardware/session acceptance.
 
 The interface supports **English and Simplified Chinese**. Use the language selector in the top row to switch immediately. The preference is saved for the selected data directory; the first launch follows the system language, with English as the fallback. App names, window titles, timer titles, and historical records are preserved in their original language.
 
 [View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
-The **[v0.1.4 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-2e201aae9575a400ec4c)** includes pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
+The next **v0.1.5 draft** adds a time range selector: **1h, 2h, 4h, 6h, 8h, 12h, 24h, Today**. Hour ranges look back from now and can cross midnight; Today shows local midnight to now. The default is 1h. Timeline and logs use the visible range, while daily app totals and deletion stay scoped to the date picker. Historical dates use that day's end as their reference; choosing Today returns to the current date. Zoom/pan stays fixed during refresh; Reset restores the selected range and live following.
+
+This draft retains pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
 
 This draft also saves more distinct app colors across restarts and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
 
 **Daily app totals** are compact: drag any app label left or right to scroll, or use the wheel, horizontal trackpad or arrow/Home/End/Page keys. A thin position line appears during interaction and hides after about one second idle, without covering labels or shifting the layout.
 
-![v0.1.4 compact totals indicator and draggable app labels with demonstration records](docs/images/focuson-ui-interactions.png)
+![Time range selector and compact daily app totals with demonstration records](docs/images/focuson-ui-interactions.png)
 
 This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. The public v0.1.1 downloads below retain their original build.
 
@@ -31,7 +33,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 - Daily app totals and a timeline with separate usage, stopped, and timer lanes.
 - Window and title changes recorded as separate segments.
 - Independent titled timers with start, pause, resume, and stop controls.
-- Date navigation, search, range filtering, zoom, and record details. Filters do not change daily totals.
+- Date navigation, rolling hour ranges, Today, search, range filtering, zoom, and record details. Filters do not change daily totals.
 - Manual recording pause and platform session observation for lock, sleep, and display state.
 - Confirmation before deleting a day's records; records on other dates are preserved.
 - Local storage, login startup, and activation of the existing instance when launched again.

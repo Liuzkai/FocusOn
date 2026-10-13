@@ -39,6 +39,14 @@ public sealed class MainWindowTests
     }
     private static void Click(MainWindow window, string name) => window.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
+    private static MainWindow CreateWindow(Func<DateOnly, Task<DayView>> read, Func<DateOnly, Task> delete,
+        Func<TimerAction, string?, Task> timer, Action<string>? language = null)
+    {
+        var window = new MainWindow(read, delete, timer, language, () => View().StartUtc.AddHours(10));
+        window.FindControl<ComboBox>("RangePicker")!.SelectedIndex = 1;
+        return window;
+    }
+
     [AvaloniaFact]
     public async Task Switching_languages_preserves_records_timer_selection_and_zoom_and_saves_preference()
     {
@@ -46,7 +54,7 @@ public sealed class MainWindowTests
         var timerChanges = 0;
         Localizer.SetLanguage("zh-CN");
         var original = View() with { Timer = new("用户标题 · 不翻译", TimeSpan.FromMinutes(5), true), Warning = "Linux：无法确认锁屏和会话状态，请在支持 logind 的本地桌面会话运行。标题计时和历史回看仍可使用。" };
-        var window = new MainWindow(_ => Task.FromResult(original), _ => Task.CompletedTask, (_, _) => { timerChanges++; return Task.CompletedTask; }, language => LanguagePreference.Save(directory, language));
+        var window = CreateWindow(_ => Task.FromResult(original), _ => Task.CompletedTask, (_, _) => { timerChanges++; return Task.CompletedTask; }, language => LanguagePreference.Save(directory, language));
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -73,7 +81,7 @@ public sealed class MainWindowTests
     public async Task Failed_language_save_keeps_the_previous_language_and_recording_state()
     {
         Localizer.SetLanguage("zh-CN");
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask, _ => throw new IOException("denied"));
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask, _ => throw new IOException("denied"));
         try
         {
             window.Show(); await window.StartRefreshAsync(); window.SetPauseState(true);
@@ -91,7 +99,7 @@ public sealed class MainWindowTests
     {
         Localizer.SetLanguage("en");
         var deleted = false;
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => { deleted = true; return Task.CompletedTask; }, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => { deleted = true; return Task.CompletedTask; }, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync(); Click(window, "DeleteDayButton");
@@ -113,7 +121,7 @@ public sealed class MainWindowTests
     [AvaloniaFact]
     public async Task Search_changes_logs_and_preserves_full_day_totals_and_selection_details()
     {
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -136,7 +144,7 @@ public sealed class MainWindowTests
     {
         TitleTimerState? timer = null;
         var actions = new List<TimerAction>();
-        var window = new MainWindow(_ => Task.FromResult(View() with { Timer = timer }), _ => Task.CompletedTask, (action, title) =>
+        var window = CreateWindow(_ => Task.FromResult(View() with { Timer = timer }), _ => Task.CompletedTask, (action, title) =>
         {
             actions.Add(action);
             timer = action == TimerAction.Stop ? null : new(title!, TimeSpan.FromSeconds(5), action != TimerAction.Pause);
@@ -160,7 +168,7 @@ public sealed class MainWindowTests
     [AvaloniaFact]
     public async Task Timeline_uses_recorded_bounds_and_keeps_zoom_during_refresh()
     {
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -169,7 +177,7 @@ public sealed class MainWindowTests
             Click(window, "ZoomInButton"); var first = timeline.VisibleStart; var last = timeline.VisibleEnd;
             Assert.Equal(TimeSpan.FromHours(1), last - first);
             await window.RefreshAsync(); Assert.Equal(first, timeline.VisibleStart); Assert.Equal(last, timeline.VisibleEnd);
-            Click(window, "FullDayModeButton"); Assert.Equal(View().EndUtc - View().StartUtc, timeline.VisibleEnd - timeline.VisibleStart);
+            window.FindControl<ComboBox>("RangePicker")!.SelectedIndex = 7; await window.RefreshAsync(); Assert.Equal(TimeSpan.FromHours(10), timeline.VisibleEnd - timeline.VisibleStart);
         }
         finally { window.StopRefresh(); window.Close(); }
     }
@@ -177,7 +185,7 @@ public sealed class MainWindowTests
     [AvaloniaFact]
     public async Task Missing_capture_permission_is_visible_while_history_stays_readable()
     {
-        var window = new MainWindow(_ => Task.FromResult(View() with { Status = "前台采集不可用", Warning = "请授权辅助功能" }), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View() with { Status = "前台采集不可用", Warning = "请授权辅助功能" }), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -191,7 +199,7 @@ public sealed class MainWindowTests
     [AvaloniaFact]
     public async Task Drag_range_filters_intersecting_logs_without_changing_full_day_totals()
     {
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -215,7 +223,7 @@ public sealed class MainWindowTests
     public async Task Date_deletion_requires_confirmation_and_cancellation_preserves_records()
     {
         var deleted = new List<DateOnly>();
-        var window = new MainWindow(_ => Task.FromResult(View()), day => { deleted.Add(day); return Task.CompletedTask; }, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), day => { deleted.Add(day); return Task.CompletedTask; }, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
@@ -236,7 +244,7 @@ public sealed class MainWindowTests
     [AvaloniaFact]
     public async Task High_contrast_keeps_readable_labels_and_replaces_application_colors()
     {
-        var window = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var window = CreateWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         try
         {
             window.Show(); await window.StartRefreshAsync();
