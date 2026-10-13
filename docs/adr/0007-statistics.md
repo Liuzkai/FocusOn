@@ -1,0 +1,9 @@
+# Statistics scope and duration allocation
+
+2026-10-13: The user requests a separate statistics page with multi-day totals and a period within one local day, guided by a dark donut/bar/line reference. This does not change review or daily deletion semantics.
+
+The default multi-day scope is the last seven local calendar dates, including today. A date range is inclusive and supports up to 366 dates; the applied scope is shown above the charts. Single-day periods use explicit local HH:mm start/end, with 24:00 as the day end. Invalid/reversed dates or times are rejected without changing the last successfully applied scope. Future time is not counted. DST boundaries use UTC instants: invalid local instants advance to the first valid instant, and repeated local starts/ends use the first/last occurrence. A DST period whose endpoints collapse has no usage.
+
+One recorder-queue command captures UTC/monotonic time once and queries the selected interval range once. Statistics include only Usage. Stored original interval allocations are retained when clipping to the selected range and daily/hourly buckets: cumulative allocated endpoint differences avoid tick loss and keep total, app share and bucket sums equal, including prior deletion splits. Live segments use the same snapshot and do not write checkpoints. Timers, stops and unrecorded intervals are excluded.
+
+The page presents real app shares, per-day or elapsed-hour usage bars and top-three app trends, plus a complete app-total list as a keyboard/readable equivalent. Empty dates/hours remain visible as zero; gaps are never synthesized as app use. Graphs reuse persisted app colors and high-contrast resources, with actual duration units and pointer details. No charting dependency or data migration is required. New functionality is v0.1.6 draft; public v0.1.5 source/assets and all older versions remain immutable.

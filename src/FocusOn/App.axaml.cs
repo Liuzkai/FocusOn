@@ -50,7 +50,7 @@ public partial class App : Application
             singleInstance.Listen(() => Dispatcher.UIThread.Post(ShowMainWindow));
             controller = new RecordingController(directory);
             window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync,
-                language => LanguagePreference.Save(directory, language), readReview: controller.ReadReviewAsync);
+                language => LanguagePreference.Save(directory, language), readReview: controller.ReadReviewAsync, readStatistics: controller.ReadStatisticsAsync);
             window.LanguageChanged += () => tray?.RefreshLanguage();
             desktop!.MainWindow = window;
             using (var resource = AssetLoader.Open(new Uri("avares://FocusOn/Assets/focuson.png"))) window.Icon = new WindowIcon(resource);

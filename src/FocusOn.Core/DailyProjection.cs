@@ -9,8 +9,11 @@ public static class DailyProjection
     }
 
     private static DateTimeOffset DayStart(DateOnly day, TimeZoneInfo zone)
+        => LocalBoundary(day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone);
+
+    public static DateTimeOffset LocalBoundary(DateTime local, TimeZoneInfo zone, bool lastOccurrence = false)
     {
-        var local = day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
+        local = DateTime.SpecifyKind(local, DateTimeKind.Unspecified);
         if (zone.IsInvalidTime(local))
         {
             var invalid = local;
@@ -23,7 +26,9 @@ public static class DailyProjection
                 else local = middle;
             }
         }
-        var offset = zone.IsAmbiguousTime(local) ? zone.GetAmbiguousTimeOffsets(local).Max() : zone.GetUtcOffset(local);
+        var offset = zone.IsAmbiguousTime(local)
+            ? lastOccurrence ? zone.GetAmbiguousTimeOffsets(local).Min() : zone.GetAmbiguousTimeOffsets(local).Max()
+            : zone.GetUtcOffset(local);
         return new DateTimeOffset(local, offset).ToUniversalTime();
     }
 

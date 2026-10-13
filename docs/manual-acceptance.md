@@ -223,3 +223,8 @@ On physical Windows at 100%, 150% and 200% scale, narrow the window until daily 
 ## v0.1.5 rolling windows
 
 On physical devices, check all eight options, a real midnight transition and DST where applicable. Confirm 24h means elapsed hours and Today means local midnight to now; selecting Today returns from history. Check date labels, exact short segments/durations, log range/search/selection and live log-end following. Zoom/pan before midnight and keep the viewport through refresh, then Reset to live following. Daily totals and deletion must remain scoped to the date picker, even when earlier-date records are visible. Use separate test data; these device/DPI/trackpad checks remain pending, distinct from automated and native Linux synthetic-data evidence.
+
+
+## v0.1.6 statistics
+
+On physical Windows/macOS/Linux desktops, compare multi-day and single-day periods against known isolated records, including a real midnight/DST transition and a previously deleted day. Confirm partial-duration conservation, empty dates, 24:00 and zero/future periods. Navigate away/back while recording and an independent timer run; preserve review selection/viewport and exit from either page. Check real pointer/keyboard chart details, narrow windows, DPI/trackpad/high contrast and saved English/Chinese. Automated SQLite/UI and native Linux synthetic previews are separate evidence; these device and Mac trust items remain pending.

@@ -82,6 +82,12 @@ public sealed class RecordingController : IAsyncDisposable
         var view = await runtime.ReadReviewAsync(request);
         return view with { Daily = AddPlatformWarning(view.Daily) };
     }
+    public async Task<StatisticsView> ReadStatisticsAsync(StatisticsRequest request)
+    {
+        var view = await runtime.ReadStatisticsAsync(request);
+        var warning = foregroundWarning ?? session?.ReadCurrentState().Warning;
+        return warning is null ? view : view with { Warning = string.Join("\n", new[] { view.Warning, warning }.Where(x => !string.IsNullOrWhiteSpace(x))) };
+    }
     private DayView AddPlatformWarning(DayView view)
     {
         var state = session?.ReadCurrentState();

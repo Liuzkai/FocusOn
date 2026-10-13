@@ -337,6 +337,21 @@ public sealed class RecordingSession : IDisposable
             }, saveFailure ?? timeWarning ?? titleTimer.Warning, titleTimer.State(showLive ? liveNow : null));
     }
 
+    public StatisticsView GetStatistics(StatisticsRequest request, TimeZoneInfo zone, RecordingTime at)
+    {
+        var plan = StatisticsProjection.Plan(request, at.Utc, zone);
+        var warning = TimeChangeWarning(at);
+        var sources = ReadIntervals(plan.StartUtc, plan.EndUtc).Select(x => new StatisticsAllocation(
+            x.Interval, x.AllocationStart, x.AllocationEnd, x.AllocationTicks)).ToList();
+        var showLive = warning is null && (lastAccepted is not RecordingTime accepted || at.MonotonicTicks >= accepted.MonotonicTicks);
+        if (showLive && current is { Kind: IntervalKind.Usage } && at.Utc > current.StartUtc && at.MonotonicTicks > currentMonotonicStart)
+        {
+            sources.RemoveAll(x => x.Interval.Id == current.Id);
+            sources.Add(StatisticsAllocation.From(current with { EndUtc = at.Utc.ToUniversalTime(), Duration = TimeSpan.FromTicks(at.MonotonicTicks - currentMonotonicStart) }));
+        }
+        return StatisticsProjection.Create(plan, sources, saveFailure ?? warning ?? timeWarning);
+    }
+
     public void ChangeTimer(TimerAction action, string? title, RecordingTime at) => titleTimer.Change(action, title, at);
 
     private List<StoredInterval> ReadIntervals(DateTimeOffset start, DateTimeOffset end, SqliteTransaction? transaction = null)

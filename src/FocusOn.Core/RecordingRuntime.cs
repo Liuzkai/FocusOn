@@ -86,6 +86,13 @@ public sealed class RecordingRuntime : IDisposable
         return ReviewProjection.Create(plan, days);
     });
 
+    public Task<StatisticsView> ReadStatisticsAsync(StatisticsRequest request) => Query(session =>
+    {
+        var at = clock.Now();
+        var view = session.GetStatistics(request, TimeZoneInfo.Local, at);
+        return view with { Warning = failure ?? observationFailure ?? view.Warning };
+    });
+
     public Task ChangeTimerAsync(TimerAction action, string? title = null) => Query(session =>
     {
         session.ChangeTimer(action, title, clock.Now());

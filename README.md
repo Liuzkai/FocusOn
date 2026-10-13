@@ -28,6 +28,19 @@ This release also saves more distinct app colors across restarts and adds right-
 
 This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. Public v0.1.5 downloads use the verified source described below; earlier releases retain their original builds.
 
+## Statistics preview
+
+The next **v0.1.6 draft** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share the language selector, recording pause and Exit controls. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
+
+- **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
+- **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.
+- App shares count foreground Usage only. Pauses, missing records and independent timers are excluded. Partial intervals use their original monotonic duration allocations. DST and already deleted intervals retain the existing recording rules; future time is not counted.
+- Charts show exact-duration details on hover and with Left/Right/Home/End while focused; Escape closes the hint. The top three trends use distinct line patterns, and the complete app list remains readable in high contrast. Narrow windows stack the charts.
+
+![FocusOn multi-day statistics: app shares, daily durations and app trends](docs/images/focuson-statistics.png)
+
+Native Linux preview with synthetic records, not personal activity. [Single-day period preview](docs/images/focuson-statistics-period.png) · [Simplified Chinese preview](docs/images/focuson-statistics.zh-CN.png). This new statistics page belongs to v0.1.6; the public v0.1.5 packages keep their original source.
+
 ## Features
 
 - Daily app totals and a timeline with separate usage, stopped, and timer lanes.

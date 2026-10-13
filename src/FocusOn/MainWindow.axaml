@@ -3,30 +3,36 @@
         xmlns:local="using:FocusOn"
         x:Class="FocusOn.MainWindow" Title="FocusOn" Width="1100" Height="720" MinWidth="740" MinHeight="500"
         Background="{DynamicResource ReviewBackground}" Foreground="{DynamicResource ReviewText}">
-  <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="18" RowSpacing="10">
-    <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="6">
+  <Grid RowDefinitions="Auto,*" Margin="18" RowSpacing="14">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+      <TextBlock Text="FocusOn" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0" />
+      <Button x:Name="ReviewPageButton" Grid.Column="1" Content="回看" />
+      <Button x:Name="StatisticsPageButton" Grid.Column="2" Content="统计" />
+      <Button x:Name="PauseButton" Grid.Column="4" Content="暂停记录" />
+      <Button x:Name="ExitButton" Grid.Column="5" Content="退出" />
+      <ComboBox x:Name="LanguagePicker" Grid.Column="6" MinWidth="96" AutomationProperties.Name="界面语言">
+        <ComboBoxItem Content="中文" Tag="zh-CN" /><ComboBoxItem Content="English" Tag="en" />
+      </ComboBox>
+    </Grid>
+    <Grid x:Name="ReviewPane" Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10">
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="6">
       <Button x:Name="PreviousDayButton" Content="‹" AutomationProperties.Name="前一天" />
-      <CalendarDatePicker x:Name="ViewDatePicker" Grid.Column="1" Width="150" AutomationProperties.Name="回看日期" />
+      <CalendarDatePicker SelectedDateFormat="Custom" CustomDateFormatString="yyyy-MM-dd" x:Name="ViewDatePicker" Grid.Column="1" Width="150" AutomationProperties.Name="回看日期" />
       <Button x:Name="NextDayButton" Grid.Column="2" Content="›" AutomationProperties.Name="后一天" />
       <Button x:Name="TodayButton" Grid.Column="3" Content="今天" />
       <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
         <TextBlock x:Name="DateText" />
         <TextBlock x:Name="StatusText" Text="正在启动…" Foreground="{DynamicResource ReviewAccent}" />
       </StackPanel>
-      <Button x:Name="PauseButton" Grid.Column="5" Content="暂停记录" />
-      <Button x:Name="ExitButton" Grid.Column="6" Content="退出" />
     </Grid>
     <StackPanel Grid.Row="0" Spacing="5">
-      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="6">
         <TextBox x:Name="TimerTitleBox" Watermark="输入标题，开始独立计时" MaxLength="200" AutomationProperties.Name="计时标题" />
         <TextBlock x:Name="TimerElapsedText" Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource ReviewAccent}" />
         <Button x:Name="StartTimerButton" Grid.Column="2" Content="开始计时" />
         <Button x:Name="PauseTimerButton" Grid.Column="3" Content="暂停" IsVisible="False" />
         <Button x:Name="StopTimerButton" Grid.Column="4" Content="停止" IsVisible="False" />
-        <ComboBox x:Name="LanguagePicker" Grid.Column="5" MinWidth="96" AutomationProperties.Name="界面语言">
-          <ComboBoxItem Content="中文" Tag="zh-CN" />
-          <ComboBoxItem Content="English" Tag="en" />
-        </ComboBox>
+
       </Grid>
       <TextBlock x:Name="TimerErrorText" Foreground="{DynamicResource ReviewWarningText}" TextWrapping="Wrap" />
       <TextBlock x:Name="ResidencyText" Foreground="{DynamicResource ReviewMuted}" TextWrapping="Wrap" IsVisible="False" />
@@ -115,5 +121,7 @@
         </StackPanel></ScrollViewer>
       </Border>
     </Grid>
+    </Grid>
+    <local:StatisticsPage x:Name="StatisticsView" Grid.Row="1" IsVisible="False" />
   </Grid>
 </Window>
