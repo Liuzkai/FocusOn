@@ -1,180 +1,116 @@
-# FocusOn
+<div align="center">
+  <img src="src/FocusOn/Assets/focuson.png" width="88" height="88" alt="FocusOn icon">
+  <h1>FocusOn</h1>
+  <p><strong>See where your desktop time goes.</strong></p>
+  <p>Offline foreground app tracking, independent timers, and clear usage charts.</p>
 
-<img src="src/FocusOn/Assets/focuson.png" width="72" height="72" alt="FocusOn clock icon">
+  <a href="https://github.com/Liuzkai/FocusOn/releases/latest"><img src="https://img.shields.io/github/v/release/Liuzkai/FocusOn" alt="Latest release"></a>
+  <a href="https://github.com/Liuzkai/FocusOn/actions/workflows/build.yml"><img src="https://github.com/Liuzkai/FocusOn/actions/workflows/build.yml/badge.svg?branch=main" alt="Build and tests"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Liuzkai/FocusOn" alt="MIT license"></a>
 
-An offline desktop app for **Windows, Linux, and macOS** that records foreground app usage and provides independent titled timers. Records stay on your computer in a local SQLite database.
-
-FocusOn measures how long an app's window stays active, including reading or watching without keyboard input. It does not measure attention or count background apps.
-
-## Interface
-
-![FocusOn: titled timer, daily app totals, three timeline lanes, and activity log](docs/images/focuson-ui.png)
-
-An actual Linux screenshot with synthetic demonstration records, including a timeline across midnight. It does not show personal activity or establish hardware/session acceptance.
-
-The interface supports **English and Simplified Chinese**. In v0.1.7 source, use **Settings → Interface language** to switch immediately (older packages use the top-row selector). The preference is saved for the selected data directory; the first launch follows the system language, with English as the fallback. App names, window titles, timer titles, and historical records are preserved in their original language.
-
-[View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
-
-The **[v0.1.5 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5)** adds a time range selector: **1h, 2h, 4h, 6h, 8h, 12h, 24h, Today**. Hour ranges look back from now and can cross midnight; Today shows local midnight to now. The default is 1h. Timeline and logs use the visible range, while daily app totals and deletion stay scoped to the date picker. Historical dates use that day's end as their reference; choosing Today returns to the current date. Zoom/pan stays fixed during refresh; Reset restores the selected range and live following.
-
-This release retains pointer-following timeline hints, small separators between different apps, and automatic log-end following. Scroll to the bottom to follow new records; scroll up or select a historical record to pause following.
-
-This release also saves more distinct app colors across restarts and adds right-click zoom to a selected range. Left-click selects a record, left-drag filters a range, the wheel zooms, and right-drag pans. Use **Clear range** or **Escape** to remove the range filter.
-
-**Daily app totals** are compact: drag any app label left or right to scroll, or use the wheel, horizontal trackpad or arrow/Home/End/Page keys. A thin position line appears during interaction and hides after about one second idle, without covering labels or shifting the layout.
-
-![Time range selector and compact daily app totals with demonstration records](docs/images/focuson-ui-interactions.png)
-
-This preview shows the native Linux interface with synthetic records; it does not show personal activity or establish hardware/session acceptance. Public v0.1.5 downloads use the verified source described below; earlier releases retain their original builds.
-
-## Statistics preview
-
-The Statistics page, introduced in the **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** and included in public v0.1.9, has with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Records and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
-
-- **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
-- **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.
-- App shares count foreground Usage only. Pauses, missing records and independent timers are excluded. Partial intervals use their original monotonic duration allocations. DST and already deleted intervals retain the existing recording rules; future time is not counted.
-- Charts show exact-duration details on hover and with Left/Right/Home/End while focused; Escape closes the hint. The top three trends use distinct line patterns, and the complete app list remains readable in high contrast. Narrow windows stack the charts.
-
-![FocusOn multi-day statistics: app shares, daily durations and app trends](docs/images/focuson-statistics.png)
-
-Native Linux preview with synthetic records, not personal activity. [Single-day period preview](docs/images/focuson-statistics-period.png) · [Simplified Chinese preview](docs/images/focuson-statistics.zh-CN.png). Statistics is included in public v0.1.9; the historical v0.1.5 packages keep their original source.
-
-**v0.1.10 hover preview:** donut slices lift slightly, daily/hourly bars gain a soft column highlight, trend markers grow a subtle halo and cards gain gentle depth. Transitions settle in 170 ms and stop on navigation, window hiding or shutdown. Values and recorded proportions stay exact; empty plot space also accepts hover. Settings → Appearance → Statistics hover animations saves an opt-out with immediate static highlights. High contrast automatically uses static emphasis; keyboard details remain available. Switching language also refreshes the selected scope caption while preserving period edits and validation.
-
-![Native statistics hover animation with synthetic records](docs/images/focuson-statistics-hover.gif)
-
-Actual Linux X11 recording with synthetic demonstration records. [Chinese hover preview](docs/images/focuson-statistics-hover.zh-CN.png) · [Light theme hover preview](docs/images/focuson-statistics-hover-light.png). The [v0.1.10 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-8b8d078b872d3b9938ff) is verified from source `6147493` through the [six-target native build](https://github.com/Liuzkai/FocusOn/actions/runs/38526833375): 184 tests per target, both Windows installer lifecycle checks and 12 uploaded/downloaded SHA256-verified assets. Public v0.1.9 retains its original packages.
-
-## Settings, themes, Windows installation and updates
-
-The v0.1.7 feature adds **Settings** with saved English/Chinese and **Light / Dark** choices, a **Start at login** switch, the current data folder and a folder shortcut. System high contrast overrides either theme. About is the last card and shows the actual build version, architecture and GitHub link. From v0.1.8, the history page is named **Records** (记录). **Start at login** is visible under Settings → Startup and background, saves immediately and controls current-user startup. It starts after sign-in, hiding only when the tray is available. Navigation keeps recording/timers and records/statistics scope intact.
-
-![FocusOn Settings in Light](docs/images/focuson-settings-light.png)
-
-Native Linux preview using an isolated synthetic-data directory. [Dark Settings](docs/images/focuson-settings-dark.png) · [Chinese Settings](docs/images/focuson-settings.zh-CN.png) · [Light statistics](docs/images/focuson-statistics-light.png).
-
-Change the data location by typing an absolute path or choosing a folder, then **Save and restart**. The destination must be empty and separate from the original folder. FocusOn saves, copies and verifies SQLite and preferences, updates a small default-folder pointer, then restarts. The original directory is kept as a backup; records are never merged. A running independent timer pauses. Isolated `--data-dir` changes never modify production startup or its pointer. Older versions do not understand custom locations.
-
-Windows x64/ARM64 **Setup.exe** packages install per user with Start menu/optional desktop shortcuts and support reinstall/uninstall without deleting records. Portable ZIPs remain available. Installers are currently **unsigned**; SHA256 is integrity checking, not publisher authentication. See [Windows installation](docs/windows.md).
-
-**Check for updates** is explicit and contacts only GitHub's public stable releases without uploading records. Drafts/prereleases and versions no newer than the installed build are ignored. Windows validates the exact OS/architecture asset, official URL, size and SHA256 before saving/exiting and launching Setup. Linux/macOS use the matching official download and manual replacement. Nothing is silently downloaded or installed. A development build ahead of the latest public release correctly reports no newer stable version.
-
-From v0.1.9, an API rate limit (403/429), API outage or API-only connection timeout falls back to GitHub’s official public Release pages. Exact package links, a headers-only size check and SHA256 remain required. Successful checks are cached briefly; limited API requests back off without background polling. No GitHub token or third-party mirror is needed. If both official channels are unavailable, the app gives a retry/manual-download message instead of reporting no updates. [Native Chinese update-check preview](docs/images/focuson-update-check.zh-CN.png) shows a real API-denied request recovering against the official public latest release.
-
-Installed v0.1.7/v0.1.8 clients need **one manual installer upgrade** to obtain this fix; their existing binary cannot receive the repair through a rate-limited request. Drafts remain excluded.
-
-The **[v0.1.9 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9)** is verified from source `e3a9cff` through the [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384). All six targets pass 179 tests each. Both Windows installers pass installation, installed-app save/exit, reinstall and uninstall checks. Twelve Windows/Linux archive, installer and checksum assets are uploaded and downloaded with SHA256 verification.
-
-The [v0.1.7 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8) introduced Settings and Windows installers from source `9760d1a`; its [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655) passes 160 tests per target. The [v0.1.8 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1db24c6c1255826cdf26) adds Records/记录 navigation and the explicit Start at login/开机启动 setting from source `a8791ee`; its [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38507488287) also passes 160 tests per target.
-
-v0.1.9 is public/latest, published on explicit user instruction after rechecking all twelve original attachments. [Publication verification](https://github.com/Liuzkai/FocusOn/actions/runs/38521909276) preserves the immutable source and every older release/tag; no package was rebuilt or replaced. Earlier drafts, attachments and notices retain their original source and bytes. Unsigned Mac validation bundles are excluded from Release.
+  <p><a href="https://github.com/Liuzkai/FocusOn/releases/latest">Download</a> · <a href="#features">Features</a> · <a href="#screenshots">Screenshots</a> · <a href="#documentation">Documentation</a></p>
+</div>
 
 ## Features
 
-- Daily app totals and a timeline with separate usage, stopped, and timer lanes.
-- Window and title changes recorded as separate segments.
-- Independent titled timers with start, pause, resume, and stop controls.
-- Date navigation, rolling hour ranges, Today, search, range filtering, zoom, and record details. Filters do not change daily totals.
-- Manual recording pause and platform session observation for lock, sleep, and display state.
-- Confirmation before deleting a day's records; records on other dates are preserved.
-- Local storage, login startup, and activation of the existing instance when launched again.
-- Close to the system tray / Mac menu bar, with restore and explicit Exit. If Linux has no usable tray, the window stays visible; losing the tray restores a hidden window.
+- **Records:** app and window history, daily totals, search, and a zoomable timeline.
+- **Statistics:** app shares, daily trends, multi-day comparisons, and periods within a day.
+- **Timers:** independent titled timers with start, pause, resume, and stop.
+- **Personalization:** English / 简体中文, Light / Dark themes, and optional hover animations.
+- **Desktop integration:** tray or menu bar, start at login, and one instance per data folder.
+- **Local storage:** SQLite history, configurable data location, and updates checked on request.
 
-## Download and run
+FocusOn counts the active window, including reading or watching without keyboard input. It measures foreground usage time, not attention.
 
-Download the latest Windows/Linux **[v0.1.5 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.5)**. Windows x64 users can download [FocusOn-win-x64.zip](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.5/FocusOn-win-x64.zip) directly; ARM64 and Linux packages are on the release page. The packages include the .NET runtime; users do not need the SDK. The `.sha256` files let you verify the archives. GitHub's **Source code** downloads are source archives, not runnable apps.
+## Download
 
-| Platform | Architectures | Package and launch |
+**[Get the latest release →](https://github.com/Liuzkai/FocusOn/releases/latest)**
+
+| Platform | Architectures | Availability |
 | --- | --- | --- |
-| Windows | x64, ARM64 | Extract the complete ZIP and run `FocusOn.exe`. |
-| Linux with glibc | x64, ARM64 | Extract the complete `.tar.gz` and run `./FocusOn` in a graphical desktop session. |
-| macOS 15+ | Intel x64, Apple Silicon ARM64 | Extract the ZIP and move the complete `FocusOn.app` to `/Applications`. Availability and trust status are recorded per build. |
+| Windows | x64 / ARM64 | `Setup.exe` installer or portable ZIP |
+| Linux (glibc) | x64 / ARM64 | `.tar.gz` for a graphical desktop |
+| macOS 15+ | Intel / Apple Silicon | Source and native CI validation; signed, notarized downloads pending |
 
-Packages listed here describe the supported build targets. Availability depends on the assets attached to each release. Linux assets appended to the existing Windows `v0.1.0` release use the cross-platform source commit recorded in their `manifest.json` and release notes; the original Windows tag and assets remain unchanged.
+Packages include the .NET runtime. Choose the matching architecture and verify the adjacent `.sha256` file. GitHub's **Source code** archives are for development.
 
-Linux X11 foreground capture requires a desktop session with X11 and systemd-logind. Debian/Ubuntu graphical dependencies commonly include `libx11-6 libxext6 libice6 libsm6 libfontconfig1 libgl1`. GNOME Wayland requires the bundled extension in `gnome/focuson@focuson.local/`; see the [platform guide](docs/platforms.md) for installation. Other Wayland desktops can use history and titled timers, but foreground capture is unavailable.
+**Windows:** run `FocusOn-win-x64-Setup.exe` on Intel/AMD PCs, or the ARM64 installer on Windows on ARM. Quit the existing tray instance before upgrading; records and preferences are kept. Installers are currently unsigned. [Installation and updates](docs/windows.md).
 
-macOS requires permission in **System Settings → Privacy & Security → Accessibility**, followed by a restart. Screen Recording permission is not requested. The native backend uses NSWorkspace, Accessibility, IOKit power notifications and CoreGraphics session/display queries. History and independent timers remain available when foreground permission is denied. See the [Mac installation, permissions and signing guide](docs/macos.md).
+**Linux:** extract the matching archive and run `./FocusOn` inside its folder. X11 capture is supported; GNOME Wayland needs the bundled extension. Other Wayland desktops can use history and timers, but foreground capture is unavailable. [Dependencies and desktop integration](docs/platforms.md).
 
-An ordinary first launch registers login startup for the current user. Closing the window keeps recording and timers alive. Restore it from the tray/menu bar, the Mac Dock, or by launching the same data directory again. Choose **Exit FocusOn** in the tray/menu bar, **Exit** in the window, or native Mac **Quit** to save and stop. Only one writer and tray icon are created per data directory.
+## Screenshots
 
-Linux uses StatusNotifierItem. GNOME requires a tray host such as an AppIndicator extension, independently of the foreground capture extension. Without a confirmed host and registered icon, Close keeps the window visible with an explanation; it also reappears if the host disappears. Legacy XEmbed alone is unsupported by the current Avalonia backend. Run `python3 install-desktop.py` from a fixed extracted package location to register the supplied icons and application-menu entry for your user.
+<p align="center">
+  <img src="docs/images/focuson-ui.png" width="860" alt="FocusOn activity timeline and records">
+</p>
 
-For detailed operation and platform requirements, see the [usage guide](docs/usage.md), [platform guide](docs/platforms.md), and [manual acceptance checklist](docs/manual-acceptance.md). These supporting documents currently use Chinese.
+<details>
+<summary><strong>Statistics and hover interactions</strong></summary>
 
-## Data and privacy
+<p align="center">
+  <img src="docs/images/focuson-statistics-hover.gif" width="760" alt="Animated statistics: app shares, daily bars and trends">
+</p>
 
-| Platform | Default data directory |
+[Light theme](docs/images/focuson-statistics-hover-light.png) · [简体中文](docs/images/focuson-statistics-hover.zh-CN.png) · [Single-day period](docs/images/focuson-statistics-period.png)
+
+</details>
+
+<details>
+<summary><strong>Settings and themes</strong></summary>
+
+<p align="center">
+  <img src="docs/images/focuson-settings-light.png" width="760" alt="Light theme settings">
+</p>
+
+[Dark theme](docs/images/focuson-settings-dark.png) · [简体中文](docs/images/focuson-settings.zh-CN.png)
+
+</details>
+
+Native Linux previews use synthetic demonstration records. Screenshots may show earlier UI revisions.
+
+## Everyday use
+
+1. Open **Records** to explore your timeline. Zoom with the wheel; drag to select a time range.
+2. Open **Statistics** for a date range or a period within one day. Hover or focus a chart for details.
+3. Use **Settings** for language, theme, hover animations, start at login, data storage, and updates.
+
+Closing the window keeps recording when a usable tray is available. Restore it from the tray or launch FocusOn again. Use **Exit** to save and stop. If no tray is available, the window stays recoverable.
+
+## Privacy and data
+
+History stays on your computer. FocusOn reads active app/window metadata; it does not capture screenshots, document content, or keystrokes. Window titles may contain private information. There is no cloud sync or automatic history cleanup; update checks access GitHub only when requested.
+
+| Platform | Default data folder |
 | --- | --- |
 | Windows | `%LOCALAPPDATA%\FocusOn` |
-| Linux | `$XDG_DATA_HOME/FocusOn`, or `~/.local/share/FocusOn` |
+| Linux | `$XDG_DATA_HOME/FocusOn` or `~/.local/share/FocusOn` |
 | macOS | `~/Library/Application Support/FocusOn` |
 
-The existing Windows SQLite data remains compatible. Exit the old version before upgrading or backing up the complete data directory. Window titles can contain private information; FocusOn records titles but does not capture screenshots, document content, or keyboard input. There is no cloud sync or automatic history cleanup.
+Quit before backing up the complete data folder. Settings can copy and verify your data into a new empty folder while preserving the original.
 
-Use a separate data directory for development or demonstrations; this also skips login startup registration:
+## Documentation
 
-```bash
-./FocusOn --data-dir /tmp/focuson-demo
-```
-
-On Windows, run `FocusOn.exe --data-dir <test-directory>` instead. Language preferences are stored in `settings.json` alongside the database, independently of recording history.
+- [Windows installation and updates](docs/windows.md)
+- [Platform setup and Linux requirements (中文)](docs/platforms.md)
+- [macOS permissions and signing](docs/macos.md)
+- [Usage guide (中文)](docs/usage.md)
+- [Release workflow, version history, and verification](docs/releases.md)
 
 ## Development
 
-Use the .NET SDK pinned by [global.json](global.json), currently **10.0.401**. The app uses .NET 10, Avalonia 11.3, and Microsoft.Data.Sqlite. Restoring dependencies requires a network connection; the installed app runs offline.
-
-Windows PowerShell:
-
-```powershell
-./build.ps1 build
-./build.ps1 test
-./build.ps1 publish -Runtime win-x64
-```
-
-Linux / macOS:
+Install the .NET SDK pinned in [global.json](global.json). The app uses .NET 10, Avalonia, and Microsoft.Data.Sqlite.
 
 ```bash
 ./build.sh build
 ./build.sh test
-./build.sh publish linux-x64  # Use osx-x64 or osx-arm64 on macOS.
 ```
 
-The scripts prefer a repository SDK in `.tools/dotnet/`, then the SDK on `PATH`. Dependencies use committed lockfiles. `test` runs the core/platform SQLite regressions and headless Avalonia UI tests on all supported operating systems. Native Linux window capture and cross-process activation can be checked in an isolated X11 display:
+On Windows, use `./build.ps1 build` and `./build.ps1 test`. Dependencies use committed lockfiles. For isolated development, run with `--data-dir <test-folder>`; this skips production login startup registration.
 
-```bash
-xvfb-run -a ./build.sh smoke
-```
-
-`publish` requires a clean, committed working tree. It creates a self-contained directory, archive, per-file manifest, and archive SHA256 under `artifacts/release/`. Supported runtime identifiers are `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, and `osx-arm64`. Unix archives preserve executable permissions.
-
-For uncommitted development checks, use `./build.sh package-check <runtime>` or `./build.ps1 package-check -Runtime <runtime>`. These outputs go to `artifacts/validation/` and are marked as development validation; they are not formal committed releases.
-
-## GitHub release automation
-
-The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-hosted public-repository runners: Windows x64/ARM64, Ubuntu x64/ARM64, Intel Mac and Apple Silicon. It restores locked dependencies, runs regressions and native desktop checks, then verifies self-contained archives, icons and SHA256. Windows additionally builds per-user installers with pinned Inno Setup and validates native install, installed-app save/exit, reinstall, uninstall and record preservation. Its **Actions artifacts expire after seven days**; they are validation downloads, not Release attachments. Mac builds without Apple credentials are ad-hoc validation bundles and are not formally ready.
-
-The [desktop release workflow](.github/workflows/release.yml) accepts an explicit version tag or manual dispatch with an existing tag. Build/test/package verification must all succeed before it uploads anything. The tag, application version and every attached package source must agree. Releases stay **drafts**, and assets are never silently overwritten. Ordinary code pushes do not publish releases. See [release instructions](docs/releases.md) for exact steps, runner scope and Apple Secrets.
-
-The historical Linux append workflow remains manual and defaults to the already published `409cb51` source for `v0.1.0`. That tag and all existing Windows/Linux attachments are preserved. The new icon/residency version was built separately as `v0.1.1` and published on explicit user approval; no old tag is rewritten.
-
-Developer ID signing, hardened runtime, minimal .NET JIT entitlements, Apple notarization, app stapling and Gatekeeper checks are configured for native Mac runners. They require an existing Apple Developer Program membership and securely configured Actions Secrets. Missing credentials exclude Mac assets from Release uploads. Successful signing and notarization still require physical desktop, Accessibility and power acceptance; see [Mac validation](docs/macos.md).
-
-Linux release notes record the exact source commit and validation scope. Cross-compilation and automated tests do not replace real-device checks for permissions, sleep, lock, tray behavior, DPI, or ARM64 startup.
-
-## Source layout
-
-- `src/FocusOn.Core/`: recording rules, SQLite persistence, daily projection, titled timers, and display text.
-- `src/FocusOn.Platforms/`: native foreground/session observers, data paths, single instance, login startup, preferences, safe data relocation and explicit release-update checks.
-- `src/FocusOn/`: the shared Avalonia desktop interface, timeline, and tray.
-- `tests/`: core/platform regressions, headless UI tests, and native X11 smoke checks.
-
-Product rules and work items are maintained in the [specification](.scratch/focuson/spec.md) and [local issue tracker](.scratch/focuson/issues). See [ADR 0003](docs/adr/0003-cross-platform-desktop.md) for platform boundaries and the [verification record](tests/FocusOn.Tests/Verification.md) for actual results and remaining device checks.
+[Build and packaging instructions](docs/development.md) · [Architecture decisions](docs/adr) · [Contributing workflow](AGENTS.md)
 
 ## License
 
-Original FocusOn code and accompanying original documentation are licensed under the [MIT License](LICENSE), copyright 2026 Zhongkai Lau (Liuzkai). Copies or substantial portions must retain the copyright and full license notice. Attribution in the application interface is not required.
+Original FocusOn code and documentation are [MIT licensed](LICENSE), © 2026 Zhongkai Lau (Liuzkai). Commercial use, modification, and redistribution are permitted with the copyright and full license notice retained; UI attribution is not required.
 
-Third-party components and content retain their own licenses and notices. The .NET runtime, Avalonia, SkiaSharp, Inter fonts, Microsoft.Data.Sqlite, SQLite, and test dependencies are not relicensed by this project's MIT license.
+Bundled components retain their own licenses. See the [third-party notices](docs/licenses/README.md); they are not relicensed under FocusOn's MIT license.
