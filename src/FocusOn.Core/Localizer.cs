@@ -60,7 +60,7 @@ public static class Localizer
     private static readonly Dictionary<string, string> English = new(StringComparer.Ordinal)
     {
         ["倒计时"] = "Countdown",
-        ["计时"] = "Stopwatch",
+        ["正计时"] = "Stopwatch",
         ["计时方式"] = "Timer mode",
         ["倒计时分钟数"] = "Countdown minutes",
         ["开始倒计时"] = "Start countdown",

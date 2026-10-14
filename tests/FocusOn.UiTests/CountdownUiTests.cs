@@ -42,6 +42,7 @@ public sealed class CountdownUiTests
     [AvaloniaFact]
     public async Task Completion_releases_inputs_and_does_not_overwrite_the_next_task_title_on_refresh()
     {
+        Localizer.SetLanguage("zh-CN");
         var completed=new TitleTimerState("Old task",TimeSpan.FromMinutes(25),false,TimeSpan.FromMinutes(25),true,8);
         var w=new MainWindow(_=>Task.FromResult(View(completed)),_=>Task.CompletedTask,(_,_)=>Task.CompletedTask);
         try
@@ -57,6 +58,7 @@ public sealed class CountdownUiTests
     [AvaloniaFact]
     public void Companion_reuses_one_window_hides_per_task_restores_on_click_and_disposes_without_stopping_the_timer()
     {
+        Localizer.SetLanguage("zh-CN");
         var main=new Window();main.Show();var opened=0;using var owner=new TimerCompanionController(main,()=>opened++);
         try
         {
@@ -75,6 +77,9 @@ public sealed class CountdownUiTests
     [AvaloniaFact]
     public void Companion_drag_does_not_restore_and_screen_clamping_handles_removed_monitors()
     {
+        Localizer.SetLanguage("zh-CN");
+        var resources=Application.Current!.Resources; var hadSurface=resources.TryGetResource("ReviewSurface", null, out var oldSurface);
+        resources.Remove("ReviewSurface"); // Cold startup: hit targets must not depend on a resolved theme brush.
         var opened=0;var w=new TimerCompanion(()=>opened++,()=>{});try
         {
             w.Update(new("Drag",TimeSpan.Zero,true));w.Show();Pump(w);Assert.True(w.InputHitTest(new Point(100,30)) is not null, $"Hit test missing {w.Bounds} / {w.FindControl<Border>("Surface")!.Bounds}");var start=w.Position;
@@ -83,7 +88,7 @@ public sealed class CountdownUiTests
             Assert.Equal(new PixelPoint(780,500),TimerCompanion.Clamp(new(4000,3000),new(0,0,1040,580),260,80));
             Assert.Equal(new PixelPoint(-1920,0),TimerCompanion.Clamp(new(-4000,-3000),new(-1920,0,1920,1080),260,80));
         }
-        finally{w.DisposeWindow();}
+        finally{w.DisposeWindow();if(hadSurface)resources["ReviewSurface"]=oldSurface;}
     }
 
     [AvaloniaFact]

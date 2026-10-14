@@ -43,7 +43,7 @@ public partial class TimerCompanion : Window
     {
         TimeText.Text=TimerPresentation.Time(state);
         ProgressText.IsVisible=state.IsCountdown; ProgressText.Text=state.IsCountdown?$"{Math.Floor(state.Progress*100):0}%":string.Empty;
-        var mode=Localizer.Get(state.IsCompleted?"倒计时完成":!state.IsRunning?"已暂停":state.IsCountdown?"倒计时":"计时");
+        var mode=Localizer.Get(state.IsCompleted?"倒计时完成":!state.IsRunning?"已暂停":state.IsCountdown?"倒计时":"正计时");
         Caption.Text=mode+" · "+state.Title;
         Dial.State=state;Dial.InvalidateVisual();
         Title="FocusOn · "+TimerPresentation.Summary(state);

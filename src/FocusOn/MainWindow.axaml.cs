@@ -377,7 +377,7 @@ public partial class MainWindow : Window
                 (ViewDatePicker,"记录日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
                 (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索时间范围内的软件或窗口标题") })
                 AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
-            CountUpItem.Content = Localizer.Get("计时"); CountdownItem.Content = Localizer.Get("倒计时");
+            CountUpItem.Content = Localizer.Get("正计时"); CountdownItem.Content = Localizer.Get("倒计时");
             FocusPresetItem.Content = Localizer.Get("工作 25 分钟"); ShortBreakItem.Content = Localizer.Get("休息 5 分钟"); LongBreakItem.Content = Localizer.Get("休息 15 分钟"); CustomCountdownItem.Content = Localizer.Get("自定义");
             CountdownMinutesLabel.Text = Localizer.Get("分钟");
             AutomationProperties.SetName(TimerModePicker, Localizer.Get("计时方式")); AutomationProperties.SetName(CountdownMinutesBox, Localizer.Get("倒计时分钟数"));

@@ -31,7 +31,7 @@
     <StackPanel Grid.Row="0" Spacing="5">
       <WrapPanel>
         <ComboBox x:Name="TimerModePicker" SelectedIndex="0" MinWidth="135" Margin="0,0,8,5">
-          <ComboBoxItem x:Name="CountUpItem" Content="计时" /><ComboBoxItem x:Name="CountdownItem" Content="倒计时" />
+          <ComboBoxItem x:Name="CountUpItem" Content="正计时" /><ComboBoxItem x:Name="CountdownItem" Content="倒计时" />
         </ComboBox>
         <StackPanel x:Name="CountdownOptions" Orientation="Horizontal" Spacing="6" IsVisible="False" Margin="0,0,8,5">
           <ComboBox x:Name="CountdownPresetPicker" SelectedIndex="0" MinWidth="140">
