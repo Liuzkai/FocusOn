@@ -353,6 +353,8 @@ public sealed class RecordingSession : IDisposable
     }
 
     public void ChangeTimer(TimerAction action, string? title, RecordingTime at) => titleTimer.Change(action, title, at);
+    public void StartCountdown(string? title, TimeSpan duration, RecordingTime at) => titleTimer.Change(TimerAction.StartCountdown, title, at, duration);
+    public TitleTimerState? AdvanceTimer(RecordingTime at) => titleTimer.Advance(at);
 
     private List<StoredInterval> ReadIntervals(DateTimeOffset start, DateTimeOffset end, SqliteTransaction? transaction = null)
     {

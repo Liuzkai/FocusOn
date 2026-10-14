@@ -99,6 +99,12 @@ public sealed class RecordingRuntime : IDisposable
         return true;
     });
 
+    public Task StartCountdownAsync(string? title, TimeSpan duration) => Query(session =>
+    {
+        session.StartCountdown(title, duration, clock.Now()); return true;
+    });
+    public Task<TitleTimerState?> AdvanceTimerAsync() => Query(session => session.AdvanceTimer(clock.Now()));
+
     public Task DeleteDayAsync(DateOnly day) => Query(session =>
     {
         session.DeleteDay(day, TimeZoneInfo.Local, clock.Now());

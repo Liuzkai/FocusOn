@@ -51,6 +51,16 @@ public partial class MainWindow
             }
             catch (Exception e) { ApplySettingsLanguage(); SettingsFailure(Localizer.Get("无法保存配置：{0}", e.Message)); }
         };
+        TimerWidgetCheckBox.IsCheckedChanged += (_, _) =>
+        {
+            if (applyingSettings) return;
+            try
+            {
+                var next = preferences with { TimerWidget = TimerWidgetCheckBox.IsChecked == true };
+                savePreferences?.Invoke(next); preferences = next; SettingsFailure(null);
+            }
+            catch (Exception e) { ApplySettingsLanguage(); SettingsFailure(Localizer.Get("无法保存配置：{0}", e.Message)); }
+        };
         GithubButton.Click += async (_, _) => await OpenUrlAsync(ReleaseUpdates.RepositoryUrl);
         ReleasePageButton.Click += async (_, _) => await OpenUrlAsync(availableUpdate?.ReleaseUrl ?? ReleaseUpdates.RepositoryUrl + "/releases/latest");
         OpenDataButton.Click += async (_, _) => { if (dataDirectory is not null) await OpenUrlAsync(new Uri(dataDirectory + Path.DirectorySeparatorChar).AbsoluteUri); };
@@ -98,6 +108,9 @@ public partial class MainWindow
             AppearanceNote.Text = Localizer.Get("配置立即生效并保存；系统高对比度优先于主题选择。");
             StatisticsAnimationsCheckBox.Content = Localizer.Get("统计页面悬停动画"); StatisticsAnimationsCheckBox.IsChecked = preferences.StatisticsAnimations;
             StatisticsAnimationsNote.Text = Localizer.Get("鼠标悬停时柔和高亮图表和卡片。关闭后保留静态高亮；系统高对比度自动关闭动画。");
+            TimerWidgetCheckBox.Content = Localizer.Get("显示紧凑计时组件"); TimerWidgetCheckBox.IsChecked = preferences.TimerWidget;
+            TimerWidgetNote.Text = Localizer.Get("计时或倒计时时显示时间与进度；点击恢复主窗口，拖动调整位置。使用独立小窗及托盘或菜单栏，不嵌入系统任务栏。关闭小窗不停止计时。");
+            AutomationProperties.SetName(TimerWidgetCheckBox, Localizer.Get("显示紧凑计时组件"));
             StartupNote.Text = Localizer.Get("登录系统后自动启动 FocusOn；托盘可用时后台运行，否则显示窗口。关闭此选项可取消当前用户的自启，选择会自动保存。");
             BehaviorNote.Text = Localizer.Get(isolatedSettings ? "隔离数据模式不会更改正式环境的登录自启。" : "关闭窗口后继续后台记录；托盘或菜单栏可恢复窗口并退出。不支持托盘时保留可恢复窗口。");
             StorageNote.Text = Localizer.Get("记录仅保存在本机。更改目录会保存、复制并校验数据，然后重启；保留原目录，不合并已有数据。运行中的独立计时将暂停。");

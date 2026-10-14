@@ -15,12 +15,14 @@
 
 - **Records:** app and window history, daily totals, search, and a zoomable timeline.
 - **Statistics:** app shares, daily trends, multi-day comparisons, and periods within a day.
-- **Timers:** independent titled timers with start, pause, resume, and stop.
+- **Timers:** titled stopwatches and Pomodoro-style countdowns, with presets and custom duration.
 - **Personalization:** English / 简体中文, Light / Dark themes, and optional hover animations.
-- **Desktop integration:** tray or menu bar, start at login, and one instance per data folder.
+- **Desktop integration:** compact timer companion, tray/menu bar, start at login, and one instance per data folder.
 - **Local storage:** SQLite history, configurable data location, and updates checked on request.
 
 FocusOn counts the active window, including reading or watching without keyboard input. It measures foreground usage time, not attention.
+
+Countdown and the compact timer companion are new in the upcoming **v0.1.11 draft**. The latest public release remains v0.1.10.
 
 ## Download
 
@@ -52,6 +54,17 @@ Packages include the .NET runtime. Choose the matching architecture and verify t
 </p>
 
 [Light theme](docs/images/focuson-statistics-hover-light.png) · [简体中文](docs/images/focuson-statistics-hover.zh-CN.png) · [Single-day period](docs/images/focuson-statistics-period.png)
+
+</details>
+
+<details>
+<summary><strong>Countdown and compact timer</strong></summary>
+
+<p align="center">
+  <img src="docs/images/focuson-countdown.png" width="860" alt="FocusOn countdown with a draggable remaining-time and progress companion">
+</p>
+
+[Timer and platform details](docs/timers.md)
 
 </details>
 
@@ -90,6 +103,7 @@ Quit before backing up the complete data folder. Settings can copy and verify yo
 
 ## Documentation
 
+- [Timers and desktop companion](docs/timers.md)
 - [Windows installation and updates](docs/windows.md)
 - [Platform setup and Linux requirements (中文)](docs/platforms.md)
 - [macOS permissions and signing](docs/macos.md)

@@ -8,6 +8,17 @@ public sealed class SettingsStorageTests : IDisposable
     private readonly string root = Path.Combine(Path.GetTempPath(), "FocusOn-settings-storage-" + Guid.NewGuid().ToString("N"));
     private string Dir(string name) => Path.Combine(root, name);
     [Fact]
+    public void Timer_widget_defaults_on_and_saved_opt_out_preserves_language_and_other_choices()
+    {
+        LanguagePreference.Save(Dir("widget"), "en");
+        var old = AppPreferences.Load(Dir("widget")); Assert.True(old.TimerWidget);
+        (old with { TimerWidget = false }).Save(Dir("widget"));
+        LanguagePreference.Save(Dir("widget"), "zh-CN");
+        (AppPreferences.Load(Dir("widget")) with { Theme = "light", StatisticsAnimations = false }).Save(Dir("widget"));
+        var saved = AppPreferences.Load(Dir("widget")); Assert.False(saved.TimerWidget);
+        Assert.Equal("light", saved.Theme); Assert.False(saved.StatisticsAnimations); Assert.Equal("zh-CN", LanguagePreference.Load(Dir("widget")));
+    }
+    [Fact]
     public void Statistics_motion_defaults_on_for_existing_preferences_and_the_opt_out_survives_language_and_theme_saves()
     {
         Directory.CreateDirectory(Dir("motion"));

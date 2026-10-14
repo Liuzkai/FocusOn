@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FocusOn"
+        x:Class="FocusOn.TimerCompanion" Width="260" Height="80" CanResize="False" ShowInTaskbar="False" ShowActivated="False"
+        SystemDecorations="None" Topmost="True" Background="{DynamicResource ReviewSurface}" Title="FocusOn · Timer">
+  <Border x:Name="Surface" Background="{DynamicResource ReviewSurface}" BorderBrush="{DynamicResource ReviewMuted}" BorderThickness="1" CornerRadius="10" Padding="12,8">
+    <Grid ColumnDefinitions="44,*,24" ColumnSpacing="10">
+      <local:TimerDial x:Name="Dial" Width="42" Height="42" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <TextBlock x:Name="TimeText" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource ReviewText}" />
+          <TextBlock x:Name="ProgressText" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,4" Foreground="{DynamicResource ReviewAccent}" />
+        </StackPanel>
+        <TextBlock x:Name="Caption" FontSize="11" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ReviewMuted}" />
+      </StackPanel>
+      <Button x:Name="HideButton" Grid.Column="2" Content="×" Padding="3" VerticalAlignment="Top" Background="Transparent" Foreground="{DynamicResource ReviewMuted}" />
+    </Grid>
+  </Border>
+</Window>

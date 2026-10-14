@@ -29,6 +29,21 @@
       </StackPanel>
     </Grid>
     <StackPanel Grid.Row="0" Spacing="5">
+      <WrapPanel>
+        <ComboBox x:Name="TimerModePicker" SelectedIndex="0" MinWidth="135" Margin="0,0,8,5">
+          <ComboBoxItem x:Name="CountUpItem" Content="计时" /><ComboBoxItem x:Name="CountdownItem" Content="倒计时" />
+        </ComboBox>
+        <StackPanel x:Name="CountdownOptions" Orientation="Horizontal" Spacing="6" IsVisible="False" Margin="0,0,8,5">
+          <ComboBox x:Name="CountdownPresetPicker" SelectedIndex="0" MinWidth="140">
+            <ComboBoxItem x:Name="FocusPresetItem" Content="工作 25 分钟" Tag="25" />
+            <ComboBoxItem x:Name="ShortBreakItem" Content="休息 5 分钟" Tag="5" />
+            <ComboBoxItem x:Name="LongBreakItem" Content="休息 15 分钟" Tag="15" />
+            <ComboBoxItem x:Name="CustomCountdownItem" Content="自定义" Tag="custom" />
+          </ComboBox>
+          <NumericUpDown x:Name="CountdownMinutesBox" Minimum="1" Maximum="1440" Value="25" Increment="1" FormatString="0.##" Width="110" />
+          <TextBlock x:Name="CountdownMinutesLabel" Text="分钟" VerticalAlignment="Center" />
+        </StackPanel>
+      </WrapPanel>
       <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="6">
         <TextBox x:Name="TimerTitleBox" Watermark="输入标题，开始独立计时" MaxLength="200" AutomationProperties.Name="计时标题" />
         <TextBlock x:Name="TimerElapsedText" Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource ReviewAccent}" />
@@ -148,6 +163,8 @@
           <TextBlock x:Name="BehaviorHeading" Classes="settings-heading" Text="启动与后台运行" />
           <CheckBox x:Name="StartupCheckBox" Content="开机启动" />
           <TextBlock x:Name="StartupNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          <CheckBox x:Name="TimerWidgetCheckBox" Content="显示紧凑计时组件" />
+          <TextBlock x:Name="TimerWidgetNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
           <TextBlock x:Name="BehaviorNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
         </StackPanel></Border>
         <Border Classes="settings-card"><StackPanel Spacing="10">

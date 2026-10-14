@@ -30,9 +30,15 @@ public sealed record RecordedInterval(
 
 public sealed record AppTotal(string AppKey, string AppName, TimeSpan Duration);
 
-public sealed record TitleTimerState(string Title, TimeSpan Duration, bool IsRunning);
+public sealed record TitleTimerState(string Title, TimeSpan Duration, bool IsRunning,
+    TimeSpan? TargetDuration = null, bool IsCompleted = false, long Id = 0)
+{
+    public bool IsCountdown => TargetDuration is not null;
+    public TimeSpan Remaining => TargetDuration is { } target ? TimeSpan.FromTicks(Math.Max(0, target.Ticks - Duration.Ticks)) : TimeSpan.Zero;
+    public double Progress => TargetDuration is { Ticks: > 0 } target ? Math.Clamp((double)Duration.Ticks / target.Ticks, 0, 1) : 0;
+}
 
-public enum TimerAction { Start, Pause, Resume, Stop }
+public enum TimerAction { Start, Pause, Resume, Stop, StartCountdown }
 
 public sealed record DayView(
     DateOnly Date,

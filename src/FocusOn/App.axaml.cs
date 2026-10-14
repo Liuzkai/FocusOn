@@ -18,6 +18,9 @@ public partial class App : Application
     private SingleInstance? singleInstance;
     private TrayController? tray;
     private WindowResidency? residency;
+    private TimerCompanionController? timerCompanion;
+    private readonly DispatcherTimer timerStatus = new() { Interval = TimeSpan.FromSeconds(1) };
+    private bool readingTimer;
     private IActivatableLifetime? activation;
     private MainWindow? window;
     private IClassicDesktopStyleApplicationLifetime? desktop;
@@ -55,7 +58,9 @@ public partial class App : Application
             singleInstance.Listen(() => Dispatcher.UIThread.Post(ShowMainWindow));
             controller = new RecordingController(directory);
             window = new MainWindow(controller.ReadDayAsync, controller.DeleteDayAsync, controller.ChangeTimerAsync,
-                language => LanguagePreference.Save(directory, language), readReview: controller.ReadReviewAsync, readStatistics: controller.ReadStatisticsAsync);
+                language => LanguagePreference.Save(directory, language), readReview: controller.ReadReviewAsync, readStatistics: controller.ReadStatisticsAsync, startCountdown: controller.StartCountdownAsync);
+            timerCompanion = new TimerCompanionController(window, ShowMainWindow);
+            timerCompanion.SetEnabled(preferences.TimerWidget);
             window.ConfigureSettings(directory, isolated, preferences, next =>
             {
                 if (!isolated && next.StartAtLogin != preferences.StartAtLogin)
@@ -69,9 +74,9 @@ public partial class App : Application
                     { if (preferences.StartAtLogin) StartupRegistration.Ensure(Environment.ProcessPath!); else StartupRegistration.Disable(); }
                     throw;
                 }
-                preferences = next;
+                preferences = next; timerCompanion.SetEnabled(next.TimerWidget);
             }, target => RelocateAsync(directory, target, isolated), installer => SaveAndLaunchAsync(isolated ? directory : null, installer, null));
-            window.LanguageChanged += () => tray?.RefreshLanguage();
+            window.LanguageChanged += () => { tray?.RefreshLanguage(); _ = RefreshTimerAsync(); };
             desktop!.MainWindow = window;
             using (var resource = AssetLoader.Open(new Uri("avares://FocusOn/Assets/focuson.png"))) window.Icon = new WindowIcon(resource);
             window.PauseRequested += async (_, _) => await SetPausedAsync(!controller.ManualPaused);
@@ -84,6 +89,8 @@ public partial class App : Application
             residency.SetTrayAvailable(tray.IsAvailable);
             await controller.StartAsync();
             checkpoint.Tick += (_, _) => controller.Poll(); checkpoint.Start();
+            timerStatus.Tick += async (_, _) => await RefreshTimerAsync(); timerStatus.Start();
+            await RefreshTimerAsync();
             if (!isolated && !startup)
             {
                 try { if (preferences.StartAtLogin) StartupRegistration.Ensure(Environment.ProcessPath!); else StartupRegistration.Disable(); }
@@ -102,6 +109,19 @@ public partial class App : Application
         }
     }
 
+    private async Task RefreshTimerAsync()
+    {
+        if (readingTimer || exiting || controller is null) return;
+        readingTimer = true;
+        try
+        {
+            var state = await controller.AdvanceTimerAsync(); if (exiting) return;
+            window?.UpdateTimer(state); tray?.UpdateTimer(state); timerCompanion?.Update(state);
+        }
+        catch (Exception error) { if (!exiting) window?.ShowWarning(Localizer.Get("计时状态更新失败：{0}", Localizer.Translate(error.Message))); }
+        finally { readingTimer = false; }
+    }
+
     private async Task RelocateAsync(string directory, string target, bool isolated)
     {
         if (exiting || window is null) return;
@@ -112,7 +132,7 @@ public partial class App : Application
     private async Task SaveAndLaunchAsync(string? isolatedDirectory, string? installer, DataDirectoryMigration? migration)
     {
         if (exiting || window is null) return;
-        exiting = true; checkpoint.Stop(); window.StopRefresh(); window.IsEnabled = false;
+        exiting = true; checkpoint.Stop(); timerStatus.Stop(); timerCompanion?.Dispose(); window.StopRefresh(); window.IsEnabled = false;
         string? errorMessage = null;
         try
         {
@@ -168,7 +188,7 @@ public partial class App : Application
     private async Task ExitAsync()
     {
         if (exiting) return;
-        exiting = true; residency?.BeginExit(); checkpoint.Stop(); window?.StopRefresh();
+        exiting = true; residency?.BeginExit(); checkpoint.Stop(); timerStatus.Stop(); timerCompanion?.Dispose(); window?.StopRefresh();
         try { if (controller is not null) await controller.DisposeAsync(); }
         catch (Exception error) { if (window is not null) { window.Show(); await MessageDialog.ShowAsync(window, "退出前记录未能可靠保存：" + error.Message); } }
         finally

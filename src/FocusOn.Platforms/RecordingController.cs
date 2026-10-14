@@ -97,6 +97,8 @@ public sealed class RecordingController : IAsyncDisposable
     }
 
     public Task ChangeTimerAsync(TimerAction action, string? title) => runtime.ChangeTimerAsync(action, title);
+    public Task StartCountdownAsync(string? title, TimeSpan duration) => runtime.StartCountdownAsync(title, duration);
+    public Task<TitleTimerState?> AdvanceTimerAsync() => runtime.AdvanceTimerAsync();
 
     public Task SetManualPausedAsync(bool paused)
     {

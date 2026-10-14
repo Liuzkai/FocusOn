@@ -8,6 +8,9 @@ internal sealed class TitleTimerStore
     private readonly SqliteConnection connection;
     private long? taskId;
     private string? title;
+    private TimeSpan? targetDuration;
+    private long savedBeforeSegment;
+    private bool completed;
     private long? segmentId;
     private RecordingTime? segmentStart;
     private RecordingTime? trustedEnd;
@@ -24,40 +27,55 @@ internal sealed class TitleTimerStore
                 basis_start INTEGER NOT NULL, basis_end INTEGER NOT NULL, basis_ticks INTEGER NOT NULL);
             CREATE INDEX IF NOT EXISTS timer_segments_task ON timer_segments(task_id);
             CREATE INDEX IF NOT EXISTS timer_segments_day ON timer_segments(end_utc,start_utc);
-            SELECT id, title FROM title_timers WHERE finished = 0 ORDER BY id DESC LIMIT 1;
+            CREATE TABLE IF NOT EXISTS timer_targets (task_id INTEGER PRIMARY KEY, target_ticks INTEGER NOT NULL CHECK(target_ticks > 0));
+            SELECT t.id, t.title, g.target_ticks FROM title_timers t LEFT JOIN timer_targets g ON g.task_id=t.id
+            WHERE t.finished = 0 ORDER BY t.id DESC LIMIT 1;
             """;
         using var reader = schema.ExecuteReader();
-        if (reader.Read()) { taskId = reader.GetInt64(0); title = reader.GetString(1); }
+        if (reader.Read())
+        {
+            taskId = reader.GetInt64(0); title = reader.GetString(1);
+            targetDuration = reader.IsDBNull(2) ? null : TimeSpan.FromTicks(reader.GetInt64(2));
+        }
         // The last successfully saved endpoint is history; reopening never extends it.
     }
 
-    public void Change(TimerAction action, string? newTitle, RecordingTime at)
+    public void Change(TimerAction action, string? newTitle, RecordingTime at, TimeSpan? target = null)
     {
-        if (action == TimerAction.Start)
+        if (action is TimerAction.Start or TimerAction.StartCountdown)
         {
-            if (taskId is not null) throw new InvalidOperationException("请先停止当前计时。");
+            if (taskId is not null && !completed) throw new InvalidOperationException("请先停止当前计时。");
             var text = newTitle?.Trim();
             if (string.IsNullOrEmpty(text) || text.Length > 200) throw new ArgumentException("请输入 1 至 200 字的计时标题。");
+            if (action == TimerAction.StartCountdown && (target is null || target < TimeSpan.FromSeconds(1) || target > TimeSpan.FromHours(24)))
+                throw new ArgumentException("倒计时时长须为1秒至24小时。");
             using var transaction = connection.BeginTransaction();
             using var create = connection.CreateCommand();
             create.Transaction = transaction;
             create.CommandText = "INSERT INTO title_timers(title) VALUES ($title); SELECT last_insert_rowid();";
             create.Parameters.AddWithValue("$title", text);
             var id = (long)create.ExecuteScalar()!;
+            if (action == TimerAction.StartCountdown)
+            {
+                using var goal = connection.CreateCommand(); goal.Transaction = transaction;
+                goal.CommandText = "INSERT INTO timer_targets(task_id,target_ticks) VALUES ($id,$ticks);";
+                goal.Parameters.AddWithValue("$id", id); goal.Parameters.AddWithValue("$ticks", target!.Value.Ticks); goal.ExecuteNonQuery();
+            }
             var segment = CreateSegment(id, at, transaction);
             transaction.Commit();
-            taskId = id;
-            title = text;
+            taskId = id; title = text; completed = false; savedBeforeSegment = 0;
+            targetDuration = action == TimerAction.StartCountdown ? target : null;
             segmentId = segment;
             segmentStart = trustedEnd = at;
             Warning = null;
             return;
         }
-        if (taskId is null) throw new InvalidOperationException("当前没有标题计时。");
+        if (taskId is null || completed) throw new InvalidOperationException("当前没有标题计时。");
         if (action == TimerAction.Resume)
         {
             if (segmentStart is null)
             {
+                savedBeforeSegment = SavedTicks(taskId.Value);
                 segmentId = CreateSegment(taskId.Value, at);
                 segmentStart = trustedEnd = at;
                 Warning = null;
@@ -71,8 +89,7 @@ internal sealed class TitleTimerStore
             finish.CommandText = "UPDATE title_timers SET finished = 1 WHERE id = $id;";
             finish.Parameters.AddWithValue("$id", taskId.Value);
             finish.ExecuteNonQuery();
-            taskId = null;
-            title = null;
+            taskId = null; title = null; targetDuration = null;
         }
     }
 
@@ -104,14 +121,30 @@ internal sealed class TitleTimerStore
             Warning = "标题计时因系统时间或时区变化已暂停；仅保留已保存的时间，请手动继续。";
             return;
         }
-        var duration = at.MonotonicTicks - start.MonotonicTicks;
+        var elapsed = at.MonotonicTicks - start.MonotonicTicks;
+        var duration = targetDuration is { } target ? Math.Min(elapsed, Math.Max(0, target.Ticks - savedBeforeSegment)) : elapsed;
+        var reached = targetDuration is { } goal && savedBeforeSegment + duration >= goal.Ticks;
+        if (duration < elapsed)
+            at = new(new DateTimeOffset(start.Utc.UtcTicks + (long)((Int128)(at.Utc.UtcTicks - start.Utc.UtcTicks) * duration / elapsed), TimeSpan.Zero),
+                start.MonotonicTicks + duration, at.TimeZoneId);
         if (duration == 0 || at.Utc <= start.Utc) return;
-        using var save = connection.CreateCommand();
-        save.CommandText = "UPDATE timer_segments SET end_utc=$end, duration_ticks=$duration, basis_end=$end, basis_ticks=$duration WHERE id=$id;";
-        save.Parameters.AddWithValue("$end", at.Utc.UtcTicks);
-        save.Parameters.AddWithValue("$duration", duration);
-        save.Parameters.AddWithValue("$id", (object?)segmentId ?? DBNull.Value);
-        try { save.ExecuteNonQuery(); }
+        try
+        {
+            using var transaction = connection.BeginTransaction();
+            using var save = connection.CreateCommand(); save.Transaction = transaction;
+            save.CommandText = "UPDATE timer_segments SET end_utc=$end, duration_ticks=$duration, basis_end=$end, basis_ticks=$duration WHERE id=$id;";
+            save.Parameters.AddWithValue("$end", at.Utc.UtcTicks);
+            save.Parameters.AddWithValue("$duration", duration);
+            save.Parameters.AddWithValue("$id", (object?)segmentId ?? DBNull.Value);
+            save.ExecuteNonQuery();
+            if (reached)
+            {
+                using var finish = connection.CreateCommand(); finish.Transaction = transaction;
+                finish.CommandText = "UPDATE title_timers SET finished=1 WHERE id=$id;";
+                finish.Parameters.AddWithValue("$id", taskId!.Value); finish.ExecuteNonQuery();
+            }
+            transaction.Commit();
+        }
         catch (SqliteException error)
         {
             segmentStart = trustedEnd = null;
@@ -120,6 +153,15 @@ internal sealed class TitleTimerStore
             throw;
         }
         trustedEnd = at;
+        if (reached) { completed = true; segmentStart = trustedEnd = null; segmentId = null; }
+    }
+
+    // Independent of window visibility. Ordinary reads remain non-mutating.
+    public TitleTimerState? Advance(RecordingTime at)
+    {
+        if (targetDuration is { } target && segmentStart is { } start &&
+            (!Reliable(at) || savedBeforeSegment + Math.Max(0, at.MonotonicTicks - start.MonotonicTicks) >= target.Ticks)) Checkpoint(at);
+        return State(at);
     }
 
     public void Pause(RecordingTime at)
@@ -143,17 +185,31 @@ internal sealed class TitleTimerStore
     {
         if (segmentStart is not RecordingTime start || now is not RecordingTime at || !Reliable(at) ||
             at.MonotonicTicks <= start.MonotonicTicks || at.Utc <= start.Utc) return null;
+        var elapsed = at.MonotonicTicks - start.MonotonicTicks;
+        if (targetDuration is { } target && elapsed > target.Ticks - savedBeforeSegment)
+        {
+            var allowed = Math.Max(0, target.Ticks - savedBeforeSegment);
+            at = new(new DateTimeOffset(start.Utc.UtcTicks + (long)((Int128)(at.Utc.UtcTicks - start.Utc.UtcTicks) * allowed / elapsed), TimeSpan.Zero),
+                start.MonotonicTicks + allowed, at.TimeZoneId);
+        }
         return new(-(segmentId ?? long.MaxValue), IntervalKind.TaskTimer, start.Utc.ToUniversalTime(), at.Utc.ToUniversalTime(),
             TimeSpan.FromTicks(at.MonotonicTicks - start.MonotonicTicks), null, "标题计时", title, true);
+    }
+
+    private long SavedTicks(long id)
+    {
+        using var sum = connection.CreateCommand();
+        sum.CommandText = "SELECT COALESCE(SUM(duration_ticks),0) FROM timer_segments WHERE task_id=$id;";
+        sum.Parameters.AddWithValue("$id", id);
+        return (long)sum.ExecuteScalar()!;
     }
 
     public TitleTimerState? State(RecordingTime? now)
     {
         if (taskId is not long id) return null;
-        using var sum = connection.CreateCommand();
-        sum.CommandText = "SELECT COALESCE(SUM(duration_ticks),0) FROM timer_segments WHERE task_id=$id;";
-        sum.Parameters.AddWithValue("$id", id);
-        var ticks = (long)sum.ExecuteScalar()!;
+        var ticks = SavedTicks(id);
+        // Removing completed history dismisses its old completion display, never resumes it.
+        if (completed && targetDuration is { } done && ticks < done.Ticks) return null;
         if (Live(now) is { } live)
         {
             if (segmentId is long saved)
@@ -165,7 +221,8 @@ internal sealed class TitleTimerStore
             }
             ticks += live.Duration.Ticks;
         }
-        return new(title!, TimeSpan.FromTicks(ticks), segmentStart is not null);
+        if (targetDuration is { } target) ticks = Math.Min(ticks, target.Ticks);
+        return new(title!, TimeSpan.FromTicks(ticks), segmentStart is not null, targetDuration, completed, id);
     }
 
     public List<RecordedInterval> Read(DateTimeOffset start, DateTimeOffset end, RecordingTime? now = null, SqliteTransaction? transaction = null, bool clip = true)
@@ -251,5 +308,8 @@ internal sealed class TitleTimerStore
         cleanup.Transaction = transaction;
         cleanup.CommandText = "DELETE FROM title_timers WHERE finished=1 AND NOT EXISTS (SELECT 1 FROM timer_segments WHERE task_id=title_timers.id AND duration_ticks>0);";
         cleanup.ExecuteNonQuery();
+        using var goals = connection.CreateCommand(); goals.Transaction = transaction;
+        goals.CommandText = "DELETE FROM timer_targets WHERE NOT EXISTS (SELECT 1 FROM title_timers WHERE id=timer_targets.task_id);";
+        goals.ExecuteNonQuery();
     }
 }

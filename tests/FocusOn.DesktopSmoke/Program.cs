@@ -29,13 +29,13 @@ sealed class SmokeApp : Application
     {
         var directory = Path.Combine(Path.GetTempPath(), "FocusOn-desktop-smoke-" + Guid.NewGuid().ToString("N"));
         RecordingController? recording = null; TrayController? tray = null; WindowResidency? residency = null; SingleInstance? instance = null;
-        MainWindow? window = null;
+        MainWindow? window = null; TimerCompanionController? companion = null;
         try
         {
             Localizer.SetLanguage("en");
             instance = new SingleInstance(directory); Require(instance.IsPrimary, "Primary writer lock unavailable.");
             recording = new RecordingController(directory); await recording.StartAsync();
-            window = new MainWindow(recording.ReadDayAsync, recording.DeleteDayAsync, recording.ChangeTimerAsync, language => LanguagePreference.Save(directory, language));
+            window = new MainWindow(recording.ReadDayAsync, recording.DeleteDayAsync, recording.ChangeTimerAsync, language => LanguagePreference.Save(directory, language), startCountdown: recording.StartCountdownAsync);
             window.ConfigureSettings(directory, true, new(), preferences => preferences.Save(directory), _ => Task.CompletedTask, _ => Task.CompletedTask);
             desktop.MainWindow = window;
             residency = new WindowResidency(window, window.SetTrayAvailable);
@@ -73,6 +73,23 @@ sealed class SmokeApp : Application
             Require(!window.FindControl<CheckBox>("StartupCheckBox")!.IsEnabled, "Isolation enabled production startup changes.");
             window.FindControl<ComboBox>("ThemePicker")!.SelectedIndex = 0;
             window.FindControl<Button>("ReviewPageButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            // Exercise real native countdown/tray/companion while the main window is resident.
+            await recording.ChangeTimerAsync(TimerAction.Stop, null);
+            await recording.StartCountdownAsync("Native countdown", TimeSpan.FromSeconds(2));
+            companion = new TimerCompanionController(window, residency.Restore);
+            var timerState = await recording.AdvanceTimerAsync();
+            companion.Update(timerState); tray.UpdateTimer(timerState);
+            var companionWindow = companion.Window!;
+            Require(companionWindow.IsVisible && !companionWindow.ShowActivated && !companionWindow.ShowInTaskbar, "Native timer companion was missing/activating/in taskbar.");
+            window.Close();
+            await Task.Delay(2300); timerState = await recording.AdvanceTimerAsync();
+            companion.Update(timerState); tray.UpdateTimer(timerState);
+            Require(timerState is { IsCompleted: true, IsRunning: false } && timerState.Duration == TimeSpan.FromSeconds(2), "Resident countdown failed to expire/cap at its actual target.");
+            Require(companionWindow.FindControl<TextBlock>("TimeText")!.Text == "00:00", "Native countdown companion did not show zero.");
+            companion.SetEnabled(false); Require(!companionWindow.IsVisible, "Native companion opt-out failed.");
+            companion.SetEnabled(true); Require(ReferenceEquals(companionWindow, companion.Window) && companionWindow.IsVisible, "Native companion duplicated window on restore.");
+            companion.Dispose(); companion = null; residency.Restore();
+            await recording.ChangeTimerAsync(TimerAction.Start, "Native desktop timer after countdown"); await Task.Delay(100);
             var platformWarning = day.Warning;
             var trustedMac = OperatingSystem.IsMacOS() ? MacPermissions.IsAccessibilityTrusted : (bool?)null;
             if (OperatingSystem.IsMacOS())
@@ -101,7 +118,7 @@ sealed class SmokeApp : Application
             Console.WriteLine(JsonSerializer.Serialize(new { result = "PASS", nativeRuntime = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier,
                 trayConfirmed = expectTray, macAccessibilityTrusted = trustedMac, platformWarning,
                 macForegroundUsageObserved = OperatingSystem.IsMacOS() && day.Intervals.Any(x => x.Kind == IntervalKind.Usage && x.Duration > TimeSpan.Zero),
-                checks = new[] { "native window", "close residency", "restore", "running timer", "single writer", "persisted languages", "settings / light-dark persistence / About / isolation", "exit/reopen SQLite", "resource release" } }));
+                checks = new[] { "native window", "close residency", "restore", "running timer", "resident countdown exact completion / native progress icon / companion / opt-out / one window", "single writer", "persisted languages", "settings / light-dark persistence / About / isolation", "exit/reopen SQLite", "resource release" } }));
             Result = 0;
         }
         catch (Exception error) { Console.Error.WriteLine(error); }
@@ -109,7 +126,7 @@ sealed class SmokeApp : Application
         {
             window?.StopRefresh(); residency?.BeginExit();
             if (recording is not null) await recording.DisposeAsync();
-            tray?.Dispose(); residency?.Dispose(); instance?.Dispose(); window?.Close();
+            companion?.Dispose(); tray?.Dispose(); residency?.Dispose(); instance?.Dispose(); window?.Close();
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             desktop.Shutdown(Result);
         }

@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private readonly Func<DateOnly, Task> deleteDay;
     private readonly Func<TimerAction, string?, Task> changeTimer;
     private readonly Action<string>? saveLanguage;
+    private readonly Func<string?, TimeSpan, Task>? startCountdown;
     private readonly Func<DateTimeOffset> utcNow;
     private readonly Func<ReviewRequest, Task<ReviewView>>? readReview;
     private readonly ObservableCollection<IntervalRow> rows = [];
@@ -35,9 +36,9 @@ public partial class MainWindow : Window
 
     public MainWindow(Func<DateOnly, Task<DayView>> readDay, Func<DateOnly, Task> deleteDay, Func<TimerAction, string?, Task> changeTimer,
         Action<string>? saveLanguage = null, Func<DateTimeOffset>? utcNow = null, Func<ReviewRequest, Task<ReviewView>>? readReview = null,
-        Func<StatisticsRequest, Task<StatisticsView>>? readStatistics = null)
+        Func<StatisticsRequest, Task<StatisticsView>>? readStatistics = null, Func<string?, TimeSpan, Task>? startCountdown = null)
     {
-        this.readDay = readDay; this.deleteDay = deleteDay; this.changeTimer = changeTimer; this.saveLanguage = saveLanguage;
+        this.readDay = readDay; this.deleteDay = deleteDay; this.changeTimer = changeTimer; this.saveLanguage = saveLanguage; this.startCountdown = startCountdown;
         this.utcNow = utcNow ?? (() => DateTimeOffset.UtcNow); this.readReview = readReview; selectedDate = Today();
         InitializeComponent();
         StatisticsView.Configure(readStatistics ?? ReadStatisticsFallback, this.utcNow);
@@ -75,6 +76,16 @@ public partial class MainWindow : Window
         PauseButton.Click += (_, _) => PauseRequested?.Invoke(this, EventArgs.Empty);
         ExitButton.Click += (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty);
         DeleteDayButton.Click += async (_, _) => await DeleteDayAsync();
+        TimerModePicker.SelectionChanged += (_, _) => { if (!applyingLanguage) ApplyTimerMode(); };
+        CountdownPresetPicker.SelectionChanged += (_, _) =>
+        {
+            if (!applyingLanguage && CountdownPresetPicker.SelectedItem is ComboBoxItem { Tag: string preset } && int.TryParse(preset, out var minutes)) CountdownMinutesBox.Value = minutes;
+        };
+        CountdownMinutesBox.ValueChanged += (_, _) =>
+        {
+            if (!applyingLanguage && CountdownPresetPicker.SelectedItem is ComboBoxItem { Tag: string preset } &&
+                int.TryParse(preset, out var minutes) && CountdownMinutesBox.Value != minutes) CountdownPresetPicker.SelectedIndex = 3;
+        };
         StartTimerButton.Click += async (_, _) => await ChangeTimerAsync(TimerAction.Start);
         PauseTimerButton.Click += async (_, _) => await ChangeTimerAsync(timerState?.IsRunning == true ? TimerAction.Pause : TimerAction.Resume);
         StopTimerButton.Click += async (_, _) => await ChangeTimerAsync(TimerAction.Stop);
@@ -273,22 +284,59 @@ public partial class MainWindow : Window
             : search.Length > 0 ? Localizer.Get("搜索：{0} · {1} 条匹配 · 全天汇总不变", search, rows.Count)
             : Localizer.Get("{0} · 左键点击或拖选，滚轮缩放，右键拖动平移，右键点击放大选区", mode);
     }
+    public void UpdateTimer(TitleTimerState? state)
+    {
+        if (stopped) return;
+        if (timerState?.Id != state?.Id || timerState?.IsRunning != state?.IsRunning || timerState?.IsCompleted != state?.IsCompleted) timerVersion++;
+        ShowTimer(state);
+    }
+    private void ApplyTimerMode()
+    {
+        CountdownOptions.IsVisible = TimerModePicker.SelectedIndex == 1;
+        StartTimerButton.Content = Localizer.Get(TimerModePicker.SelectedIndex == 1 ? "开始倒计时" : "开始计时");
+        TimerTitleBox.Watermark = Localizer.Get(TimerModePicker.SelectedIndex == 1 ? "输入标题（可选）" : "输入标题，开始独立计时");
+    }
     private void ShowTimer(TitleTimerState? state)
     {
-        timerState = state; TimerTitleBox.IsReadOnly = state is not null;
-        if (state is not null) TimerTitleBox.Text = state.Title;
-        StartTimerButton.IsVisible = state is null; PauseTimerButton.IsVisible = StopTimerButton.IsVisible = state is not null;
+        var previous = timerState; timerState = state; var active = state is { IsCompleted: false };
+        TimerTitleBox.IsReadOnly = active;
+        TimerModePicker.IsEnabled = CountdownOptions.IsEnabled = !active;
+        if (state is not null)
+        {
+            if (active || previous?.Id != state.Id) TimerTitleBox.Text = state.Title;
+            if (active)
+            {
+                TimerModePicker.SelectedIndex = state.IsCountdown ? 1 : 0;
+                if (state.TargetDuration is { } target && previous?.Id != state.Id)
+                {
+                    var minutes = (decimal)target.TotalMinutes;
+                    CountdownPresetPicker.SelectedIndex = minutes == 25 ? 0 : minutes == 5 ? 1 : minutes == 15 ? 2 : 3;
+                    CountdownMinutesBox.Value = minutes;
+                }
+            }
+        }
+        StartTimerButton.IsVisible = !active; PauseTimerButton.IsVisible = StopTimerButton.IsVisible = active;
         PauseTimerButton.Content = Localizer.Get(state?.IsRunning == true ? "暂停" : "继续");
-        TimerElapsedText.Text = state is null ? string.Empty : $"{(int)state.Duration.TotalHours:00}:{state.Duration.Minutes:00}:{state.Duration.Seconds:00}";
+        TimerElapsedText.Text = state is null ? string.Empty : TimerPresentation.Summary(state);
+        ApplyTimerMode();
     }
     private async Task ChangeTimerAsync(TimerAction action)
     {
         if (changingTimer || deleting || stopped) return;
-        if (action == TimerAction.Start && string.IsNullOrWhiteSpace(TimerTitleBox.Text)) { TimerErrorText.Text = Localizer.Get("请先填写计时标题"); TimerTitleBox.Focus(); return; }
+        if (action == TimerAction.Start && TimerModePicker.SelectedIndex != 1 && string.IsNullOrWhiteSpace(TimerTitleBox.Text)) { TimerErrorText.Text = Localizer.Get("请先填写计时标题"); TimerTitleBox.Focus(); return; }
         changingTimer = true; StartTimerButton.IsEnabled = PauseTimerButton.IsEnabled = StopTimerButton.IsEnabled = false; TimerErrorText.Text = string.Empty;
         try
         {
-            await changeTimer(action, TimerTitleBox.Text); timerVersion++;
+            if (action == TimerAction.Start && TimerModePicker.SelectedIndex == 1)
+            {
+                if (CountdownMinutesBox.Value is not { } minutes || minutes < 1 || minutes > 1440) throw new ArgumentException("倒计时时长须为1秒至24小时。");
+                var title = string.IsNullOrWhiteSpace(TimerTitleBox.Text) ? Localizer.Get(CountdownPresetPicker.SelectedIndex switch
+                { 0 => "工作时段", 1 => "短休息", 2 => "长休息", _ => "倒计时" }) : TimerTitleBox.Text;
+                if (startCountdown is null) throw new InvalidOperationException("倒计时尚未初始化。");
+                await startCountdown(title, TimeSpan.FromMinutes((double)minutes));
+            }
+            else await changeTimer(action, TimerTitleBox.Text);
+            timerVersion++;
             if (action == TimerAction.Stop) TimerTitleBox.Text = string.Empty;
             await RefreshAsync();
         }
@@ -329,7 +377,11 @@ public partial class MainWindow : Window
                 (ViewDatePicker,"记录日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
                 (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索时间范围内的软件或窗口标题") })
                 AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
-            TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索时间范围内的软件或窗口标题"); TodayRangeItem.Content = Localizer.Get("今天");
+            CountUpItem.Content = Localizer.Get("计时"); CountdownItem.Content = Localizer.Get("倒计时");
+            FocusPresetItem.Content = Localizer.Get("工作 25 分钟"); ShortBreakItem.Content = Localizer.Get("休息 5 分钟"); LongBreakItem.Content = Localizer.Get("休息 15 分钟"); CustomCountdownItem.Content = Localizer.Get("自定义");
+            CountdownMinutesLabel.Text = Localizer.Get("分钟");
+            AutomationProperties.SetName(TimerModePicker, Localizer.Get("计时方式")); AutomationProperties.SetName(CountdownMinutesBox, Localizer.Get("倒计时分钟数"));
+            SearchBox.Watermark = Localizer.Get("搜索时间范围内的软件或窗口标题"); TodayRangeItem.Content = Localizer.Get("今天");
             TotalsHeading.Text = Localizer.Get("全天软件汇总"); DetailsHeading.Text = Localizer.Get("记录详情"); DetailsEmptyText.Text = Localizer.Get("选择一条记录查看详情。");
             var headers = new[] { "开始时间", "软件 / 状态", "窗口标题 / 说明", "时长" };
             for (var i = 0; i < headers.Length; i++) LogGrid.Columns[i].Header = Localizer.Get(headers[i]);
