@@ -1,7 +1,7 @@
 {
   "sourceCommit": "9717a118e008fc9c335230b0e5177178eadbd04d",
   "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855",
-  "validationResult": "failure",
+  "validationResult": "partial-diagnostic",
   "jobs": [
     {
       "name": "Native linux-arm64",
@@ -41,8 +41,8 @@
     },
     {
       "name": "receipt",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855/job/115795204949"
     }
   ],
