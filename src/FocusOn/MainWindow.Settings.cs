@@ -114,7 +114,9 @@ public partial class MainWindow
         {
             var update = await updates.CheckAsync(); if (stopped) return;
             availableUpdate = update;
-            SetUpdateStatus(update is null ? "当前版本 {0} 没有可用的正式更新。" : "可用版本 {0}", update?.Version.ToString(3) ?? ReleaseUpdates.CurrentVersion.ToString(3));
+            var status = update is not null ? "可用版本 {0}" : updates.UsedWebsiteFallback
+                ? "已通过官方 Release 检查，当前版本 {0} 没有可用的正式更新。" : "当前版本 {0} 没有可用的正式更新。";
+            SetUpdateStatus(status, update?.Version.ToString(3) ?? ReleaseUpdates.CurrentVersion.ToString(3));
             DownloadUpdateButton.IsVisible = update is not null;
         }
         catch (Exception e) { if (!stopped) SetUpdateStatus("检查更新失败：{0}", Localizer.Translate(e.Message)); }
