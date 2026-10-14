@@ -1,0 +1,69 @@
+{
+  "tag": "v0.1.9",
+  "publishExistingDraft": true,
+  "authorization": "User explicitly requested on 2026-10-14 (UTC): \u53d1\u5e03, in direct reply to the verified v0.1.9 repair draft.",
+  "sourceCommit": "e3a9cff1e930e8b6070218694b0a1f33130eabe4",
+  "buildRunId": 38511486384,
+  "assets": [
+    {
+      "name": "FocusOn-linux-arm64.tar.gz",
+      "size": 45245972,
+      "digest": "sha256:42e08dda9ed294e684cb224241765085a097190f3d4f85b550442ddf8974a7a0"
+    },
+    {
+      "name": "FocusOn-linux-arm64.tar.gz.sha256",
+      "size": 93,
+      "digest": "sha256:ba8da822bf53e06590b5885a5c1aa728474dd46fd719970fe2856631e4a0d621"
+    },
+    {
+      "name": "FocusOn-linux-x64.tar.gz",
+      "size": 47878307,
+      "digest": "sha256:019a96c837f7f985cd59ab7d47c174015227098bd2a2fe4cae330c3af9c80561"
+    },
+    {
+      "name": "FocusOn-linux-x64.tar.gz.sha256",
+      "size": 91,
+      "digest": "sha256:b1d9ea2db1a352423f517232ce56be297b6cb253edcce58d62a2a98c0403db98"
+    },
+    {
+      "name": "FocusOn-win-arm64-Setup.exe",
+      "size": 33214698,
+      "digest": "sha256:901b44ce6163e7cd76e115cd5a25b18ce7c0d150fcff5c4e282505d62962ea8e"
+    },
+    {
+      "name": "FocusOn-win-arm64-Setup.exe.sha256",
+      "size": 95,
+      "digest": "sha256:6e153cf4528520ec487e03a6959387bf2ccbadd49dada0a2cb2e73dccdea55b3"
+    },
+    {
+      "name": "FocusOn-win-arm64.zip",
+      "size": 47309168,
+      "digest": "sha256:1945a86fd9553fdc304cd7b0574ff6856fbe273e192eb9827a4101c9067b8d6a"
+    },
+    {
+      "name": "FocusOn-win-arm64.zip.sha256",
+      "size": 88,
+      "digest": "sha256:b2b0a08ec4b565e26b353a9123686613cd536160f9808b091df8c5624592cb0a"
+    },
+    {
+      "name": "FocusOn-win-x64-Setup.exe",
+      "size": 36158224,
+      "digest": "sha256:910b37ef843b520dc655a0952e43281ca96200ad9bd5ea4c1abafb0fd8fc700a"
+    },
+    {
+      "name": "FocusOn-win-x64-Setup.exe.sha256",
+      "size": 93,
+      "digest": "sha256:ba30255e638ac5ed96c716017f5677e726f252167e0d2edc79d2fd6baae27961"
+    },
+    {
+      "name": "FocusOn-win-x64.zip",
+      "size": 49704355,
+      "digest": "sha256:7ff79fd0f92f62df9f3fc19b24e1b2e072ccec55a7037902bc80b47bec8d1606"
+    },
+    {
+      "name": "FocusOn-win-x64.zip.sha256",
+      "size": 86,
+      "digest": "sha256:dabbae16b4e7c2d248af05b09fab9c861a18a954af45cc2e6ac0ce3e1e7334d0"
+    }
+  ]
+}
