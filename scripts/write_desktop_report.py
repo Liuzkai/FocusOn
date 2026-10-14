@@ -12,7 +12,7 @@ root = pathlib.Path(__file__).resolve().parent.parent
 report = {'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
           'runUrl': f'https://github.com/{repo}/actions/runs/{run_id}', 'validationResult': os.environ['VALIDATION_RESULT'],
           'jobs': [{key: job[key] for key in ['name','status','conclusion','html_url']} for job in api(f'repos/{repo}/actions/runs/{run_id}/jobs?per_page=100')['jobs']], 'evidence': {}}
-for name in ['verification.json', 'mac-signing.json']:
+for name in ['verification.json', 'mac-signing.json', 'installer.json']:
     for path in (root / 'artifacts/evidence').rglob(name):
         value = json.loads(path.read_text()); report['evidence'].setdefault(path.parent.name.removeprefix('evidence-'), {})[name] = value
 for path in (root / 'artifacts/evidence').rglob('*.log'):

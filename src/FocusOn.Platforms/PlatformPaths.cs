@@ -25,6 +25,6 @@ public static class PlatformPaths
         if (args.Length != 0 && !isolated && !startup)
             throw new ArgumentException("支持的启动参数：--startup 或 --data-dir <目录>。");
         if (isolated && string.IsNullOrWhiteSpace(args[^1])) throw new ArgumentException("数据目录不能为空。");
-        return (isolated ? Path.GetFullPath(args[^1]) : DataDirectory, isolated, startup);
+        return (isolated ? Path.GetFullPath(args[^1]) : DataLocation.Resolve(DataDirectory), isolated, startup);
     }
 }

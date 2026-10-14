@@ -41,10 +41,12 @@ public partial class MainWindow : Window
         this.utcNow = utcNow ?? (() => DateTimeOffset.UtcNow); this.readReview = readReview; selectedDate = Today();
         InitializeComponent();
         StatisticsView.Configure(readStatistics ?? ReadStatisticsFallback, this.utcNow);
-        ReviewPageButton.Click += (_, _) => ShowPage(false);
-        StatisticsPageButton.Click += (_, _) => ShowPage(true);
+        ReviewPageButton.Click += (_, _) => ShowPage(0);
+        StatisticsPageButton.Click += (_, _) => ShowPage(1);
+        SettingsPageButton.Click += (_, _) => ShowPage(2);
+        InitializeSettings();
         PropertyChanged += (_, change) => { if (change.Property == IsVisibleProperty) StatisticsView.SetActive(IsVisible && StatisticsView.IsVisible); };
-        ShowPage(false);
+        ShowPage(0);
         if (PlatformSettings is { } settings)
         {
             void ApplyTheme(PlatformColorValues colors)
@@ -52,7 +54,7 @@ public partial class MainWindow : Window
                 if (Application.Current is { } app) ReviewTheme.Apply(app.Resources, colors.ContrastPreference == ColorContrastPreference.High);
                 foreach (var row in rows) row.RefreshAppearance();
                 TimelineView.InvalidateVisual(); TotalsScrollViewer.InvalidateVisual();
-                StatisticsView.ApplyLanguage(); ShowPage(StatisticsView.IsVisible);
+                StatisticsView.ApplyLanguage(); ShowPage(activePage);
                 if (started && !stopped) _ = RefreshAsync();
             }
             ApplyTheme(settings.GetColorValues());
@@ -104,8 +106,8 @@ public partial class MainWindow : Window
         LanguagePicker.SelectionChanged += (_, _) =>
         {
             if (applyingLanguage || LanguagePicker.SelectedItem is not ComboBoxItem { Tag: string language } || language == Localizer.Language) return;
-            try { this.saveLanguage?.Invoke(language); Localizer.SetLanguage(language); ApplyLanguage(); LanguageChanged?.Invoke(); }
-            catch (Exception error) { ApplyLanguage(); ShowWarning(Localizer.Get("无法保存界面语言：{0}", Localizer.Translate(error.Message))); }
+            try { this.saveLanguage?.Invoke(language); Localizer.SetLanguage(language); ApplyLanguage(); LanguageChanged?.Invoke(); SettingsFailure(null); }
+            catch (Exception error) { ApplyLanguage(); SettingsFailure(Localizer.Get("无法保存界面语言：{0}", Localizer.Translate(error.Message))); }
         };
         ApplyLanguage(); UpdateDateControls(); UpdateTimelineControls();
     }
@@ -116,15 +118,19 @@ public partial class MainWindow : Window
     public event Action<DayView>? DayRefreshed;
     public event Action? LanguageChanged;
     public void SetPauseState(bool paused) { manualPaused = paused; PauseButton.Content = Localizer.Get(paused ? "继续记录" : "暂停记录"); }
-    public void StopRefresh() { stopped = true; refreshTimer.Stop(); logEndFollower.Dispose(); StatisticsView.Stop(); }
-    private void ShowPage(bool statistics)
+    public void StopRefresh() { stopped = true; refreshTimer.Stop(); logEndFollower.Dispose(); StatisticsView.Stop(); updates.Dispose(); }
+    private int activePage;
+    private void ShowPage(int page)
     {
-        ReviewPane.IsVisible = !statistics; StatisticsView.IsVisible = statistics;
-        ReviewPageButton.Background = statistics ? Brushes.Transparent : ReviewTheme.Surface;
-        StatisticsPageButton.Background = statistics ? ReviewTheme.Surface : Brushes.Transparent;
-        ReviewPageButton.Foreground = statistics ? ReviewTheme.Muted : ReviewTheme.Accent;
-        StatisticsPageButton.Foreground = statistics ? ReviewTheme.Accent : ReviewTheme.Muted;
-        StatisticsView.SetActive(statistics && IsVisible);
+        activePage = page;
+        ReviewPane.IsVisible = page == 0; StatisticsView.IsVisible = page == 1; SettingsPane.IsVisible = page == 2;
+        var buttons = new[] { ReviewPageButton, StatisticsPageButton, SettingsPageButton };
+        for (var i = 0; i < buttons.Length; i++)
+        {
+            buttons[i].Background = page == i ? ReviewTheme.Surface : Brushes.Transparent;
+            buttons[i].Foreground = page == i ? ReviewTheme.Accent : ReviewTheme.Muted;
+        }
+        StatisticsView.SetActive(page == 1 && IsVisible);
     }
     private async Task<StatisticsView> ReadStatisticsFallback(StatisticsRequest request)
     {
@@ -314,7 +320,7 @@ public partial class MainWindow : Window
                 (TodayButton,"今天"), (ExitButton,"退出"), (StartTimerButton,"开始计时"), (StopTimerButton,"停止"),
                 (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"),
                 (ResetDayButton,"重置"), (ClearRangeButton,"清除范围"), (DeleteDayButton,"删除所选日期") }) pair.Control.Content = Localizer.Get(pair.Text);
-            ReviewPageButton.Content = Localizer.Get("回看"); StatisticsPageButton.Content = Localizer.Get("统计"); StatisticsView.ApplyLanguage();
+            ReviewPageButton.Content = Localizer.Get("回看"); StatisticsPageButton.Content = Localizer.Get("统计"); StatisticsView.ApplyLanguage(); ApplySettingsLanguage();
             foreach (var pair in new (Control Control, string Text)[] { (PreviousDayButton,"前一天"), (NextDayButton,"后一天"),
                 (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
                 (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索时间范围内的软件或窗口标题") })

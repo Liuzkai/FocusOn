@@ -12,7 +12,7 @@ FocusOn measures how long an app's window stays active, including reading or wat
 
 An actual Linux screenshot with synthetic demonstration records, including a timeline across midnight. It does not show personal activity or establish hardware/session acceptance.
 
-The interface supports **English and Simplified Chinese**. Use the language selector in the top row to switch immediately. The preference is saved for the selected data directory; the first launch follows the system language, with English as the fallback. App names, window titles, timer titles, and historical records are preserved in their original language.
+The interface supports **English and Simplified Chinese**. In v0.1.7 source, use **Settings → Interface language** to switch immediately (older packages use the top-row selector). The preference is saved for the selected data directory; the first launch follows the system language, with English as the fallback. App names, window titles, timer titles, and historical records are preserved in their original language.
 
 [View the Simplified Chinese interface](docs/images/focuson-ui.zh-CN.png).
 
@@ -30,7 +30,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 
 ## Statistics preview
 
-The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share the language selector, recording pause and Exit controls. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
+The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
 
 - **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
 - **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.
@@ -40,6 +40,22 @@ The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29
 ![FocusOn multi-day statistics: app shares, daily durations and app trends](docs/images/focuson-statistics.png)
 
 Native Linux preview with synthetic records, not personal activity. [Single-day period preview](docs/images/focuson-statistics-period.png) · [Simplified Chinese preview](docs/images/focuson-statistics.zh-CN.png). This new statistics page belongs to v0.1.6; the public v0.1.5 packages keep their original source.
+
+## Settings, themes, Windows installation and updates
+
+The v0.1.7 feature adds **Settings** with saved English/Chinese and **Light / Dark** choices, a login startup switch, the current data folder and a folder shortcut. System high contrast overrides either theme. About is the last card and shows the actual build version, architecture and GitHub link. Navigation keeps recording/timers and review/statistics scope intact.
+
+![FocusOn Settings in Light](docs/images/focuson-settings-light.png)
+
+Native Linux preview using an isolated synthetic-data directory. [Dark Settings](docs/images/focuson-settings-dark.png) · [Chinese Settings](docs/images/focuson-settings.zh-CN.png) · [Light statistics](docs/images/focuson-statistics-light.png).
+
+Change the data location by typing an absolute path or choosing a folder, then **Save and restart**. The destination must be empty and separate from the original folder. FocusOn saves, copies and verifies SQLite and preferences, updates a small default-folder pointer, then restarts. The original directory is kept as a backup; records are never merged. A running independent timer pauses. Isolated `--data-dir` changes never modify production startup or its pointer. Older versions do not understand custom locations.
+
+Windows x64/ARM64 **Setup.exe** packages install per user with Start menu/optional desktop shortcuts and support reinstall/uninstall without deleting records. Portable ZIPs remain available. Installers are currently **unsigned**; SHA256 is integrity checking, not publisher authentication. See [Windows installation](docs/windows.md).
+
+**Check for updates** is explicit and contacts only GitHub's public stable releases without uploading records. Drafts/prereleases and versions no newer than the installed build are ignored. Windows validates the exact OS/architecture asset, official URL, size and SHA256 before saving/exiting and launching Setup. Linux/macOS use the matching official download and manual replacement. Nothing is silently downloaded or installed. A development build ahead of the latest public release correctly reports no newer stable version.
+
+v0.1.7 is being prepared as a new draft through the existing six-native-target workflow. v0.1.5 remains public/latest and v0.1.6 remains its original statistics draft. Existing tags, attachments and notices are preserved; unsigned Mac validation bundles are excluded from Release.
 
 ## Features
 
@@ -124,7 +140,7 @@ For uncommitted development checks, use `./build.sh package-check <runtime>` or 
 
 ## GitHub release automation
 
-The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-hosted public-repository runners: Windows x64/ARM64, Ubuntu x64/ARM64, Intel Mac and Apple Silicon. It restores locked dependencies, runs regressions and native desktop checks, then verifies self-contained archives, icons and SHA256. Its **Actions artifacts expire after seven days**; they are validation downloads, not Release attachments. Mac builds without Apple credentials are ad-hoc validation bundles and are not formally ready.
+The [desktop build workflow](.github/workflows/build.yml) uses standard GitHub-hosted public-repository runners: Windows x64/ARM64, Ubuntu x64/ARM64, Intel Mac and Apple Silicon. It restores locked dependencies, runs regressions and native desktop checks, then verifies self-contained archives, icons and SHA256. Windows additionally builds per-user installers with pinned Inno Setup and validates native install, installed-app save/exit, reinstall, uninstall and record preservation. Its **Actions artifacts expire after seven days**; they are validation downloads, not Release attachments. Mac builds without Apple credentials are ad-hoc validation bundles and are not formally ready.
 
 The [desktop release workflow](.github/workflows/release.yml) accepts an explicit version tag or manual dispatch with an existing tag. Build/test/package verification must all succeed before it uploads anything. The tag, application version and every attached package source must agree. Releases stay **drafts**, and assets are never silently overwritten. Ordinary code pushes do not publish releases. See [release instructions](docs/releases.md) for exact steps, runner scope and Apple Secrets.
 
@@ -137,7 +153,7 @@ Linux release notes record the exact source commit and validation scope. Cross-c
 ## Source layout
 
 - `src/FocusOn.Core/`: recording rules, SQLite persistence, daily projection, titled timers, and display text.
-- `src/FocusOn.Platforms/`: native foreground/session observers, data paths, single instance, login startup, and language preferences.
+- `src/FocusOn.Platforms/`: native foreground/session observers, data paths, single instance, login startup, preferences, safe data relocation and explicit release-update checks.
 - `src/FocusOn/`: the shared Avalonia desktop interface, timeline, and tray.
 - `tests/`: core/platform regressions, headless UI tests, and native X11 smoke checks.
 

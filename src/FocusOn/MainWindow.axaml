@@ -3,16 +3,19 @@
         xmlns:local="using:FocusOn"
         x:Class="FocusOn.MainWindow" Title="FocusOn" Width="1100" Height="720" MinWidth="740" MinHeight="500"
         Background="{DynamicResource ReviewBackground}" Foreground="{DynamicResource ReviewText}">
+  <Window.Styles>
+    <Style Selector="Border.settings-card"><Setter Property="Background" Value="{DynamicResource ReviewSurface}" /><Setter Property="CornerRadius" Value="12" /><Setter Property="Padding" Value="18" /></Style>
+    <Style Selector="TextBlock.settings-heading"><Setter Property="FontSize" Value="16" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+  </Window.Styles>
   <Grid RowDefinitions="Auto,*" Margin="18" RowSpacing="14">
-    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="8">
       <TextBlock Text="FocusOn" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0" />
       <Button x:Name="ReviewPageButton" Grid.Column="1" Content="回看" />
       <Button x:Name="StatisticsPageButton" Grid.Column="2" Content="统计" />
-      <Button x:Name="PauseButton" Grid.Column="4" Content="暂停记录" />
-      <Button x:Name="ExitButton" Grid.Column="5" Content="退出" />
-      <ComboBox x:Name="LanguagePicker" Grid.Column="6" MinWidth="96" AutomationProperties.Name="界面语言">
-        <ComboBoxItem Content="中文" Tag="zh-CN" /><ComboBoxItem Content="English" Tag="en" />
-      </ComboBox>
+      <Button x:Name="SettingsPageButton" Grid.Column="3" Content="配置" />
+      <Button x:Name="PauseButton" Grid.Column="5" Content="暂停记录" />
+      <Button x:Name="ExitButton" Grid.Column="6" Content="退出" />
+
     </Grid>
     <Grid x:Name="ReviewPane" Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10">
     <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="6">
@@ -123,5 +126,47 @@
     </Grid>
     </Grid>
     <local:StatisticsPage x:Name="StatisticsView" Grid.Row="1" IsVisible="False" />
+    <ScrollViewer x:Name="SettingsPane" Grid.Row="1" IsVisible="False" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Spacing="16" MaxWidth="920" HorizontalAlignment="Stretch" Margin="0,0,12,18">
+        <TextBlock x:Name="SettingsHeading" Text="配置" FontSize="26" FontWeight="SemiBold" />
+        <TextBlock x:Name="SettingsError" Foreground="{DynamicResource ReviewWarningText}" TextWrapping="Wrap" IsVisible="False" />
+        <Border Classes="settings-card"><StackPanel Spacing="12">
+          <TextBlock x:Name="AppearanceHeading" Classes="settings-heading" Text="外观" />
+          <WrapPanel>
+            <StackPanel Spacing="5" Margin="0,0,28,8"><TextBlock x:Name="LanguageLabel" Text="界面语言" Foreground="{DynamicResource ReviewMuted}" />
+              <ComboBox x:Name="LanguagePicker" MinWidth="170"><ComboBoxItem Content="中文" Tag="zh-CN" /><ComboBoxItem Content="English" Tag="en" /></ComboBox>
+            </StackPanel>
+            <StackPanel Spacing="5" Margin="0,0,0,8"><TextBlock x:Name="ThemeLabel" Text="主题" Foreground="{DynamicResource ReviewMuted}" />
+              <ComboBox x:Name="ThemePicker" MinWidth="170"><ComboBoxItem Content="Dark" Tag="dark" /><ComboBoxItem Content="Light" Tag="light" /></ComboBox>
+            </StackPanel>
+          </WrapPanel>
+          <TextBlock x:Name="AppearanceNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+        </StackPanel></Border>
+        <Border Classes="settings-card"><StackPanel Spacing="10">
+          <TextBlock x:Name="BehaviorHeading" Classes="settings-heading" Text="启动与后台运行" />
+          <CheckBox x:Name="StartupCheckBox" Content="登录时启动到托盘" />
+          <TextBlock x:Name="BehaviorNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+        </StackPanel></Border>
+        <Border Classes="settings-card"><StackPanel Spacing="10">
+          <TextBlock x:Name="StorageHeading" Classes="settings-heading" Text="数据保存" />
+          <TextBlock x:Name="StorageNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          <TextBlock x:Name="CurrentDataDirectoryText" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          <TextBox x:Name="DataDirectoryBox" />
+          <WrapPanel><Button x:Name="OpenDataButton" Content="打开数据目录" Margin="0,0,8,6" /><Button x:Name="BrowseDataButton" Content="选择目录…" Margin="0,0,8,6" /><Button x:Name="ChangeDataButton" Content="保存并重启" Margin="0,0,8,6" /></WrapPanel>
+        </StackPanel></Border>
+        <Border Classes="settings-card"><StackPanel Spacing="10">
+          <TextBlock x:Name="UpdatesHeading" Classes="settings-heading" Text="更新" />
+          <TextBlock x:Name="UpdateNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          <TextBlock x:Name="UpdateStatus" TextWrapping="Wrap" />
+          <WrapPanel><Button x:Name="CheckUpdatesButton" Content="检查更新" Margin="0,0,8,6" /><Button x:Name="DownloadUpdateButton" Content="下载并安装…" Margin="0,0,8,6" IsVisible="False" /><Button x:Name="ReleasePageButton" Content="查看 Release" Margin="0,0,8,6" /></WrapPanel>
+        </StackPanel></Border>
+        <Border Classes="settings-card"><StackPanel Spacing="10">
+          <TextBlock x:Name="AboutHeading" Classes="settings-heading" Text="关于" />
+          <TextBlock x:Name="VersionText" />
+          <Button x:Name="GithubButton" Content="github.com/Liuzkai/FocusOn ↗" HorizontalAlignment="Left" />
+          <TextBlock x:Name="AboutNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+        </StackPanel></Border>
+      </StackPanel>
+    </ScrollViewer>
   </Grid>
 </Window>

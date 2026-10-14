@@ -36,6 +36,7 @@ sealed class SmokeApp : Application
             instance = new SingleInstance(directory); Require(instance.IsPrimary, "Primary writer lock unavailable.");
             recording = new RecordingController(directory); await recording.StartAsync();
             window = new MainWindow(recording.ReadDayAsync, recording.DeleteDayAsync, recording.ChangeTimerAsync, language => LanguagePreference.Save(directory, language));
+            window.ConfigureSettings(directory, true, new(), preferences => preferences.Save(directory), _ => Task.CompletedTask, _ => Task.CompletedTask);
             desktop.MainWindow = window;
             residency = new WindowResidency(window, window.SetTrayAvailable);
             tray = new TrayController(residency.Restore, () => { }, () => { }, () => { });
@@ -64,6 +65,14 @@ sealed class SmokeApp : Application
             Require(LanguagePreference.Load(directory) == "zh-CN", "Native language preference not persisted.");
             window.FindControl<Avalonia.Controls.ComboBox>("LanguagePicker")!.SelectedIndex = 1;
             Require(LanguagePreference.Load(directory) == "en", "English preference not persisted.");
+            window.FindControl<Button>("SettingsPageButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            Require(window.FindControl<ScrollViewer>("SettingsPane")!.IsVisible, "Native settings navigation failed.");
+            window.FindControl<ComboBox>("ThemePicker")!.SelectedIndex = 1;
+            Require(AppPreferences.Load(directory).Theme == "light" && ReviewTheme.Light, "Native Light preference not persisted.");
+            Require(window.FindControl<TextBlock>("VersionText")!.Text!.Contains(ReleaseUpdates.CurrentVersion.ToString(3)), "Native About version missing.");
+            Require(!window.FindControl<CheckBox>("StartupCheckBox")!.IsEnabled, "Isolation enabled production startup changes.");
+            window.FindControl<ComboBox>("ThemePicker")!.SelectedIndex = 0;
+            window.FindControl<Button>("ReviewPageButton")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             var platformWarning = day.Warning;
             var trustedMac = OperatingSystem.IsMacOS() ? MacPermissions.IsAccessibilityTrusted : (bool?)null;
             if (OperatingSystem.IsMacOS())
@@ -92,7 +101,7 @@ sealed class SmokeApp : Application
             Console.WriteLine(JsonSerializer.Serialize(new { result = "PASS", nativeRuntime = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier,
                 trayConfirmed = expectTray, macAccessibilityTrusted = trustedMac, platformWarning,
                 macForegroundUsageObserved = OperatingSystem.IsMacOS() && day.Intervals.Any(x => x.Kind == IntervalKind.Usage && x.Duration > TimeSpan.Zero),
-                checks = new[] { "native window", "close residency", "restore", "running timer", "single writer", "persisted languages", "exit/reopen SQLite", "resource release" } }));
+                checks = new[] { "native window", "close residency", "restore", "running timer", "single writer", "persisted languages", "settings / light-dark persistence / About / isolation", "exit/reopen SQLite", "resource release" } }));
             Result = 0;
         }
         catch (Exception error) { Console.Error.WriteLine(error); }

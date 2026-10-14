@@ -30,6 +30,22 @@ public static class StartupRegistration
         else throw new PlatformNotSupportedException();
     }
 
+    public static void Disable()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            using var run = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
+            run?.DeleteValue("FocusOn", throwOnMissingValue: false);
+        }
+        else if (OperatingSystem.IsMacOS()) File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "LaunchAgents", "org.focuson.app.plist"));
+        else
+        {
+            var xdg = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            var config = !string.IsNullOrEmpty(xdg) && Path.IsPathFullyQualified(xdg) ? xdg : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            File.Delete(Path.Combine(config, "autostart", "focuson.desktop"));
+        }
+    }
+
     private static void WriteAtomic(string path, string text)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);

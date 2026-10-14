@@ -6,11 +6,13 @@ namespace FocusOn;
 
 public static class MessageDialog
 {
-    public static async Task<bool> ShowAsync(Window owner, string message, bool confirm = false)
+    public static Task<bool> ConfirmAsync(Window owner, string message, string acceptLabel) => ShowAsync(owner, message, true, acceptLabel);
+
+    public static async Task<bool> ShowAsync(Window owner, string message, bool confirm = false, string? acceptLabel = null)
     {
-        var dialog = new Window { Title = confirm ? Localizer.Get("确认删除日期") : "FocusOn", Width = 500, SizeToContent = SizeToContent.Height,
+        var dialog = new Window { Title = confirm && acceptLabel is null ? Localizer.Get("确认删除日期") : "FocusOn", Width = 500, SizeToContent = SizeToContent.Height,
             CanResize = false, WindowStartupLocation = WindowStartupLocation.CenterOwner };
-        var accept = new Button { Content = Localizer.Get(confirm ? "删除" : "确定"), Name = "AcceptButton" };
+        var accept = new Button { Content = Localizer.Get(acceptLabel ?? (confirm ? "删除" : "确定")), Name = "AcceptButton" };
         var cancel = new Button { Content = Localizer.Get("取消"), Name = "CancelButton", IsVisible = confirm };
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10, HorizontalAlignment = HorizontalAlignment.Right };
         buttons.Children.Add(cancel); buttons.Children.Add(accept);

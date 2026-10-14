@@ -88,7 +88,7 @@ public sealed class MainWindowTests
             window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 1;
             Assert.Equal("zh-CN", Localizer.Language); Assert.Equal(0, window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex);
             Assert.Equal("继续记录", window.FindControl<Button>("PauseButton")!.Content);
-            Assert.Contains("denied", window.FindControl<TextBlock>("WarningText")!.Text);
+            Assert.Contains("denied", window.FindControl<TextBlock>("SettingsError")!.Text);
             Assert.Equal(2, window.FindControl<DataGrid>("LogGrid")!.ItemsSource.Cast<IntervalRow>().Count());
         }
         finally { window.StopRefresh(); window.Close(); Localizer.SetLanguage("zh-CN"); }

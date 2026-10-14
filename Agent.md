@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-13。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`c0938e7` / `v0.1.5`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-14。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`c0938e7` / `v0.1.5`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -114,7 +114,7 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 & '.\src\FocusOn\bin\Release\net10.0\FocusOn.exe' --data-dir $focusOnQaData
 ```
 
-开发构建需要对应 .NET 10 运行时与平台图形依赖；发布目录包含 .NET 运行时。macOS 需辅助功能权限，Wayland GNOME 需随附桥接；见 docs/platforms.md。`--data-dir <目录>` 跳过正式自启注册，隐藏隔离启动的参数顺序为 `--startup --data-dir <目录>`。普通无参数启动按平台注册当前用户 Run 键、XDG autostart 或 macOS LaunchAgent，指向固定程序路径并加 `--startup`；没有应用内自启开关。验收时核对目标数据目录和实例。
+开发构建需要对应 .NET 10 运行时与平台图形依赖；发布目录包含 .NET 运行时。macOS 需辅助功能权限，Wayland GNOME 需随附桥接；见 docs/platforms.md。`--data-dir <目录>` 跳过正式自启注册，隐藏隔离启动的参数顺序为 `--startup --data-dir <目录>`。普通无参数启动按平台注册当前用户 Run 键、XDG autostart 或 macOS LaunchAgent，指向固定程序路径并加 `--startup`；v0.1.7 起配置页有保存的登录自启开关，默认启用；隔离启动不修改正式自启。验收时核对目标数据目录和实例。
 
 ## 6. 开发与验证约定
 
@@ -126,6 +126,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 - 按现有 tracker，代码票需实现、必需检查、审查和提交后，在 Comments 追加结果和提交引用才能关闭；移交 08 的人工项仍属待验收。08 与整体规格不能仅凭代码完成或历史测试数关闭。
 
 ## 7. 当前进度与接续事项
+
+**最新 21 票（2026-10-14，实施中）：**同一 main 增加配置页（语言移入、保存 Light/Dark/系统高对比度优先、登录自启开关、打开/修改数据目录、末尾 About 真版本/架构/GitHub）；仅主动检查正式更新，Windows 校验下载后保存退出安装，Linux/Mac 手动替换。目录迁移空目录/双锁、SQLite Backup 包含 WAL、integrity_check、偏好文件 SHA、原目录保留、原默认目录原子指针、隔离启动不改正式路径。新 Windows x64/ARM64 Inno6.5.4 安装器及原生安装/启动/再次安装/卸载/数据保留门禁；无 Windows 签名，Mac 信任限制沿用。计划新 v0.1.7 草稿，现有 v0.1.5 公开/latest 与 v0.1.6 草稿、所有旧标签/附件和原许可保留。详细进度见21票/ADR0008/docs/windows.md。
 
 **最新 20 票（2026-10-13）：**新增参考深色环形/圆角柱状/折线的统计页：默认近7天、多日首尾包含/快捷30天/最多366天，单日HH:mm时段及24:00日结束。仅前台Usage参与，原始分配端点保证精确裁切/分桶/总和，保留删除与本地DST规则，不迁移数据。两页切换保留回看选中/视窗并继续采集/独立计时；两语、统一ISO日期、窄布局、高对比度、线型/键盘和跟随指针详情。114核心/平台+34UI回归与真实Linux合成记录鼠标检查通过，三张截图加入英文README。已公开v0.1.5原源码/资产保持；统计版本计划为v0.1.6草稿。不可变源码 `161c21f5b48e96701d812b2d80cf918b75acde56` / v0.1.6 标签对象 `d11531a73290673fcd583a3cb328adc2e6dae6e1`；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38378437157) Success，六目标各148测试、原生与包校验通过。[草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e) 八个Windows/Linux x64/ARM64附件上传下载校验通过；全部旧Release元数据/附件/标签与v0.1.5公开原资产匹配。Mac两目标为ad-hoc-validation，未Developer ID/公证/staple，临时7天验证产物，不上传正式Release。20工程票关闭，08/整体规格与设备验收仍开放。
 

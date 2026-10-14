@@ -19,17 +19,6 @@ public static class LanguagePreference
     public static void Save(string directory, string language)
     {
         if (language is not ("zh-CN" or "en")) throw new ArgumentException("Unsupported interface language.", nameof(language));
-        Directory.CreateDirectory(directory);
-        var path = Path.Combine(directory, "settings.json");
-        var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        try
-        {
-            // Preserve future settings owned by other parts of the application.
-            var settings = File.Exists(path) ? JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(path)) ?? [] : [];
-            settings["language"] = JsonSerializer.SerializeToElement(language);
-            File.WriteAllText(temporary, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
-            File.Move(temporary, path, overwrite: true);
-        }
-        finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        SettingsFile.Set(directory, "language", language);
     }
 }

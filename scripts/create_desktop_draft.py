@@ -68,6 +68,18 @@ try:
             if signing['status'] != 'developer-id-notarized' or not signing['notarized'] or not signing['stapled']:
                 report['macExcluded'].append(rid); continue
         assets += [archive, pathlib.Path(str(archive) + '.sha256')]
+        if rid.startswith('win-'):
+            installer = root / 'artifacts/release' / f'FocusOn-{rid}-Setup.exe'
+            evidence_files = list((root / 'artifacts/evidence').rglob('installer.json'))
+            native = [json.loads(p.read_text(encoding='utf-8-sig')) for p in evidence_files if json.loads(p.read_text(encoding='utf-8-sig'))['runtime'] == rid]
+            assert len(native) == 1 and native[0]['sourceCommit'] == source
+            assert native[0]['nativeInstallation'].startswith('PASS:')
+            assert installer.stat().st_size == native[0]['bytes']
+            assert hashlib.sha256(installer.read_bytes()).hexdigest().upper() == native[0]['sha256']
+            checksum = pathlib.Path(str(installer) + '.sha256')
+            assert checksum.read_text().split() == [native[0]['sha256'], installer.name]
+            assets += [installer, checksum]
+
     release = find(tag)
     if release is not None:
         assert release['draft'], 'Published releases are immutable; use a new version'
@@ -78,6 +90,8 @@ try:
 Includes the .NET runtime, the integrated FocusOn icon, recoverable tray behavior, and English / Simplified Chinese with a saved language preference. Archives include MIT and third-party notices; adjacent SHA256 files verify downloads.
 
 The time range selector offers 1h, 2h, 4h, 6h, 8h, 12h, 24h and Today; the default is 1h. Hour ranges are elapsed lookbacks and can cross midnight. Today shows local midnight to now. Timeline and intersecting logs follow the visible range; daily totals and deletion retain the date picker's daily scope. Historical dates use their day end as the reference. Zoom/pan stays fixed during refresh; Reset restores the selected preset and live following. Cross-day projections are joined in one recorder snapshot without duplicate records or duration rounding loss.
+
+Settings now contains saved English/Chinese and Light/Dark choices, a login startup switch, a data-folder shortcut and explicit copy/verify/restart relocation with the original folder preserved. About shows the actual build version, native architecture and repository. Updates are checked only on request against public stable releases; Windows verifies package SHA256 before save/exit and per-user installation. Windows x64/ARM64 Setup.exe assets include shortcuts and uninstall/upgrade support, preserve records outside the program folder and have native installation/installed-app/upgrade/uninstall verification. These installers are unsigned; SHA256 is integrity checking, not publisher authentication. Other platforms use manual replacement from the matching official release.
 
 Statistics has its own page with inclusive multi-day ranges (last 7 / 30 days, up to 366 dates) and a local single-day HH:mm period with 24:00 as the day end. Dark donut app shares, rounded duration bars, top-three app trends and a full app list use real foreground Usage only; timers, pauses and gaps are excluded. Original monotonic allocation endpoints preserve exact range/bucket totals, including deleted parts and DST repeated hours. Applied scope, empty/error/loading states, English/Chinese, high contrast, responsive charts, pointer details and keyboard navigation are supported. Switching pages preserves review selection/zoom and continues recording and timers.
 

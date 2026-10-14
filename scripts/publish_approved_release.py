@@ -71,6 +71,8 @@ try:
     assert release['target_commitish'] == source, 'Draft source differs from the approved immutable tag'
     expected = {a['name']: a for a in approval['assets']}
     names = {f'FocusOn-{rid}{extension}{checksum}' for rid, extension in [('win-x64', '.zip'), ('win-arm64', '.zip'), ('linux-x64', '.tar.gz'), ('linux-arm64', '.tar.gz')] for checksum in ['', '.sha256']}
+    if tuple(map(int, tag[1:].split('.'))) >= (0, 1, 7):
+        names |= {f'FocusOn-{rid}-Setup.exe{checksum}' for rid in ['win-x64', 'win-arm64'] for checksum in ['', '.sha256']}
     assert set(expected) == names == {a['name'] for a in release['assets']}, 'Unexpected or missing release attachments'
     before = snapshot(release)
     for asset in release['assets']:
@@ -82,6 +84,11 @@ try:
             with path.open('rb') as stream: digest = 'sha256:' + hashlib.file_digest(stream, 'sha256').hexdigest()
             assert path.stat().st_size == asset['size'] and digest == asset['digest'], 'Downloaded attachment changed: ' + name
             if name.endswith('.sha256'): continue
+            checksum, filename = pathlib.Path(str(path) + '.sha256').read_text().split()
+            assert checksum.lower() == digest.removeprefix('sha256:') and filename == name
+            if name.endswith('-Setup.exe'):
+                assert path.read_bytes()[:2] == b'MZ', 'Invalid Windows installer'
+                continue
             rid = name.removeprefix('FocusOn-').removesuffix('.tar.gz').removesuffix('.zip')
             manifest_name = 'FocusOn-' + rid + '/manifest.json'
             if path.suffix == '.zip':
@@ -98,7 +105,7 @@ try:
     if release['draft']:
         body = (release.get('body') or '').replace('This release stays a draft.',
             'Published on explicit user approval after verification of the existing attachments.')
-        body += f'''\n\n## Publication\n\nPublished the existing Windows/Linux x64 and ARM64 archives without rebuilding or replacing attachments. Source `{source}` matches immutable tag `{tag}`. Eight downloads, SHA256 files, manifests and the successful six-target native build were rechecked before publication. Daily records remain compatible; archives retain MIT and third-party notices.\n\nmacOS is excluded: current bundles are ad-hoc validation only, without Developer ID signing, notarization or stapling. Physical desktop permissions, power and DPI acceptance remains pending. See docs/macos.md for securely configuring Apple Secrets.\n\nVerified build: {result['buildRunUrl']}\nAll earlier releases and tags are preserved.\n'''
+        body += f'''\n\n## Publication\n\nPublished the existing Windows/Linux x64 and ARM64 archives without rebuilding or replacing attachments. Source `{source}` matches immutable tag `{tag}`. All approved downloads, SHA256 files, manifests and the successful six-target native build were rechecked before publication. Daily records remain compatible; archives retain MIT and third-party notices.\n\nmacOS is excluded: current bundles are ad-hoc validation only, without Developer ID signing, notarization or stapling. Physical desktop permissions, power and DPI acceptance remains pending. See docs/macos.md for securely configuring Apple Secrets.\n\nVerified build: {result['buildRunUrl']}\nAll earlier releases and tags are preserved.\n'''
         api(f'repos/{repo}/releases/{release["id"]}', 'PATCH', {'draft': False, 'prerelease': False, 'make_latest': 'true', 'body': body})
     published = api(f'repos/{repo}/releases/{release["id"]}')
     assert not published['draft'] and not published['prerelease'] and published['published_at']
