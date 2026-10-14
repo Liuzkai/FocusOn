@@ -127,6 +127,8 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
+**最新 25 票（2026-10-14，实施中）：**统计悬停170ms有限过渡，环形扇区浮起、柱条时间桶/趋势点高亮、卡片微阴影；配置保存统计动画开关，高对比度静态反馈，切页/窗口隐藏/退出停止。实际Native预览同时发现并修正空白绘图区命中、Fluent浮窗透明和选中范围语言文案刷新，时段输入/已应用范围/验证保留。144核心平台+40UI（184）及Release零警告通过，原生两主题/两语言/动画中间帧与结束稳定/提示/保存通过，README有真实GIF；准备独立v0.1.10草稿，v0.1.9已公开及旧标签/附件保持。详见25票。
+
 **最新 24 票（2026-10-14，工程关闭）：**用户明确回复“发布”，原v0.1.9修复包已公开设为latest；发布维护 `c208e9058909246611dafbbf7822e470d1b285b5` / [发布核验](https://github.com/Liuzkai/FocusOn/actions/runs/38521909276) Success，包源仍 `e3a9cff1e930e8b6070218694b0a1f33130eabe4`、原标签对象19ee76f0f83e9d388c734aabc9adce90ee42793d和12附件不变。云端发布前核对6原生目标179测试/下载SHA/manifest/历史快照；本云环境再次下载12公开附件核对大小、SHA、6包校验文件/4归档源，公开latest确为v0.1.9。旧API限流客户端需手动安装一次。全部旧Release/标签/附件/MIT/第三方许可保留，Mac未签名公证/正式附件排除，08/父规格开放。随后统计悬停动画使用新v0.1.10草稿，见25票。
 
 **最新 23 票（2026-10-14，工程关闭）：**旧安装版GitHub API403更新失败已修复，API限流/故障可回退同仓库官方稳定Release（HEAD版本跳转/准确大小、受限HTML/链接/digest、完整下载校验），成功短缓存/API退避和两语清晰错误。真实云端API被拒绝时实际检查按钮成功，旧公开Linux包HTML/HEAD/47773611bytes/SHA下载校验通过；本地179回归及18发布保护通过。不可变源 `e3a9cff1e930e8b6070218694b0a1f33130eabe4` / v0.1.9标签对象 `19ee76f0f83e9d388c734aabc9adce90ee42793d`；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384) Success，六平台各179测试及原生/包检查、Windows两安装器生命周期通过；[v0.1.9草稿](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9) 12附件上传下载SHA验证。旧v17/v18需退出后手动安装一次；草稿不能自动检测，公开/latest仍v0.1.5。全部旧标签/Release/附件/MIT/第三方声明保留，Mac原生验证但无Developer ID/公证/staple，附件排除。真实旧版升级/设备/网络验收继续08；本次文档提交晚于构建源，勿改写标签。详见23票/ADR0009。

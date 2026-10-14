@@ -92,6 +92,8 @@ public static class Localizer
         ["登录时启动到托盘"] = "Start in the tray at login",
         ["保存并重启"] = "Save and restart",
         ["配置立即生效并保存；系统高对比度优先于主题选择。"] = "Preferences apply immediately and are saved. System high contrast overrides the selected theme.",
+        ["统计页面悬停动画"] = "Statistics hover animations",
+        ["鼠标悬停时柔和高亮图表和卡片。关闭后保留静态高亮；系统高对比度自动关闭动画。"] = "Gently highlight charts and cards on hover. Turn off for static highlights; system high contrast automatically disables motion.",
         ["隔离数据模式不会更改正式环境的登录自启。"] = "Isolated data mode does not change login startup for your regular installation.",
         ["关闭窗口后继续后台记录；托盘或菜单栏可恢复窗口并退出。不支持托盘时保留可恢复窗口。"] = "Closing the window keeps recording in the background. Restore or exit from the tray or menu bar. Without tray support the window remains recoverable.",
         ["记录仅保存在本机。更改目录会保存、复制并校验数据，然后重启；保留原目录，不合并已有数据。运行中的独立计时将暂停。"] = "Records stay on this computer. Changing folders saves, copies and verifies data, then restarts. The original folder is kept; existing data is never merged. A running independent timer will pause.",

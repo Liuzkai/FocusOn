@@ -40,6 +40,17 @@ public partial class MainWindow
             try { var next = preferences with { StartAtLogin = StartupCheckBox.IsChecked == true }; savePreferences?.Invoke(next); preferences = next; SettingsFailure(null); }
             catch (Exception e) { ApplySettingsLanguage(); SettingsFailure(Localizer.Get("无法保存配置：{0}", e.Message)); }
         };
+        StatisticsAnimationsCheckBox.IsCheckedChanged += (_, _) =>
+        {
+            if (applyingSettings) return;
+            try
+            {
+                var next = preferences with { StatisticsAnimations = StatisticsAnimationsCheckBox.IsChecked == true };
+                savePreferences?.Invoke(next); preferences = next;
+                StatisticsView.SetMotionEnabled(next.StatisticsAnimations); SettingsFailure(null);
+            }
+            catch (Exception e) { ApplySettingsLanguage(); SettingsFailure(Localizer.Get("无法保存配置：{0}", e.Message)); }
+        };
         GithubButton.Click += async (_, _) => await OpenUrlAsync(ReleaseUpdates.RepositoryUrl);
         ReleasePageButton.Click += async (_, _) => await OpenUrlAsync(availableUpdate?.ReleaseUrl ?? ReleaseUpdates.RepositoryUrl + "/releases/latest");
         OpenDataButton.Click += async (_, _) => { if (dataDirectory is not null) await OpenUrlAsync(new Uri(dataDirectory + Path.DirectorySeparatorChar).AbsoluteUri); };
@@ -71,7 +82,7 @@ public partial class MainWindow
             ReviewTheme.Apply(app.Resources, ReviewTheme.HighContrast, theme);
         }
         foreach (var row in rows) row.RefreshAppearance();
-        TimelineView.InvalidateVisual(); TotalsScrollViewer.InvalidateVisual(); StatisticsView.ApplyLanguage();
+        TimelineView.InvalidateVisual(); TotalsScrollViewer.InvalidateVisual(); StatisticsView.SetMotionEnabled(preferences.StatisticsAnimations); StatisticsView.ApplyLanguage();
         if (view is not null) UpdateTotals(view);
         ShowPage(activePage);
     }
@@ -85,6 +96,8 @@ public partial class MainWindow
             foreach (var (button, key) in new (Button, string)[] { (SettingsPageButton,"配置"), (OpenDataButton,"打开数据目录"), (BrowseDataButton,"选择目录…"), (ChangeDataButton,"保存并重启"), (CheckUpdatesButton,"检查更新"), (ReleasePageButton,"查看 Release") }) button.Content = Localizer.Get(key);
             DownloadUpdateButton.Content = Localizer.Get(OperatingSystem.IsWindows() ? "下载并安装…" : "下载更新…");
             AppearanceNote.Text = Localizer.Get("配置立即生效并保存；系统高对比度优先于主题选择。");
+            StatisticsAnimationsCheckBox.Content = Localizer.Get("统计页面悬停动画"); StatisticsAnimationsCheckBox.IsChecked = preferences.StatisticsAnimations;
+            StatisticsAnimationsNote.Text = Localizer.Get("鼠标悬停时柔和高亮图表和卡片。关闭后保留静态高亮；系统高对比度自动关闭动画。");
             StartupNote.Text = Localizer.Get("登录系统后自动启动 FocusOn；托盘可用时后台运行，否则显示窗口。关闭此选项可取消当前用户的自启，选择会自动保存。");
             BehaviorNote.Text = Localizer.Get(isolatedSettings ? "隔离数据模式不会更改正式环境的登录自启。" : "关闭窗口后继续后台记录；托盘或菜单栏可恢复窗口并退出。不支持托盘时保留可恢复窗口。");
             StorageNote.Text = Localizer.Get("记录仅保存在本机。更改目录会保存、复制并校验数据，然后重启；保留原目录，不合并已有数据。运行中的独立计时将暂停。");
@@ -98,6 +111,7 @@ public partial class MainWindow
             DataDirectoryBox.Watermark = Localizer.Get("输入完整的新目录路径，或点击选择目录");
             BrowseDataButton.IsEnabled = ChangeDataButton.IsEnabled = OpenDataButton.IsEnabled = dataDirectory is not null;
             AutomationProperties.SetName(StartupCheckBox, Localizer.Get("开机启动"));
+            AutomationProperties.SetName(StatisticsAnimationsCheckBox, Localizer.Get("统计页面悬停动画"));
             AutomationProperties.SetName(ThemePicker, Localizer.Get("主题")); AutomationProperties.SetName(DataDirectoryBox, Localizer.Get("数据保存"));
             if (updateStatusKey is not null) UpdateStatus.Text = Localizer.Get(updateStatusKey, updateStatusArguments);
             if (SettingsError.Text is { } error) SettingsError.Text = Localizer.Translate(error);

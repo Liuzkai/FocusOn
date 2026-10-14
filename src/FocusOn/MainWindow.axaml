@@ -141,6 +141,8 @@
             </StackPanel>
           </WrapPanel>
           <TextBlock x:Name="AppearanceNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
+          <CheckBox x:Name="StatisticsAnimationsCheckBox" Content="统计页面悬停动画" />
+          <TextBlock x:Name="StatisticsAnimationsNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
         </StackPanel></Border>
         <Border Classes="settings-card"><StackPanel Spacing="10">
           <TextBlock x:Name="BehaviorHeading" Classes="settings-heading" Text="启动与后台运行" />

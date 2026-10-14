@@ -8,6 +8,21 @@ public sealed class SettingsStorageTests : IDisposable
     private readonly string root = Path.Combine(Path.GetTempPath(), "FocusOn-settings-storage-" + Guid.NewGuid().ToString("N"));
     private string Dir(string name) => Path.Combine(root, name);
     [Fact]
+    public void Statistics_motion_defaults_on_for_existing_preferences_and_the_opt_out_survives_language_and_theme_saves()
+    {
+        Directory.CreateDirectory(Dir("motion"));
+        var path = Path.Combine(Dir("motion"), "settings.json");
+        File.WriteAllText(path, "{\"language\":\"en\",\"theme\":\"light\",\"startAtLogin\":false,\"custom\":42}");
+        var original = AppPreferences.Load(Dir("motion")); Assert.True(original.StatisticsAnimations);
+        (original with { StatisticsAnimations = false }).Save(Dir("motion"));
+        LanguagePreference.Save(Dir("motion"), "zh-CN");
+        var loaded = AppPreferences.Load(Dir("motion")); Assert.False(loaded.StatisticsAnimations);
+        Assert.Equal("light", loaded.Theme); Assert.False(loaded.StartAtLogin); Assert.Contains("42", File.ReadAllText(path));
+        (loaded with { Theme = "dark", StatisticsAnimations = true }).Save(Dir("motion"));
+        Assert.True(AppPreferences.Load(Dir("motion")).StatisticsAnimations);
+        Assert.Equal("zh-CN", LanguagePreference.Load(Dir("motion")));
+    }
+    [Fact]
     public void Preferences_preserve_language_and_unknown_settings_and_reopen_light_and_disabled_startup()
     {
         Directory.CreateDirectory(Dir("source")); var path = Path.Combine(Dir("source"), "settings.json");

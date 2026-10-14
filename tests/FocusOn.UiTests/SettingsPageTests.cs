@@ -10,6 +10,29 @@ namespace FocusOn.UiTests;
 
 public sealed class SettingsPageTests
 {
+    [AvaloniaFact]
+    public void Statistics_motion_choice_is_saved_and_a_failed_change_restores_the_control()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "FocusOn-motion-settings-" + Guid.NewGuid().ToString("N"));
+        var fail = false;
+        var w = new MainWindow(_ => Task.FromResult(View()), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        try
+        {
+            w.ConfigureSettings(directory, true, new(), value => { if (fail) throw new IOException("denied"); value.Save(directory); }, _ => Task.CompletedTask, _ => Task.CompletedTask);
+            w.Show(); Click(w, "SettingsPageButton");
+            var choice = w.FindControl<CheckBox>("StatisticsAnimationsCheckBox")!;
+            Assert.True(choice.IsChecked); choice.IsChecked = false;
+            Assert.False(AppPreferences.Load(directory).StatisticsAnimations);
+            w.FindControl<ComboBox>("ThemePicker")!.SelectedIndex = 1;
+            w.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 1;
+            Assert.Equal("Statistics hover animations", choice.Content);
+            Assert.False(AppPreferences.Load(directory).StatisticsAnimations);
+            fail = true; choice.IsChecked = true;
+            Assert.False(choice.IsChecked); Assert.False(AppPreferences.Load(directory).StatisticsAnimations);
+            Assert.Contains("denied", w.FindControl<TextBlock>("SettingsError")!.Text);
+        }
+        finally { w.ApplySelectedTheme("dark"); w.StopRefresh(); w.Close(); Localizer.SetLanguage("zh-CN"); if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    }
     private static void Click(MainWindow w, string name) => w.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     private static DayView View()
     {

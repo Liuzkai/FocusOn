@@ -1,6 +1,7 @@
 using System.Globalization;
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
 using Avalonia.Threading;
 
 namespace FocusOn;
@@ -12,7 +13,7 @@ public partial class StatisticsPage : UserControl
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromSeconds(5) };
     private StatisticsRequest? request;
     private long revision;
-    private bool reading, refreshAgain, active, stopped;
+    private bool reading, refreshAgain, active, stopped, changingLanguage;
     private string? error, validationError;
     private bool? wideLayout;
     public StatisticsView? CurrentView { get; private set; }
@@ -23,6 +24,7 @@ public partial class StatisticsPage : UserControl
         ApplyButton.Click += async (_, _) => await ApplyFiltersAsync();
         ModePicker.SelectionChanged += (_, _) =>
         {
+            if (changingLanguage) return;
             if (ModePicker.SelectedIndex == 1) StartDatePicker.SelectedDate = EndDatePicker.SelectedDate ?? now().LocalDateTime.Date;
             validationError = null; UpdateMode(); UpdateError();
         };
@@ -57,9 +59,16 @@ public partial class StatisticsPage : UserControl
     public void SetActive(bool value)
     {
         active = value;
+        SetValue(StatisticsMotion.ActiveProperty, value && !stopped);
         if (!value) { timer.Stop(); ShareChart.HideHint(); BarsChart.HideHint(); TrendChart.HideHint(); return; }
         if (stopped) return;
         timer.Start(); _ = request is null ? ApplyFiltersAsync() : RefreshAsync();
+    }
+    public void SetMotionEnabled(bool value)
+    {
+        SetValue(StatisticsMotion.EnabledProperty, value && !ReviewTheme.HighContrast);
+        ShareChart.InvalidateVisual(); BarsChart.InvalidateVisual(); TrendChart.InvalidateVisual();
+        foreach (var card in this.GetLogicalDescendants().OfType<StatisticsCard>()) card.UpdateAppearance();
     }
     public void Stop() { stopped = true; SetActive(false); revision++; }
     private async Task PresetAsync(int days)
@@ -163,7 +172,19 @@ public partial class StatisticsPage : UserControl
             (ShareNote,"占比以所选范围的软件使用时长为分母；前五名外的软件合并为“其他软件”。") }) control.Text = Localizer.Get(text);
         foreach (var (control, text) in new (Button, string)[] { (ApplyButton,"应用筛选"), (SevenDaysButton,"近7天"), (ThirtyDaysButton,"近30天"), (WholeDayButton,"全天") }) control.Content = Localizer.Get(text);
         foreach (var (control, text) in new (Control, string)[] { (ModePicker,"统计范围"), (StartDatePicker,"开始日期"), (EndDatePicker,"结束日期"), (FromBox,"开始时间"), (ToBox,"结束时间") }) AutomationProperties.SetName(control, Localizer.Get(text));
-        MultiDayItem.Content = Localizer.Get("多日"); PeriodItem.Content = Localizer.Get("单日时段"); UpdateMode();
+        var multi = Localizer.Get("多日"); var period = Localizer.Get("单日时段");
+        if (!Equals(MultiDayItem.Content, multi) || !Equals(PeriodItem.Content, period))
+        {
+            changingLanguage = true;
+            try
+            {
+                var selected = ModePicker.SelectedIndex;
+                MultiDayItem.Content = multi; PeriodItem.Content = period;
+                ModePicker.SelectedIndex = -1; ModePicker.SelectedIndex = selected;
+            }
+            finally { changingLanguage = false; }
+        }
+        UpdateMode();
         if (CurrentView is { } value) Present(value);
         UpdateError();
     }

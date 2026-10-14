@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
@@ -7,6 +8,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Xunit;
 
 namespace FocusOn.UiTests;
@@ -35,6 +37,74 @@ public sealed class StatisticsPageTests
             utcNow: () => Now, readStatistics: stats ?? (request => Task.FromResult(Stats(request))));
     private static void Click(Control parent, string name) => parent.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     private static void Pump(Window window) { window.UpdateLayout(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout(); Dispatcher.UIThread.RunJobs(); }
+
+    [AvaloniaFact]
+    public async Task Language_refreshes_the_visible_scope_caption_without_resetting_a_period_or_its_validation()
+    {
+        Localizer.SetLanguage("en"); var window = Window();
+        try
+        {
+            window.Show(); Click(window, "StatisticsPageButton"); Pump(window);
+            var page = window.FindControl<StatisticsPage>("StatisticsView")!;
+            var mode = page.FindControl<ComboBox>("ModePicker")!; mode.SelectedIndex = 1;
+            var date = Today.AddDays(-1); page.FindControl<CalendarDatePicker>("StartDatePicker")!.SelectedDate = date.ToDateTime(TimeOnly.MinValue);
+            await page.ApplyFiltersAsync();
+            var applied = page.CurrentView!.Plan.Request;
+            page.FindControl<TextBox>("ToBox")!.Text = "25:00"; await page.ApplyFiltersAsync();
+            window.FindControl<ComboBox>("LanguagePicker")!.SelectedIndex = 0; Pump(window);
+            Assert.Contains(mode.GetVisualDescendants().OfType<TextBlock>(), x => x.Text == "单日时段");
+            Assert.Equal(date.ToDateTime(TimeOnly.MinValue), page.FindControl<CalendarDatePicker>("StartDatePicker")!.SelectedDate);
+            Assert.Equal("25:00", page.FindControl<TextBox>("ToBox")!.Text);
+            Assert.True(page.FindControl<TextBlock>("ErrorText")!.IsVisible); Assert.Equal(applied, page.CurrentView.Plan.Request);
+        }
+        finally { window.StopRefresh(); window.Close(); Localizer.SetLanguage("zh-CN"); }
+    }
+
+    [AvaloniaFact]
+    public void Static_hover_follows_buckets_and_exposes_the_same_details_to_accessibility_without_changing_totals()
+    {
+        var window = Window(); window.Height = 1340;
+        try
+        {
+            window.ConfigureSettings(Path.GetTempPath(), true, new(StatisticsAnimations: false), _ => { }, _ => Task.CompletedTask, _ => Task.CompletedTask);
+            window.Show(); Click(window, "StatisticsPageButton"); Pump(window);
+            var page = window.FindControl<StatisticsPage>("StatisticsView")!;
+            var chart = page.FindControl<StatisticsChart>("BarsChart")!;
+            var original = page.CurrentView!;
+            void Move(int index)
+            {
+                var point = chart.TranslatePoint(new Point(48 + (chart.Bounds.Width - 64) / 7 * (index + .5), 100), window)!.Value;
+                window.MouseMove(point); Pump(window);
+            }
+            Move(0); Assert.Contains(Today.AddDays(-6).ToString("yyyy-MM-dd"), AutomationProperties.GetItemStatus(chart));
+            var hint = chart.GetLogicalDescendants().OfType<Popup>().Single(); Assert.True(hint.IsOpen);
+            Assert.True(hint.Child!.Opacity > 0); // A logically open popup must be visible under the Fluent tooltip style.
+            Move(6); Assert.Contains(Today.ToString("yyyy-MM-dd"), AutomationProperties.GetItemStatus(chart));
+            Assert.Equal(((TextBlock)((ToolTip)hint.Child!).Content!).Text, AutomationProperties.GetItemStatus(chart));
+            Assert.Same(original, page.CurrentView); Assert.Equal(TimeSpan.FromHours(14), page.CurrentView!.Duration);
+            Click(window, "ReviewPageButton"); Assert.False(hint.IsOpen); Assert.Equal(string.Empty, AutomationProperties.GetItemStatus(chart));
+        }
+        finally { window.StopRefresh(); window.Close(); }
+    }
+
+    [AvaloniaFact]
+    public void High_contrast_keyboard_details_remain_available_and_window_hiding_clears_interaction()
+    {
+        var window = Window(); window.Height = 1340;
+        try
+        {
+            ReviewTheme.Apply(Application.Current!.Resources, true);
+            window.Show(); Click(window, "StatisticsPageButton"); Pump(window);
+            var page = window.FindControl<StatisticsPage>("StatisticsView")!; page.SetMotionEnabled(true);
+            var chart = page.FindControl<StatisticsChart>("TrendChart")!;
+            chart.Focus(); window.KeyPressQwerty(PhysicalKey.End, RawInputModifiers.None); Pump(window);
+            var hint = chart.GetLogicalDescendants().OfType<Popup>().Single(); Assert.True(hint.IsOpen);
+            Assert.Contains(Today.ToString("yyyy-MM-dd"), AutomationProperties.GetItemStatus(chart));
+            window.Hide(); Assert.False(hint.IsOpen); Assert.Equal(string.Empty, AutomationProperties.GetItemStatus(chart));
+            window.Show(); Pump(window); Assert.False(hint.IsOpen);
+        }
+        finally { ReviewTheme.Apply(Application.Current!.Resources, false); window.StopRefresh(); window.Close(); }
+    }
 
     [AvaloniaFact]
     public async Task Navigation_loads_seven_days_and_keeps_review_zoom_selection_timer_and_language()
@@ -75,7 +145,7 @@ public sealed class StatisticsPageTests
             page.FindControl<TextBox>("FromBox")!.Text = "09:30"; page.FindControl<TextBox>("ToBox")!.Text = "10:30";
             await page.ApplyFiltersAsync(); Pump(window);
             Assert.Equal(Today, page.CurrentView!.Plan.Request.StartDate);
-            Assert.Equal(TimeSpan.FromHours(1), page.CurrentView.Duration);
+            Assert.Equal(TimeSpan.FromHours(1), page.CurrentView!.Duration);
             Assert.All(page.CurrentView.Apps, app => Assert.Equal(TimeSpan.FromMinutes(30), app.Duration));
             var scope = page.FindControl<TextBlock>("ScopeText")!.Text;
             Assert.Contains("09:30 — 10:30", scope); Assert.Contains("1", page.FindControl<TextBlock>("AverageText")!.Text);
@@ -85,7 +155,7 @@ public sealed class StatisticsPageTests
             page.FindControl<TextBox>("ToBox")!.Text = "09:00"; await page.ApplyFiltersAsync();
             Assert.Equal(scope, page.FindControl<TextBlock>("ScopeText")!.Text);
             Click(page, "WholeDayButton"); Pump(window); Assert.Equal(TimeSpan.FromDays(1), page.CurrentView!.Plan.Request.EndTime);
-            Assert.Equal(TimeSpan.FromHours(2), page.CurrentView.Duration);
+            Assert.Equal(TimeSpan.FromHours(2), page.CurrentView!.Duration);
         }
         finally { window.StopRefresh(); window.Close(); }
     }
@@ -103,7 +173,7 @@ public sealed class StatisticsPageTests
             page.FindControl<ComboBox>("ModePicker")!.SelectedIndex = 1;
             page.FindControl<TextBox>("FromBox")!.Text = "09:30"; page.FindControl<TextBox>("ToBox")!.Text = "10:00";
             await page.ApplyFiltersAsync(); pending.SetResult(Stats(requests[0])); await Task.Yield(); Pump(window);
-            Assert.True(page.CurrentView!.Plan.Request.IsPeriod); Assert.Equal(TimeSpan.FromMinutes(30), page.CurrentView.Duration);
+            Assert.True(page.CurrentView!.Plan.Request.IsPeriod); Assert.Equal(TimeSpan.FromMinutes(30), page.CurrentView!.Duration);
             Assert.Equal("1小时", page.FindControl<TextBlock>("AverageText")!.Text);
             window.StopRefresh(); var count = requests.Count; await page.RefreshAsync(); Assert.Equal(count, requests.Count);
         }

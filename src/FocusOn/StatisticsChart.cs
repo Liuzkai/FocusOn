@@ -26,15 +26,18 @@ public sealed class StatisticsChart : Control
     private Point? hover;
     private Window? owner;
     private int keyboardIndex = -1;
+    private int activeIndex = -1;
+    private readonly HoverMotion motion;
     public StatisticsChartKind Kind { get; set; }
 
     public StatisticsChart()
     {
+        motion = new(InvalidateVisual);
         ClipToBounds = true; Focusable = true;
         hint = new Popup { PlacementTarget = this, Placement = PlacementMode.AnchorAndGravity,
             PlacementAnchor = PopupAnchor.BottomRight, PlacementGravity = PopupGravity.BottomRight,
             HorizontalOffset = 12, VerticalOffset = 16, ShouldUseOverlayLayer = true, IsHitTestVisible = false,
-            TakesFocusFromNativeControl = false, Child = new ToolTip { Content = hintText, MaxWidth = 380, IsHitTestVisible = false } };
+            TakesFocusFromNativeControl = false, Child = new ToolTip { Content = hintText, MaxWidth = 380, Opacity = 1, IsHitTestVisible = false } };
         LogicalChildren.Add(hint);
     }
     public void SetData(StatisticsView value)
@@ -68,6 +71,7 @@ public sealed class StatisticsChart : Control
     {
         var value = Text(text, brush, size); context.DrawText(value, new Point(center.X - value.Width / 2, center.Y - value.Height / 2));
     }
+    private double Emphasis(int index) => index >= 0 && index < motion.Values.Length ? motion.Values[index] : 0;
     private Point Center => new(Bounds.Width / 2, Bounds.Height / 2);
     private double Radius => Math.Max(1, Math.Min(Bounds.Width / 2 - 20, Bounds.Height / 2 - 14));
     private static Point Polar(Point center, double radius, double degrees)
@@ -84,6 +88,8 @@ public sealed class StatisticsChart : Control
     public override void Render(DrawingContext context)
     {
         base.Render(context);
+        // Empty plot space must receive pointer input too, including between thin trend lines.
+        context.DrawRectangle(Brushes.Transparent, null, new Rect(Bounds.Size));
         if (Bounds.Width < 70 || Bounds.Height < 80) return;
         if (Kind == StatisticsChartKind.Donut) { RenderDonut(context); return; }
         var plot = Plot; var maximum = Maximum(Kind == StatisticsChartKind.Lines);
@@ -100,21 +106,24 @@ public sealed class StatisticsChart : Control
         for (var i = 0; i < view.Buckets.Count; i++)
         {
             var bucket = view.Buckets[i]; var x = plot.Left + step * (i + .5);
+            var emphasis = Emphasis(i);
+            if (emphasis > .001)
+            {
+                using (context.PushOpacity(ReviewTheme.HighContrast ? .22 : .09 * emphasis)) context.DrawRectangle(ReviewTheme.Accent, null,
+                    new Rect(x - step * .43, plot.Top, step * .86, plot.Height), 5, 5);
+                using (context.PushOpacity(ReviewTheme.HighContrast ? 1 : emphasis)) context.DrawLine(new Pen(ReviewTheme.Accent, 1, DashStyle.Dot),
+                    new Point(x, plot.Top), new Point(x, plot.Bottom));
+            }
             if (i % stride == 0)
-                CenterText(context, bucket.Period.Label, new Point(x, plot.Bottom + 17), ReviewTheme.Muted);
+                CenterText(context, bucket.Period.Label, new Point(x, plot.Bottom + 17), i == activeIndex ? ReviewTheme.Foreground : ReviewTheme.Muted);
             if (Kind != StatisticsChartKind.Bars) continue;
-            var width = Math.Min(34, step * .65);
+            var width = Math.Min(34, step * .65) * (1 + .12 * emphasis);
             using (context.PushOpacity(.45)) context.DrawRectangle(ReviewTheme.Border, null, new Rect(x - width / 2, plot.Top, width, plot.Height), width / 2, width / 2);
             var height = plot.Height * bucket.Duration.TotalHours / maximum;
             if (height > 0)
                 context.DrawRectangle(bucket.Apps.Count > 0 ? ReviewTheme.ApplicationBrush(bucket.Apps[0].AppKey) : ReviewTheme.Accent,
                     null, new Rect(x - width / 2, plot.Bottom - height, width, height), Math.Min(width / 2, height / 2), Math.Min(width / 2, height / 2));
             if (step >= 60 && height > 0) CenterText(context, Short(bucket.Duration), new Point(x, Math.Max(8, plot.Bottom - height - 11)), ReviewTheme.Foreground);
-        }
-        if (keyboardIndex >= 0 && keyboardIndex < view.Buckets.Count)
-        {
-            var x = plot.Left + step * (keyboardIndex + .5);
-            context.DrawLine(new Pen(ReviewTheme.Accent, 1), new Point(x, plot.Top), new Point(x, plot.Bottom));
         }
         if (Kind != StatisticsChartKind.Lines) return;
         var series = 0;
@@ -128,7 +137,13 @@ public sealed class StatisticsChart : Control
                     var duration = view.Buckets[i].Apps.FirstOrDefault(x => x.AppKey == app.AppKey)?.Duration ?? TimeSpan.Zero;
                     var point = new Point(plot.Left + step * (i + .5), plot.Bottom - plot.Height * duration.TotalHours / maximum);
                     if (i == 0) path.BeginFigure(point, false); else path.LineTo(point);
-                    if (step >= 28) context.DrawEllipse(color, new Pen(ReviewTheme.Surface, 1), point, 3.5, 3.5);
+                    var emphasis = Emphasis(i);
+                    if (emphasis > .001)
+                    {
+                        using (context.PushOpacity(ReviewTheme.HighContrast ? .3 : .18 * emphasis)) context.DrawEllipse(color, null, point, 10, 10);
+                        using (context.PushOpacity(emphasis)) context.DrawEllipse(null, new Pen(color, 1.5), point, 8, 8);
+                    }
+                    if (step >= 28 || emphasis > .001) context.DrawEllipse(color, new Pen(ReviewTheme.Surface, 1), point, 3.5 + 2 * emphasis, 3.5 + 2 * emphasis);
                 }
                 path.EndFigure(false);
             }
@@ -145,21 +160,25 @@ public sealed class StatisticsChart : Control
         if (view is not null && view.Duration > TimeSpan.Zero)
         {
             var angle = -90.0;
+            var index = 0;
             foreach (var row in Shares(view))
             {
                 var sweep = row.Fraction * 360; var gap = Math.Min(1.8, sweep * .1);
                 var from = angle + gap / 2; var to = angle + sweep - gap / 2;
+                var emphasis = Emphasis(index++);
+                var sliceCenter = StatisticsMotion.Enabled(this) ? Polar(center, 6 * emphasis, angle + sweep / 2) : center;
                 var geometry = new StreamGeometry();
                 using (var path = geometry.Open())
                 {
-                    path.BeginFigure(Polar(center, radius, from), true);
-                    path.ArcTo(Polar(center, radius, to), new Size(radius, radius), 0, to - from > 180, SweepDirection.Clockwise);
-                    path.LineTo(Polar(center, inner, to));
-                    path.ArcTo(Polar(center, inner, from), new Size(inner, inner), 0, to - from > 180, SweepDirection.CounterClockwise);
+                    path.BeginFigure(Polar(sliceCenter, radius, from), true);
+                    path.ArcTo(Polar(sliceCenter, radius, to), new Size(radius, radius), 0, to - from > 180, SweepDirection.Clockwise);
+                    path.LineTo(Polar(sliceCenter, inner, to));
+                    path.ArcTo(Polar(sliceCenter, inner, from), new Size(inner, inner), 0, to - from > 180, SweepDirection.CounterClockwise);
                     path.EndFigure(true);
                 }
                 context.DrawGeometry(row.Color, null, geometry);
-                if (row.Fraction >= .08) CenterText(context, row.Fraction.ToString("P0", CultureInfo.CurrentCulture), Polar(center, (radius + inner) / 2, angle + sweep / 2), ReviewTheme.Background, 12);
+                if (emphasis > .001) using (context.PushOpacity(emphasis)) context.DrawGeometry(null, new Pen(ReviewTheme.HighContrast ? ReviewTheme.Accent : ReviewTheme.Foreground, 1.5), geometry);
+                if (row.Fraction >= .08) CenterText(context, row.Fraction.ToString("P0", CultureInfo.CurrentCulture), Polar(sliceCenter, (radius + inner) / 2, angle + sweep / 2), ReviewTheme.Background, 12);
                 angle += sweep;
             }
         }
@@ -168,29 +187,40 @@ public sealed class StatisticsChart : Control
     }
     private void RefreshHint()
     {
-        if (hover is not { } point || view is null) { hint.IsOpen = false; return; }
+        if (!StatisticsMotion.Active(this) || hover is not { } point || view is null) { hint.IsOpen = false; SetEmphasis(-1); return; }
         string? text = null;
+        var index = -1;
         if (Kind == StatisticsChartKind.Donut)
         {
             var delta = point - Center; var distance = Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
-            if (distance >= Radius * .67 && distance <= Radius)
+            // The small hit margin also covers a lifted slice, avoiding hover oscillation at its edge.
+            if (distance >= Radius * .67 - 7 && distance <= Radius + 7)
             {
                 var angle = (Math.Atan2(delta.Y, delta.X) * 180 / Math.PI + 450) % 360; var position = 0.0;
-                foreach (var row in Shares(view)) { position += row.Fraction * 360; if (angle < position) { text = row.Name + " · " + row.Share + "\n" + DisplayText.Duration(row.Value, true); break; } }
+                var rowIndex = 0;
+                foreach (var row in Shares(view)) { position += row.Fraction * 360; if (angle < position) { index = rowIndex; text = row.Name + " · " + row.Share + "\n" + DisplayText.Duration(row.Value, true); break; } rowIndex++; }
             }
         }
         else if (Plot.Contains(point) && view.Buckets.Count > 0)
         {
-            var index = Math.Clamp((int)((point.X - Plot.Left) / Plot.Width * view.Buckets.Count), 0, view.Buckets.Count - 1);
+            index = Math.Clamp((int)((point.X - Plot.Left) / Plot.Width * view.Buckets.Count), 0, view.Buckets.Count - 1);
             var bucket = view.Buckets[index];
             text = DisplayText.Time(bucket.Period.StartUtc, true) + " — " + DisplayText.Time(bucket.Period.EndUtc, true) + "\n"
                 + Localizer.Get("前台使用时长") + " · " + DisplayText.Duration(bucket.Duration, true)
                 + string.Concat(bucket.Apps.Take(3).Select(x => "\n" + x.AppName + " · " + DisplayText.Duration(x.Duration)));
         }
+        SetEmphasis(index); AutomationProperties.SetItemStatus(this, text ?? string.Empty);
         if (text is null) { hint.IsOpen = false; return; }
         hintText.Text = text; hint.PlacementRect = new Rect(point, new Size(1, 1)); hint.IsOpen = true;
     }
-    public void HideHint() { hover = null; hint.IsOpen = false; keyboardIndex = -1; InvalidateVisual(); }
+    private void SetEmphasis(int index)
+    {
+        activeIndex = index;
+        var count = view is null ? 0 : Kind == StatisticsChartKind.Donut ? Shares(view).Count : view.Buckets.Count;
+        var values = new double[count]; if (index >= 0 && index < count) values[index] = 1;
+        motion.Set(values, StatisticsMotion.Active(this) && StatisticsMotion.Enabled(this));
+    }
+    public void HideHint() { hover = null; hint.IsOpen = false; keyboardIndex = activeIndex = -1; motion.Clear(); AutomationProperties.SetItemStatus(this, string.Empty); InvalidateVisual(); }
     protected override void OnPointerMoved(PointerEventArgs e) { base.OnPointerMoved(e); keyboardIndex = -1; hover = e.GetPosition(this); RefreshHint(); InvalidateVisual(); }
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -206,10 +236,16 @@ public sealed class StatisticsChart : Control
             hover = Polar(Center, Radius * .82, angle);
         }
         else hover = new Point(Plot.Left + Plot.Width / count * (keyboardIndex + .5), Plot.Center.Y);
-        RefreshHint(); AutomationProperties.SetName(this, hintText.Text); InvalidateVisual(); e.Handled = true;
+        RefreshHint(); InvalidateVisual(); e.Handled = true;
     }
     protected override void OnLostFocus(RoutedEventArgs e) { HideHint(); base.OnLostFocus(e); }
-    protected override void OnPointerExited(PointerEventArgs e) { HideHint(); base.OnPointerExited(e); }
+    protected override void OnPointerExited(PointerEventArgs e) { hover = null; hint.IsOpen = false; keyboardIndex = -1; SetEmphasis(-1); AutomationProperties.SetItemStatus(this, string.Empty); base.OnPointerExited(e); }
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == StatisticsMotion.EnabledProperty) { motion?.Snap(); InvalidateVisual(); }
+        if ((change.Property == StatisticsMotion.ActiveProperty && !StatisticsMotion.Active(this)) || (change.Property == IsVisibleProperty && !IsVisible)) HideHint();
+    }
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e); owner = TopLevel.GetTopLevel(this) as Window;

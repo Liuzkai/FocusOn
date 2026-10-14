@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace FocusOn;
 
-public sealed record AppPreferences(string Theme = "dark", bool StartAtLogin = true)
+public sealed record AppPreferences(string Theme = "dark", bool StartAtLogin = true, bool StatisticsAnimations = true)
 {
     public static AppPreferences Load(string directory)
     {
@@ -12,26 +12,28 @@ public sealed record AppPreferences(string Theme = "dark", bool StartAtLogin = t
             var root = json.RootElement;
             var theme = root.TryGetProperty("theme", out var t) && t.GetString() is "light" ? "light" : "dark";
             var startup = !root.TryGetProperty("startAtLogin", out var s) || s.ValueKind != JsonValueKind.False;
-            return new(theme, startup);
+            var animations = !root.TryGetProperty("statisticsAnimations", out var a) || a.ValueKind != JsonValueKind.False;
+            return new(theme, startup, animations);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException) { return new(); }
     }
     public void Save(string directory)
     {
         if (Theme is not ("light" or "dark")) throw new ArgumentException("Unsupported theme.");
-        SettingsFile.Set(directory, "theme", Theme, "startAtLogin", StartAtLogin);
+        SettingsFile.Set(directory, "theme", Theme, "startAtLogin", StartAtLogin, "statisticsAnimations", StatisticsAnimations);
     }
 }
 
 internal static class SettingsFile
 {
-    public static void Set(string directory, string key, object value, string? otherKey = null, object? otherValue = null)
+    public static void Set(string directory, string key, object value, string? otherKey = null, object? otherValue = null, string? thirdKey = null, object? thirdValue = null)
     {
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, "settings.json");
         var settings = File.Exists(path) ? JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(path)) ?? [] : [];
         settings[key] = JsonSerializer.SerializeToElement(value);
         if (otherKey is not null) settings[otherKey] = JsonSerializer.SerializeToElement(otherValue);
+        if (thirdKey is not null) settings[thirdKey] = JsonSerializer.SerializeToElement(thirdValue);
         WriteAtomic(path, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
     }
     public static void WriteAtomic(string path, string contents)

@@ -11,7 +11,7 @@
         <StackPanel Spacing="4"><TextBlock x:Name="Heading" Text="统计" FontSize="26" FontWeight="SemiBold" /><TextBlock x:Name="Subtitle" Classes="caption" Text="查看多日或一天内指定时段的前台软件使用情况。" TextWrapping="Wrap" /></StackPanel>
         <TextBlock x:Name="LoadStatus" Grid.Column="1" Classes="caption" VerticalAlignment="Center" />
       </Grid>
-      <Border Classes="stat-card">
+      <local:StatisticsCard Classes="stat-card">
         <StackPanel Spacing="10">
           <WrapPanel>
             <StackPanel Margin="0,0,12,8" Spacing="4"><TextBlock x:Name="ModeLabel" Classes="caption" Text="统计范围" /><ComboBox x:Name="ModePicker" Width="170" SelectedIndex="0"><ComboBoxItem x:Name="MultiDayItem" Content="多日" /><ComboBoxItem x:Name="PeriodItem" Content="单日时段" /></ComboBox></StackPanel>
@@ -27,25 +27,25 @@
           <TextBlock x:Name="FilterHelp" Classes="caption" TextWrapping="Wrap" />
           <TextBlock x:Name="ErrorText" Foreground="{DynamicResource ReviewWarningText}" TextWrapping="Wrap" IsVisible="False" />
         </StackPanel>
-      </Border>
+      </local:StatisticsCard>
       <TextBlock x:Name="ScopeText" Classes="caption" TextWrapping="Wrap" />
       <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-        <Border Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="TotalLabel" Classes="caption" Text="前台使用时长" /><TextBlock x:Name="TotalText" Text="—" FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource ReviewAccent}" /></StackPanel></Border>
-        <Border Grid.Column="1" Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="AppsLabel" Classes="caption" Text="使用软件数" /><TextBlock x:Name="AppsText" Text="—" FontSize="24" FontWeight="SemiBold" /></StackPanel></Border>
-        <Border Grid.Column="2" Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="AverageLabel" Classes="caption" Text="平均每天" /><TextBlock x:Name="AverageText" Text="—" FontSize="24" FontWeight="SemiBold" /></StackPanel></Border>
+        <local:StatisticsCard x:Name="TotalCard" Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="TotalLabel" Classes="caption" Text="前台使用时长" /><TextBlock x:Name="TotalText" Text="—" FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource ReviewAccent}" /></StackPanel></local:StatisticsCard>
+        <local:StatisticsCard Grid.Column="1" Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="AppsLabel" Classes="caption" Text="使用软件数" /><TextBlock x:Name="AppsText" Text="—" FontSize="24" FontWeight="SemiBold" /></StackPanel></local:StatisticsCard>
+        <local:StatisticsCard Grid.Column="2" Classes="stat-card"><StackPanel Spacing="7"><TextBlock x:Name="AverageLabel" Classes="caption" Text="平均每天" /><TextBlock x:Name="AverageText" Text="—" FontSize="24" FontWeight="SemiBold" /></StackPanel></local:StatisticsCard>
       </Grid>
       <TextBlock x:Name="EmptyText" Text="所选范围没有软件使用记录。" Foreground="{DynamicResource ReviewMuted}" IsVisible="False" />
-      <Border Classes="stat-card">
+      <local:StatisticsCard Classes="stat-card">
         <Grid ColumnDefinitions="*,*" ColumnSpacing="18">
           <StackPanel Spacing="8"><TextBlock x:Name="ShareHeading" Classes="section-title" Text="软件使用占比" /><local:StatisticsChart x:Name="ShareChart" Kind="Donut" Height="232" /></StackPanel>
           <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center"><TextBlock x:Name="ShareNote" Classes="caption" TextWrapping="Wrap" /><ItemsControl x:Name="ShareLegend"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4"><Border Width="9" Height="9" CornerRadius="5" Background="{Binding Color}" Margin="0,0,10,0" /><TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="2" Text="{Binding Share}" Margin="10,0,0,0" /></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
         </Grid>
-      </Border>
+      </local:StatisticsCard>
       <Grid x:Name="ChartsLayout" ColumnDefinitions="*,*" ColumnSpacing="14" RowSpacing="14">
-      <Border x:Name="BarsCard" Classes="stat-card"><StackPanel Spacing="10"><TextBlock x:Name="BarsHeading" Classes="section-title" Text="每日使用时长" /><local:StatisticsChart x:Name="BarsChart" Kind="Bars" Height="230" /></StackPanel></Border>
-      <Border x:Name="TrendCard" Grid.Column="1" Classes="stat-card"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock x:Name="TrendHeading" Classes="section-title" Text="软件使用趋势" /><TextBlock x:Name="TrendNote" Grid.Column="1" Classes="caption" Text="时长排名前三的软件" VerticalAlignment="Center" /></Grid><local:StatisticsChart x:Name="TrendChart" Kind="Lines" Height="220" /><ItemsControl x:Name="TrendLegend"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4"><Border Width="8" Height="8" CornerRadius="4" Background="{Binding Color}" /><TextBlock Text="{Binding Pattern}" FontSize="12" /><TextBlock Text="{Binding Name}" FontSize="12" /></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></Border>
+      <local:StatisticsCard x:Name="BarsCard" Classes="stat-card"><StackPanel Spacing="10"><TextBlock x:Name="BarsHeading" Classes="section-title" Text="每日使用时长" /><local:StatisticsChart x:Name="BarsChart" Kind="Bars" Height="230" /></StackPanel></local:StatisticsCard>
+      <local:StatisticsCard x:Name="TrendCard" Grid.Column="1" Classes="stat-card"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock x:Name="TrendHeading" Classes="section-title" Text="软件使用趋势" /><TextBlock x:Name="TrendNote" Grid.Column="1" Classes="caption" Text="时长排名前三的软件" VerticalAlignment="Center" /></Grid><local:StatisticsChart x:Name="TrendChart" Kind="Lines" Height="220" /><ItemsControl x:Name="TrendLegend"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4"><Border Width="8" Height="8" CornerRadius="4" Background="{Binding Color}" /><TextBlock Text="{Binding Pattern}" FontSize="12" /><TextBlock Text="{Binding Name}" FontSize="12" /></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></local:StatisticsCard>
       </Grid>
-      <Border Classes="stat-card"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock x:Name="ListHeading" Classes="section-title" Text="软件明细" /><TextBlock x:Name="DurationHeader" Classes="caption" Text="时长 · 占比" Grid.Column="1" /></Grid><ItemsControl x:Name="AppList"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,7"><TextBlock Text="{Binding Rank}" Width="30" Foreground="{DynamicResource ReviewMuted}" /><Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="9"><Border Width="8" Height="8" CornerRadius="4" Background="{Binding Color}" /><TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" /></Grid><TextBlock Grid.Column="2" Text="{Binding Duration}" Margin="10,0,18,0" /><TextBlock Grid.Column="3" Text="{Binding Share}" Width="52" TextAlignment="Right" Foreground="{DynamicResource ReviewMuted}" /></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></Border>
+      <local:StatisticsCard Classes="stat-card"><StackPanel Spacing="10"><Grid ColumnDefinitions="*,Auto"><TextBlock x:Name="ListHeading" Classes="section-title" Text="软件明细" /><TextBlock x:Name="DurationHeader" Classes="caption" Text="时长 · 占比" Grid.Column="1" /></Grid><ItemsControl x:Name="AppList"><ItemsControl.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,7"><TextBlock Text="{Binding Rank}" Width="30" Foreground="{DynamicResource ReviewMuted}" /><Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="9"><Border Width="8" Height="8" CornerRadius="4" Background="{Binding Color}" /><TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" /></Grid><TextBlock Grid.Column="2" Text="{Binding Duration}" Margin="10,0,18,0" /><TextBlock Grid.Column="3" Text="{Binding Share}" Width="52" TextAlignment="Right" Foreground="{DynamicResource ReviewMuted}" /></Grid></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></local:StatisticsCard>
       <TextBlock x:Name="Footnote" Classes="caption" TextWrapping="Wrap" />
     </StackPanel>
   </ScrollViewer>

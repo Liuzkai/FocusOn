@@ -30,7 +30,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 
 ## Statistics preview
 
-The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Records and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
+The Statistics page, introduced in the **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** and included in public v0.1.9, has with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Records and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
 
 - **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
 - **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.
@@ -39,7 +39,13 @@ The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29
 
 ![FocusOn multi-day statistics: app shares, daily durations and app trends](docs/images/focuson-statistics.png)
 
-Native Linux preview with synthetic records, not personal activity. [Single-day period preview](docs/images/focuson-statistics-period.png) · [Simplified Chinese preview](docs/images/focuson-statistics.zh-CN.png). This new statistics page belongs to v0.1.6; the public v0.1.5 packages keep their original source.
+Native Linux preview with synthetic records, not personal activity. [Single-day period preview](docs/images/focuson-statistics-period.png) · [Simplified Chinese preview](docs/images/focuson-statistics.zh-CN.png). Statistics is included in public v0.1.9; the historical v0.1.5 packages keep their original source.
+
+**v0.1.10 hover preview:** donut slices lift slightly, daily/hourly bars gain a soft column highlight, trend markers grow a subtle halo and cards gain gentle depth. Transitions settle in 170 ms and stop on navigation, window hiding or shutdown. Values and recorded proportions stay exact; empty plot space also accepts hover. Settings → Appearance → Statistics hover animations saves an opt-out with immediate static highlights. High contrast automatically uses static emphasis; keyboard details remain available. Switching language also refreshes the selected scope caption while preserving period edits and validation.
+
+![Native statistics hover animation with synthetic records](docs/images/focuson-statistics-hover.gif)
+
+Actual Linux X11 recording, not a mock-up or personal activity. [Chinese hover preview](docs/images/focuson-statistics-hover.zh-CN.png) · [Light theme hover preview](docs/images/focuson-statistics-hover-light.png). v0.1.10 is being prepared as a separate draft; public v0.1.9 retains its verified packages.
 
 ## Settings, themes, Windows installation and updates
 
