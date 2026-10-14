@@ -45,7 +45,7 @@ Native Linux preview with synthetic records, not personal activity. [Single-day 
 
 ![Native statistics hover animation with synthetic records](docs/images/focuson-statistics-hover.gif)
 
-Actual Linux X11 recording, not a mock-up or personal activity. [Chinese hover preview](docs/images/focuson-statistics-hover.zh-CN.png) · [Light theme hover preview](docs/images/focuson-statistics-hover-light.png). v0.1.10 is being prepared as a separate draft; public v0.1.9 retains its verified packages.
+Actual Linux X11 recording with synthetic demonstration records. [Chinese hover preview](docs/images/focuson-statistics-hover.zh-CN.png) · [Light theme hover preview](docs/images/focuson-statistics-hover-light.png). The [v0.1.10 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-8b8d078b872d3b9938ff) is verified from source `6147493` through the [six-target native build](https://github.com/Liuzkai/FocusOn/actions/runs/38526833375): 184 tests per target, both Windows installer lifecycle checks and 12 uploaded/downloaded SHA256-verified assets. Public v0.1.9 retains its original packages.
 
 ## Settings, themes, Windows installation and updates
 
