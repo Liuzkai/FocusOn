@@ -30,7 +30,7 @@ This preview shows the native Linux interface with synthetic records; it does no
 
 ## Statistics preview
 
-The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Review and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
+The **[v0.1.6 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-29ffa82936509d03290e)** adds a separate Statistics page with a dark donut chart, rounded duration bars, app trend lines and a complete app list. Records and Statistics share recording pause and Exit controls; v0.1.7 moves the language selector into Settings. Switching pages keeps recording and independent timers running, and preserves the review's zoom and selection.
 
 - **Multiple days:** choose inclusive start/end dates, or Last 7 / Last 30 days. Ranges support up to 366 dates, including empty days in the daily average.
 - **Single-day period:** choose a local date and HH:mm start/end, such as 09:30–12:30. Use 24:00 for the day end or Whole day. Apply filters to update the charts; the applied scope is shown separately from edits.
@@ -43,7 +43,7 @@ Native Linux preview with synthetic records, not personal activity. [Single-day 
 
 ## Settings, themes, Windows installation and updates
 
-The v0.1.7 feature adds **Settings** with saved English/Chinese and **Light / Dark** choices, a login startup switch, the current data folder and a folder shortcut. System high contrast overrides either theme. About is the last card and shows the actual build version, architecture and GitHub link. Navigation keeps recording/timers and review/statistics scope intact.
+The v0.1.7 feature adds **Settings** with saved English/Chinese and **Light / Dark** choices, a **Start at login** switch, the current data folder and a folder shortcut. System high contrast overrides either theme. About is the last card and shows the actual build version, architecture and GitHub link. From v0.1.8, the history page is named **Records** (记录). **Start at login** is visible under Settings → Startup and background, saves immediately and controls current-user startup. It starts after sign-in, hiding only when the tray is available. Navigation keeps recording/timers and records/statistics scope intact.
 
 ![FocusOn Settings in Light](docs/images/focuson-settings-light.png)
 
@@ -55,7 +55,7 @@ Windows x64/ARM64 **Setup.exe** packages install per user with Start menu/option
 
 **Check for updates** is explicit and contacts only GitHub's public stable releases without uploading records. Drafts/prereleases and versions no newer than the installed build are ignored. Windows validates the exact OS/architecture asset, official URL, size and SHA256 before saving/exiting and launching Setup. Linux/macOS use the matching official download and manual replacement. Nothing is silently downloaded or installed. A development build ahead of the latest public release correctly reports no newer stable version.
 
-The **[v0.1.7 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8)** is verified from source `9760d1a` through the [six-native-target build](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655). All six targets pass160 tests each; native Windows x64/ARM64 install, installed-app save/exit, reinstall and uninstall checks pass. Twelve archive/installer/checksum assets are uploaded and downloaded with SHA256 verification. v0.1.5 remains public/latest and v0.1.6 remains its original statistics draft. Existing tags, attachments and notices are preserved; unsigned Mac validation bundles are excluded from Release.
+The **[v0.1.7 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8)** is verified from source `9760d1a` through the [six-native-target build](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655). All six targets pass160 tests each; native Windows x64/ARM64 install, installed-app save/exit, reinstall and uninstall checks pass. Twelve archive/installer/checksum assets are uploaded and downloaded with SHA256 verification. v0.1.8 is being prepared as a separate wording update; v0.1.5 remains public/latest and the earlier drafts retain their original packages. Existing tags, attachments and notices are preserved; unsigned Mac validation bundles are excluded from Release.
 
 ## Features
 

@@ -188,7 +188,7 @@ public partial class MainWindow : Window
         catch (Exception error)
         {
             if (stopped || requestedDate != selectedDate || requestedRangeVersion != rangeVersion) return;
-            StatusText.Text = Localizer.Get("回看更新失败"); ShowWarning(Localizer.Get("无法更新回看：{0}。已显示的记录可能不是最新。", Localizer.Translate(error.Message)));
+            StatusText.Text = Localizer.Get("记录列表更新失败"); ShowWarning(Localizer.Get("无法更新记录列表：{0}。已显示的记录可能不是最新。", Localizer.Translate(error.Message)));
         }
         finally
         {
@@ -324,9 +324,9 @@ public partial class MainWindow : Window
                 (TodayButton,"今天"), (ExitButton,"退出"), (StartTimerButton,"开始计时"), (StopTimerButton,"停止"),
                 (DurationButton,"时长"), (GroupsButton,showGroups ? "时段 ⊟" : "时段 ⊞"),
                 (ResetDayButton,"重置"), (ClearRangeButton,"清除范围"), (DeleteDayButton,"删除所选日期") }) pair.Control.Content = Localizer.Get(pair.Text);
-            ReviewPageButton.Content = Localizer.Get("回看"); StatisticsPageButton.Content = Localizer.Get("统计"); StatisticsView.ApplyLanguage(); ApplySettingsLanguage();
+            ReviewPageButton.Content = Localizer.Get("记录"); StatisticsPageButton.Content = Localizer.Get("统计"); StatisticsView.ApplyLanguage(); ApplySettingsLanguage();
             foreach (var pair in new (Control Control, string Text)[] { (PreviousDayButton,"前一天"), (NextDayButton,"后一天"),
-                (ViewDatePicker,"回看日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
+                (ViewDatePicker,"记录日期"), (TimerTitleBox,"计时标题"), (LanguagePicker,"界面语言"), (TotalsScrollViewer,"全天软件汇总"), (RangePicker,"时间范围"),
                 (ZoomInButton,"放大时间线"), (ZoomOutButton,"缩小时间线"), (SearchBox,"搜索时间范围内的软件或窗口标题") })
                 AutomationProperties.SetName(pair.Control, Localizer.Get(pair.Text));
             TimerTitleBox.Watermark = Localizer.Get("输入标题，开始独立计时"); SearchBox.Watermark = Localizer.Get("搜索时间范围内的软件或窗口标题"); TodayRangeItem.Content = Localizer.Get("今天");

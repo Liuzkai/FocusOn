@@ -10,7 +10,7 @@
   <Grid RowDefinitions="Auto,*" Margin="18" RowSpacing="14">
     <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="8">
       <TextBlock Text="FocusOn" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0" />
-      <Button x:Name="ReviewPageButton" Grid.Column="1" Content="回看" />
+      <Button x:Name="ReviewPageButton" Grid.Column="1" Content="记录" />
       <Button x:Name="StatisticsPageButton" Grid.Column="2" Content="统计" />
       <Button x:Name="SettingsPageButton" Grid.Column="3" Content="配置" />
       <Button x:Name="PauseButton" Grid.Column="5" Content="暂停记录" />
@@ -20,7 +20,7 @@
     <Grid x:Name="ReviewPane" Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10">
     <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="6">
       <Button x:Name="PreviousDayButton" Content="‹" AutomationProperties.Name="前一天" />
-      <CalendarDatePicker SelectedDateFormat="Custom" CustomDateFormatString="yyyy-MM-dd" x:Name="ViewDatePicker" Grid.Column="1" Width="150" AutomationProperties.Name="回看日期" />
+      <CalendarDatePicker SelectedDateFormat="Custom" CustomDateFormatString="yyyy-MM-dd" x:Name="ViewDatePicker" Grid.Column="1" Width="150" AutomationProperties.Name="记录日期" />
       <Button x:Name="NextDayButton" Grid.Column="2" Content="›" AutomationProperties.Name="后一天" />
       <Button x:Name="TodayButton" Grid.Column="3" Content="今天" />
       <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
@@ -144,7 +144,8 @@
         </StackPanel></Border>
         <Border Classes="settings-card"><StackPanel Spacing="10">
           <TextBlock x:Name="BehaviorHeading" Classes="settings-heading" Text="启动与后台运行" />
-          <CheckBox x:Name="StartupCheckBox" Content="登录时启动到托盘" />
+          <CheckBox x:Name="StartupCheckBox" Content="开机启动" />
+          <TextBlock x:Name="StartupNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
           <TextBlock x:Name="BehaviorNote" TextWrapping="Wrap" Foreground="{DynamicResource ReviewMuted}" />
         </StackPanel></Border>
         <Border Classes="settings-card"><StackPanel Spacing="10">
