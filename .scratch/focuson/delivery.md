@@ -260,7 +260,7 @@ Native Intel/Apple Silicon macOS tests, foreground/.app startup/Quit and package
 
 ## v0.1.9 update-check recovery delivery
 
-Source `e3a9cff1e930e8b6070218694b0a1f33130eabe4`, immutable tag `v0.1.9` / object `19ee76f0f83e9d388c734aabc9adce90ee42793d`; [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384) Success. All six native targets pass 179 tests each and package/source/runtime checks; Windows x64/ARM64 installed-app save/exit, reinstall/uninstall and record/preference preservation pass. [Draft release](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-ee1853cad82b7c49a967) contains 12 uploaded/downloaded-verified Windows/Linux archive, installer and checksum assets.
+Source `e3a9cff1e930e8b6070218694b0a1f33130eabe4`, immutable tag `v0.1.9` / object `19ee76f0f83e9d388c734aabc9adce90ee42793d`; [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384) Success. All six native targets pass 179 tests each and package/source/runtime checks; Windows x64/ARM64 installed-app save/exit, reinstall/uninstall and record/preference preservation pass. [Draft release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9) contains 12 uploaded/downloaded-verified Windows/Linux archive, installer and checksum assets.
 
 API 403/429, service/transport failures and API-only timeout can recover through the same official repository's public stable Release redirect/assets. Exact headers-only size and GitHub digest/checksum agreement remain required before installation. Successes cache briefly and limited API calls back off; two-channel failures explain retry/manual access. No GitHub token, mirrors or recording uploads. Real cloud API-denied native Check, Chinese/English status, cache and preserved public Linux archive SHA have been validated; details are in verification.md and ADR0009.
 
@@ -268,11 +268,20 @@ API 403/429, service/transport failures and API-only timeout can recover through
 
 | Package | Bytes | SHA256 | Official draft download |
 | --- | ---: | --- | --- |
-| FocusOn-linux-arm64.tar.gz | 45245972 | `42E08DDA9ED294E684CB224241765085A097190F3D4F85B550442DDF8974A7A0` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-linux-arm64.tar.gz) |
-| FocusOn-linux-x64.tar.gz | 47878307 | `019A96C837F7F985CD59AB7D47C174015227098BD2A2FE4CAE330C3AF9C80561` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-linux-x64.tar.gz) |
-| FocusOn-win-arm64-Setup.exe | 33214698 | `901B44CE6163E7CD76E115CD5A25B18CE7C0D150FCFF5C4E282505D62962EA8E` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-win-arm64-Setup.exe) |
-| FocusOn-win-arm64.zip | 47309168 | `1945A86FD9553FDC304CD7B0574FF6856FBE273E192EB9827A4101C9067B8D6A` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-win-arm64.zip) |
-| FocusOn-win-x64-Setup.exe | 36158224 | `910B37EF843B520DC655A0952E43281CA96200AD9BD5EA4C1ABAFB0FD8FC700A` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-win-x64-Setup.exe) |
-| FocusOn-win-x64.zip | 49704355 | `7FF79FD0F92F62DF9F3FC19B24E1B2E072CCEC55A7037902BC80B47BEC8D1606` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/untagged-ee1853cad82b7c49a967/FocusOn-win-x64.zip) |
+| FocusOn-linux-arm64.tar.gz | 45245972 | `42E08DDA9ED294E684CB224241765085A097190F3D4F85B550442DDF8974A7A0` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-linux-arm64.tar.gz) |
+| FocusOn-linux-x64.tar.gz | 47878307 | `019A96C837F7F985CD59AB7D47C174015227098BD2A2FE4CAE330C3AF9C80561` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-linux-x64.tar.gz) |
+| FocusOn-win-arm64-Setup.exe | 33214698 | `901B44CE6163E7CD76E115CD5A25B18CE7C0D150FCFF5C4E282505D62962EA8E` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-win-arm64-Setup.exe) |
+| FocusOn-win-arm64.zip | 47309168 | `1945A86FD9553FDC304CD7B0574FF6856FBE273E192EB9827A4101C9067B8D6A` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-win-arm64.zip) |
+| FocusOn-win-x64-Setup.exe | 36158224 | `910B37EF843B520DC655A0952E43281CA96200AD9BD5EA4C1ABAFB0FD8FC700A` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-win-x64-Setup.exe) |
+| FocusOn-win-x64.zip | 49704355 | `7FF79FD0F92F62DF9F3FC19B24E1B2E072CCEC55A7037902BC80B47BEC8D1606` | [Download](https://github.com/Liuzkai/FocusOn/releases/download/v0.1.9/FocusOn-win-x64.zip) |
 
 Every older tag, Release metadata/asset snapshot, existing Windows attachment, original latest MIT license and third-party notice remains intact. Windows installers are unsigned. Both Mac architectures pass native validation but have no Developer ID/notarization/stapling/formal readiness and are excluded from Release; their Actions validation artifacts expire after seven days. Existing secure Apple setup instructions remain docs/macos.md. Physical device/permission/power/DPI and parent acceptance remain open. Final documentation follows the immutable source tag.
+
+
+## 2026-10-14: v0.1.9 public publication
+
+User explicitly replied “发布” to the verified v0.1.9 repair draft. Publication maintenance `c208e9058909246611dafbbf7822e470d1b285b5` / [run](https://github.com/Liuzkai/FocusOn/actions/runs/38521909276) Success makes [v0.1.9](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9) public/latest. The package source remains `e3a9cff1e930e8b6070218694b0a1f33130eabe4`, immutable tag object `19ee76f0f83e9d388c734aabc9adce90ee42793d` and all twelve original attachment sizes/digests stay identical. The workflow rechecked the successful six-target native build38511486384 (179 tests per target), every download/checksum/source manifest and all historical release/tag snapshots before and after publication. No rebuild, asset replacement or tag rewrite.
+
+All twelve public downloads were independently rechecked in this cloud: exact size/SHA256, six package checksum filenames/digests, four archive manifests and the public/latest redirect to v0.1.9 match. Windows x64/ARM64 Setup.exe and ZIP plus Linux x64/ARM64 tar.gz are public, with adjacent .sha256 files. Rate-limited API-only old clients require one manual installer upgrade; the repaired checker can recover via official public Release pages. Current Windows installers are unsigned; macOS remains native ad-hoc validation only, excluded without Developer ID signing/notarization/stapling. Physical old-to-new upgrade/network/privacy/power/DPI and08/parent specification stay open.
+
+The subsequently requested statistics hover animations use a fresh v0.1.10 draft. Future feature builds still default to drafts; no older feature draft is published by this authorization.

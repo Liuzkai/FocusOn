@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-14。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`c0938e7` / `v0.1.5`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-14。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`e3a9cff` / `v0.1.9`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -127,7 +127,9 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 23 票（2026-10-14，工程关闭）：**旧安装版GitHub API403更新失败已修复，API限流/故障可回退同仓库官方稳定Release（HEAD版本跳转/准确大小、受限HTML/链接/digest、完整下载校验），成功短缓存/API退避和两语清晰错误。真实云端API被拒绝时实际检查按钮成功，旧公开Linux包HTML/HEAD/47773611bytes/SHA下载校验通过；本地179回归及18发布保护通过。不可变源 `e3a9cff1e930e8b6070218694b0a1f33130eabe4` / v0.1.9标签对象 `19ee76f0f83e9d388c734aabc9adce90ee42793d`；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384) Success，六平台各179测试及原生/包检查、Windows两安装器生命周期通过；[v0.1.9草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-ee1853cad82b7c49a967) 12附件上传下载SHA验证。旧v17/v18需退出后手动安装一次；草稿不能自动检测，公开/latest仍v0.1.5。全部旧标签/Release/附件/MIT/第三方声明保留，Mac原生验证但无Developer ID/公证/staple，附件排除。真实旧版升级/设备/网络验收继续08；本次文档提交晚于构建源，勿改写标签。详见23票/ADR0009。
+**最新 24 票（2026-10-14，工程关闭）：**用户明确回复“发布”，原v0.1.9修复包已公开设为latest；发布维护 `c208e9058909246611dafbbf7822e470d1b285b5` / [发布核验](https://github.com/Liuzkai/FocusOn/actions/runs/38521909276) Success，包源仍 `e3a9cff1e930e8b6070218694b0a1f33130eabe4`、原标签对象19ee76f0f83e9d388c734aabc9adce90ee42793d和12附件不变。云端发布前核对6原生目标179测试/下载SHA/manifest/历史快照；本云环境再次下载12公开附件核对大小、SHA、6包校验文件/4归档源，公开latest确为v0.1.9。旧API限流客户端需手动安装一次。全部旧Release/标签/附件/MIT/第三方许可保留，Mac未签名公证/正式附件排除，08/父规格开放。随后统计悬停动画使用新v0.1.10草稿，见25票。
+
+**最新 23 票（2026-10-14，工程关闭）：**旧安装版GitHub API403更新失败已修复，API限流/故障可回退同仓库官方稳定Release（HEAD版本跳转/准确大小、受限HTML/链接/digest、完整下载校验），成功短缓存/API退避和两语清晰错误。真实云端API被拒绝时实际检查按钮成功，旧公开Linux包HTML/HEAD/47773611bytes/SHA下载校验通过；本地179回归及18发布保护通过。不可变源 `e3a9cff1e930e8b6070218694b0a1f33130eabe4` / v0.1.9标签对象 `19ee76f0f83e9d388c734aabc9adce90ee42793d`；[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384) Success，六平台各179测试及原生/包检查、Windows两安装器生命周期通过；[v0.1.9草稿](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9) 12附件上传下载SHA验证。旧v17/v18需退出后手动安装一次；草稿不能自动检测，公开/latest仍v0.1.5。全部旧标签/Release/附件/MIT/第三方声明保留，Mac原生验证但无Developer ID/公证/staple，附件排除。真实旧版升级/设备/网络验收继续08；本次文档提交晚于构建源，勿改写标签。详见23票/ADR0009。
 
 **最新 22 票（2026-10-14，工程关闭）：**“回看 / Review”导航更名“记录 / Records”，关联日期/列表更新文案同步；配置既有自启开关明确为“开机启动 / Start at login”并补充当前用户登录后的启动/托盘/保存说明。沿用既有真实注册、持久化和隔离保护，不增加重复设置或系统服务。已交付 [v0.1.8 草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1db24c6c1255826cdf26)，不可变源 `a8791ee1c85296152fad009e6e90535ae382186c` / 标签对象 `7d4e5769b56651696b8388431cb9200789008c93`，[构建](https://github.com/Liuzkai/FocusOn/actions/runs/38507488287) Success，六目标各160测试、原生/包/Windows两安装器生命周期通过，12附件上传下载SHA通过。全部旧Release/标签/附件/许可保留，公开/latest仍v0.1.5；Mac签名/公证与真实登录/DPI/设备仍待08。中英文真实合成截图更新。详见22票。
 

@@ -16,6 +16,6 @@ Setup uses [Inno Setup 6.5.4](https://github.com/jrsoftware/issrc/tree/is-6_5_4)
 
 ## GitHub rate-limit recovery (v0.1.9)
 
-If v0.1.7/v0.1.8 shows `403 (rate limit exceeded)`, manually download the matching official repair installer once and quit FocusOn before installation. Existing records/preferences are retained. Drafts are invisible to stable checks; public/latest remains v0.1.5 until explicitly approved publication, so a development build may have no applicable update.
+If v0.1.7/v0.1.8 shows `403 (rate limit exceeded)`, manually download the matching official repair installer once and quit FocusOn before installation. Existing records/preferences are retained. Drafts are invisible to stable checks; public/latest is now v0.1.9. A newer development build may still have no applicable public update.
 
 The fixed checker falls back to the same official repository’s public stable redirect/assets when the API is unavailable. It reads exact download links/digests and headers-only byte counts, then preserves full download/checksum validation before installation. No token or third-party mirror is required. Successful checks cache briefly; API rate limits back off. If the website also fails, use View release and retry later/check connectivity. This is transport recovery, not Authenticode signing; the Windows installers remain unsigned.

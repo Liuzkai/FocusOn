@@ -59,11 +59,11 @@ From v0.1.9, an API rate limit (403/429), API outage or API-only connection time
 
 Installed v0.1.7/v0.1.8 clients need **one manual installer upgrade** to obtain this fix; their existing binary cannot receive the repair through a rate-limited request. Drafts remain excluded.
 
-The **[v0.1.9 repair draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-ee1853cad82b7c49a967)** is verified from source `e3a9cff` through the [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384). All six targets pass 179 tests each. Both Windows installers pass installation, installed-app save/exit, reinstall and uninstall checks. Twelve Windows/Linux archive, installer and checksum assets are uploaded and downloaded with SHA256 verification.
+The **[v0.1.9 release](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.9)** is verified from source `e3a9cff` through the [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38511486384). All six targets pass 179 tests each. Both Windows installers pass installation, installed-app save/exit, reinstall and uninstall checks. Twelve Windows/Linux archive, installer and checksum assets are uploaded and downloaded with SHA256 verification.
 
 The [v0.1.7 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8) introduced Settings and Windows installers from source `9760d1a`; its [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655) passes 160 tests per target. The [v0.1.8 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1db24c6c1255826cdf26) adds Records/记录 navigation and the explicit Start at login/开机启动 setting from source `a8791ee`; its [native build](https://github.com/Liuzkai/FocusOn/actions/runs/38507488287) also passes 160 tests per target.
 
-v0.1.5 remains public/latest. Earlier drafts, tags, attachments and notices retain their original source and bytes. Unsigned Mac validation bundles are excluded from Release.
+v0.1.9 is public/latest, published on explicit user instruction after rechecking all twelve original attachments. [Publication verification](https://github.com/Liuzkai/FocusOn/actions/runs/38521909276) preserves the immutable source and every older release/tag; no package was rebuilt or replaced. Earlier drafts, attachments and notices retain their original source and bytes. Unsigned Mac validation bundles are excluded from Release.
 
 ## Features
 
