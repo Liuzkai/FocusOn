@@ -51,7 +51,11 @@ public partial class MainWindow : Window
         {
             void ApplyTheme(PlatformColorValues colors)
             {
-                if (Application.Current is { } app) ReviewTheme.Apply(app.Resources, colors.ContrastPreference == ColorContrastPreference.High);
+                if (Application.Current is { } app)
+                {
+                    ReviewTheme.Apply(app.Resources, colors.ContrastPreference == ColorContrastPreference.High);
+                    app.RequestedThemeVariant = ReviewTheme.Light && !ReviewTheme.HighContrast ? Avalonia.Styling.ThemeVariant.Light : Avalonia.Styling.ThemeVariant.Dark;
+                }
                 foreach (var row in rows) row.RefreshAppearance();
                 TimelineView.InvalidateVisual(); TotalsScrollViewer.InvalidateVisual();
                 StatisticsView.ApplyLanguage(); ShowPage(activePage);

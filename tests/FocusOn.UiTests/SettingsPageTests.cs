@@ -49,7 +49,7 @@ public sealed class SettingsPageTests
             w.FindControl<ComboBox>("ThemePicker")!.SelectedIndex=1;
             Assert.Equal(0,w.FindControl<ComboBox>("ThemePicker")!.SelectedIndex); Assert.Equal("dark",ReviewTheme.Theme);
             Assert.Contains("denied",w.FindControl<TextBlock>("SettingsError")!.Text);
-            ReviewTheme.Apply(Application.Current!.Resources,true,"light"); Assert.Equal(Brushes.White,ReviewTheme.Foreground); Assert.Equal(Brushes.Black,ReviewTheme.Surface);
+            ReviewTheme.Apply(Application.Current!.Resources,true,"light"); w.ApplySelectedTheme("light"); Assert.Equal(ThemeVariant.Dark, Application.Current.RequestedThemeVariant); Assert.Equal(Brushes.White,ReviewTheme.Foreground); Assert.Equal(Brushes.Black,ReviewTheme.Surface);
             Assert.True(w.FindControl<Button>("ExitButton")!.IsVisible);
         }
         finally { ReviewTheme.Apply(Application.Current!.Resources,false,"dark"); w.ApplySelectedTheme("dark"); w.StopRefresh(); w.Close(); }

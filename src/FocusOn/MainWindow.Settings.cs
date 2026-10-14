@@ -67,7 +67,7 @@ public partial class MainWindow
     {
         if (Application.Current is { } app)
         {
-            app.RequestedThemeVariant = theme == "light" ? ThemeVariant.Light : ThemeVariant.Dark;
+            app.RequestedThemeVariant = theme == "light" && !ReviewTheme.HighContrast ? ThemeVariant.Light : ThemeVariant.Dark;
             ReviewTheme.Apply(app.Resources, ReviewTheme.HighContrast, theme);
         }
         foreach (var row in rows) row.RefreshAppearance();

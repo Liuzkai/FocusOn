@@ -76,14 +76,15 @@ public sealed class DataDirectoryMigration : IDisposable
             }
         }
     }
-    private static string Canonical(string path)
+    private static string Canonical(string path, int depth = 0)
     {
+        if (depth > 40) throw new IOException("数据目录链接层数过多。");
         if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path)) throw new IOException("请选择完整数据目录路径。");
         var full = Path.GetFullPath(path); var root = Path.GetPathRoot(full)!; var current = root;
         foreach (var part in full[root.Length..].Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
         {
             current = Path.Combine(current, part);
-            if (Directory.Exists(current)) current = new DirectoryInfo(current).ResolveLinkTarget(true)?.FullName ?? current;
+            if (Directory.Exists(current) && new DirectoryInfo(current).ResolveLinkTarget(true) is { } resolved) current = Canonical(resolved.FullName, depth + 1);
         }
         return Path.TrimEndingDirectorySeparator(current);
     }

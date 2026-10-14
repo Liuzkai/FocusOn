@@ -34,12 +34,14 @@ public sealed class SettingsStorageTests : IDisposable
         LanguagePreference.Save(Dir("source"), "en"); new AppPreferences("light", false).Save(Dir("source"));
         File.WriteAllText(Path.Combine(Dir("source"), "app-colors.json"), "colors");
         var original = File.ReadAllBytes(Path.Combine(Dir("source"), "focuson.db"));
+        string destination;
         using (var move = new DataDirectoryMigration(Dir("source"), Dir("target")))
         {
+            destination = move.Target;
             using var duplicate = new SingleInstance(Dir("target")); Assert.False(duplicate.IsPrimary);
             move.CopyAndCommit(Dir("default"));
         }
-        Assert.Equal(Dir("target"), DataLocation.Resolve(Dir("default")));
+        Assert.Equal(destination, DataLocation.Resolve(Dir("default")));
         Assert.Equal(original, File.ReadAllBytes(Path.Combine(Dir("source"), "focuson.db")));
         Assert.Equal("en", LanguagePreference.Load(Dir("target"))); Assert.Equal(new AppPreferences("light", false), AppPreferences.Load(Dir("target")));
         Assert.Equal("colors", File.ReadAllText(Path.Combine(Dir("target"), "app-colors.json")));
@@ -62,7 +64,12 @@ public sealed class SettingsStorageTests : IDisposable
         Assert.Throws<IOException>(() => new DataDirectoryMigration(Dir("source"), Dir("source/nested")));
         using var busy = new SingleInstance(Dir("busy")); Assert.Throws<IOException>(() => new DataDirectoryMigration(Dir("source"), Dir("busy")));
         if (!OperatingSystem.IsWindows())
-        { Directory.CreateSymbolicLink(Dir("alias"), Dir("source")); Assert.Throws<IOException>(() => new DataDirectoryMigration(Dir("source"), Dir("alias/nested"))); }
+        {
+            Directory.CreateSymbolicLink(Dir("alias"), Dir("source")); Assert.Throws<IOException>(() => new DataDirectoryMigration(Dir("source"), Dir("alias/nested")));
+            Directory.CreateSymbolicLink(Dir("parent-alias"), root);
+            Directory.CreateSymbolicLink(Dir("indirect-alias"), Dir("parent-alias/source"));
+            Assert.Throws<IOException>(() => new DataDirectoryMigration(Dir("source"), Dir("indirect-alias/nested")));
+        }
     }
     [Fact]
     public void Failed_database_copy_does_not_redirect_and_removes_only_its_own_copied_files()

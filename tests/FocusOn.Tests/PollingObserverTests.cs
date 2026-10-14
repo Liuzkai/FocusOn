@@ -36,8 +36,12 @@ public sealed class PollingObserverTests
         Action<ForegroundObservation?, RecordingTime> observed, Action<RecordingTime, string> interrupted)
         : PollingForegroundObserver(clock, observed, (_, error) => throw new Exception(error), interrupted)
     {
-        protected override ForegroundObservation ReadForeground()
+        private int reads;
+        protected override ForegroundObservation? ReadForeground()
         {
+            // Control exactly one delayed lookup. A later valid sample would legitimately
+            // resume usage while a busy runner is scheduling the assertion continuation.
+            if (Interlocked.Increment(ref reads) > 1) return null;
             started.Set(); release.Wait(TimeSpan.FromSeconds(5)); return new(1, "editor", "Editor", "document");
         }
     }

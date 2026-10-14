@@ -59,6 +59,7 @@ public static class Localizer
     public static IReadOnlyDictionary<string, string> Translations => English;
     private static readonly Dictionary<string, string> English = new(StringComparer.Ordinal)
     {
+        ["数据目录链接层数过多。"] = "Too many data folder links.",
         ["当前目录：{0}"] = "Current folder: {0}",
         ["输入完整的新目录路径，或点击选择目录"] = "Enter an absolute new folder path, or choose a folder",
         ["选择目录…"] = "Choose folder…",
