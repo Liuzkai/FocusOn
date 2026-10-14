@@ -1,7 +1,7 @@
 {
   "sourceCommit": "9717a118e008fc9c335230b0e5177178eadbd04d",
   "runUrl": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855",
-  "validationResult": "partial-diagnostic",
+  "validationResult": "failure",
   "jobs": [
     {
       "name": "Native linux-arm64",
@@ -29,8 +29,8 @@
     },
     {
       "name": "Native osx-x64",
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855/job/115789857071"
     },
     {
@@ -38,9 +38,45 @@
       "status": "completed",
       "conclusion": "failure",
       "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855/job/115789857094"
+    },
+    {
+      "name": "receipt",
+      "status": "in_progress",
+      "conclusion": null,
+      "html_url": "https://github.com/Liuzkai/FocusOn/actions/runs/38545336855/job/115795204949"
     }
   ],
   "evidence": {
+    "osx-x64": {
+      "verification.json": {
+        "runtime": "osx-x64",
+        "sourceCommit": "9717a118e008fc9c335230b0e5177178eadbd04d",
+        "files": 249,
+        "archiveBytes": 49465470,
+        "archiveSha256": "66BB59A4CD02A4259AC370B22DC95EB359B65442EE1D74CDF934F27E72346F48",
+        "nativeFilesChecked": [
+          "FocusOn",
+          "libcoreclr.dylib",
+          "libe_sqlite3.dylib",
+          "libSkiaSharp.dylib",
+          "libAvaloniaNative.dylib"
+        ],
+        "result": "PASS"
+      },
+      "mac-signing.json": {
+        "status": "ad-hoc-validation",
+        "credentialsConfigured": false,
+        "notarized": false,
+        "stapled": false,
+        "formalReady": false
+      },
+      "package-check.log": "{\"runtime\": \"osx-x64\", \"sourceCommit\": \"9717a118e008fc9c335230b0e5177178eadbd04d\", \"files\": 249, \"archiveBytes\": 49465470, \"archiveSha256\": \"66BB59A4CD02A4259AC370B22DC95EB359B65442EE1D74CDF934F27E72346F48\", \"nativeFilesChecked\": [\"FocusOn\", \"libcoreclr.dylib\", \"libe_sqlite3.dylib\", \"libSkiaSharp.dylib\", \"libAvaloniaNative.dylib\"], \"result\": \"PASS\"}\n",
+      "publish.log": "  Determining projects to restore...\n  All projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/osx-x64/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/osx-x64/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/osx-x64/FocusOn.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/artifacts/release/.staging-69623f3394574a76915790ad8fad201a/FocusOn.app/Contents/Resources/runtime/\nMac validation bundle: ad-hoc only; no Developer ID or notarization claim.\n\u5df2\u6838\u5bf9\u81ea\u5305\u542b\u6587\u4ef6\u3001\u67b6\u6784\u4e0e\u6e05\u5355\uff1a/Users/runner/work/FocusOn/FocusOn/artifacts/release/FocusOn-osx-x64.zip\n",
+      "app-bundle.log": "{\"result\": \"PASS\", \"runtime\": \"osx-x64\", \"checks\": [\"actual self-contained .app startup\", \"SQLite initialized\", \"native Quit event\", \"normal exit\"]}\n",
+      "build.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 6.78 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 6.71 sec).\n  Restored /Users/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 12.48 sec).\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:30.73\n",
+      "native-desktop.log": "{\"result\":\"PASS\",\"nativeRuntime\":\"osx-x64\",\"trayConfirmed\":true,\"macAccessibilityTrusted\":true,\"platformWarning\":null,\"macForegroundUsageObserved\":true,\"checks\":[\"native window\",\"close residency\",\"restore\",\"running timer\",\"resident countdown exact completion / native progress icon / companion / opt-out / one window\",\"single writer\",\"persisted languages\",\"settings / light-dark persistence / About / isolation\",\"exit/reopen SQLite\",\"resource release\"]}\n",
+      "tests.log": "  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 3.18 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   152, Skipped:     0, Total:   152, Duration: 5 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 1.6 sec).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /Users/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /Users/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:    45, Skipped:     0, Total:    45, Duration: 20 s - FocusOn.UiTests.dll (net10.0)\n"
+    },
     "linux-x64": {
       "build.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/FocusOn.Platforms.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/FocusOn.Core.csproj (in 1.43 sec).\n  Restored /home/runner/work/FocusOn/FocusOn/src/FocusOn/FocusOn.csproj (in 3.59 sec).\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:10.72\n",
       "tests.log": "  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/FocusOn.Tests.csproj (in 2.43 sec).\n  2 of 3 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn.Tests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.Tests/bin/Release/net10.0/FocusOn.Tests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n\nPassed!  - Failed:     0, Passed:   152, Skipped:     0, Total:   152, Duration: 5 s - FocusOn.Tests.dll (net10.0)\n  Determining projects to restore...\n  Restored /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/FocusOn.UiTests.csproj (in 895 ms).\n  3 of 4 projects are up-to-date for restore.\n  FocusOn.Core -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Core/bin/Release/net10.0/FocusOn.Core.dll\n  FocusOn.Platforms -> /home/runner/work/FocusOn/FocusOn/src/FocusOn.Platforms/bin/Release/net10.0/FocusOn.Platforms.dll\n  FocusOn -> /home/runner/work/FocusOn/FocusOn/src/FocusOn/bin/Release/net10.0/FocusOn.dll\n  FocusOn.UiTests -> /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll\nTest run for /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/bin/Release/net10.0/FocusOn.UiTests.dll (.NETCoreApp,Version=v10.0)\nA total of 1 test files matched the specified pattern.\n[xUnit.net 00:00:02.93]     FocusOn.UiTests.CountdownUiTests.Companion_drag_does_not_restore_and_screen_clamping_handles_removed_monitors [FAIL]\n  Failed FocusOn.UiTests.CountdownUiTests.Companion_drag_does_not_restore_and_screen_clamping_handles_removed_monitors [10 ms]\n  Error Message:\n   Hit test missing 0, 0, 260, 80 / 0, 0, 260, 80\n  Stack Trace:\n     at FocusOn.UiTests.CountdownUiTests.Companion_drag_does_not_restore_and_screen_clamping_handles_removed_monitors() in /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/CountdownUiTests.cs:line 80\n   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\n[xUnit.net 00:00:03.56]     FocusOn.UiTests.CountdownUiTests.Companion_reuses_one_window_hides_per_task_restores_on_click_and_disposes_without_stopping_the_timer [FAIL]\n  Failed FocusOn.UiTests.CountdownUiTests.Companion_reuses_one_window_hides_per_task_restores_on_click_and_disposes_without_stopping_the_timer [6 ms]\n  Error Message:\n   Hit test missing 0, 0, 260, 80 / 0, 0, 260, 80\n  Stack Trace:\n     at FocusOn.UiTests.CountdownUiTests.Companion_reuses_one_window_hides_per_task_restores_on_click_and_disposes_without_stopping_the_timer() in /home/runner/work/FocusOn/FocusOn/tests/FocusOn.UiTests/CountdownUiTests.cs:line 66\n   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\n\nFailed!  - Failed:     2, Passed:    43, Skipped:     0, Total:    45, Duration: 6 s - FocusOn.UiTests.dll (net10.0)\n/usr/share/dotnet/dotnet \u9000\u51fa\u7801 1\n"
