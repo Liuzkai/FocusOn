@@ -22,7 +22,7 @@
 
 FocusOn counts the active window, including reading or watching without keyboard input. It measures foreground usage time, not attention.
 
-Countdown and the compact timer companion are new in the upcoming **v0.1.11 draft**. The latest public release remains v0.1.10.
+Countdown and the compact timer companion are new in the [**v0.1.11 draft**](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-6cc6551e254de0992d3b). The latest public release remains v0.1.10.
 
 ## Download
 

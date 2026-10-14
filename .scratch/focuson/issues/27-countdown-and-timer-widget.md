@@ -4,7 +4,7 @@
 
 **Blocked by:** 10 (closed), 13 (closed), 21 (closed), 26 (closed)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -24,3 +24,5 @@
 - Native main run38545336855 exposed two pointer-hit regressions in fresh CI (five completed targets build/core tests passed; companion hit targets had no resolved theme brush). Read-only diagnostic38546722855 reused the existing evidence writer on a temporary diagnostics branch; it did not create tags, change assets or publish anything. Fixed the root hit surface to unconditional Transparent, retaining the window's themed background, and added a cold-theme hit/drag assertion instead of weakening pointer checks. Also separated the Stopwatch translation key from the existing Timer timeline lane. Local rerun and corrected six-target CI follow; source9717a11 is not the release source.
 
 - Corrected run38547582866: all six core suites152 PASS; Intel Mac also45UI/native/package PASS, while five faster runners still hit the two pointer preconditions before their first rendered scene (measured bounds were present). This refines the earlier theme diagnosis: transparent hit surface is retained, but the headless harness must explicitly commit a render tick before pointer input. Pump now uses Avalonia's supported ForceRenderTimerTick, preserving all hit/drag/click assertions, without changing application timer rules or disabling tests. Source6357eda is not tagged/released; deterministic harness rerun follows.
+
+- 2026-10-14 engineering complete: reviewed/committed implementation9717a11, input/key correction6357eda and deterministic renderer harness `af95946991389b05cd930a9b9e4ec8ad629e13ca`. Immutable v0.1.11 tag `64a26aef7a1f4ac9ce1fe60801dd9a33c3939664`; main38548799446 and [tagged38549545926](https://github.com/Liuzkai/FocusOn/actions/runs/38549545926) Success, six native targets each197 tests, desktop/countdown/companion/package/source checks and both Windows installer lifecycle/data preservation PASS. [Draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-6cc6551e254de0992d3b) has12 uploaded/downloaded SHA256-verified Windows/Linux assets; original public v0.1.10/all older assets/tags/MIT/notices unchanged. Actual isolated Linux App Stats-page60s completion/SQLite/drag/same-window restore and native synthetic60% screenshot/close-without-stop PASS. Future creator notes document this feature; current draft notes are maintained separately without replacing source/tag/assets. Mac native validation passes but no Developer ID/notary/staple and excluded; physical menus/multi-monitor/DPI/power/permission/network/Wayland placement and08/parent remain open. This later completion documentation is committed after the immutable package source; no further publication is implied.

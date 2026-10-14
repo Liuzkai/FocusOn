@@ -3,7 +3,7 @@
 Choose **Stopwatch** or **Countdown** at the top of Records. Both are independent of foreground app totals; only one can be active at a time.
 
 - **Stopwatch:** enter a title, start, pause/resume, then stop to retain history.
-- **Countdown:** choose Focus25min, Break5min, Break15min, or Custom1–1440 minutes. The title is optional. Start, pause/resume or stop; at zero the session finishes once and retains its actual elapsed history. Start the next work/break session explicitly.
+- **Countdown:** choose Focus 25 min, Break 5 min, Break 15 min, or Custom1–1440 minutes. The title is optional. Start, pause/resume or stop; at zero the session finishes once and retains its actual elapsed history. Start the next work/break session explicitly.
 - Closing the main window keeps a running timer active when a confirmed tray is available. Pausing recording or locking the screen does not pause the independent timer. Sleep, exit, a detected time/sampling anomaly, or deletion intersecting its active history pauses it; manually resume afterward. Restart restores the last saved elapsed time as paused, without counting downtime.
 
 ## Companion

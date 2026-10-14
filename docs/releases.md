@@ -171,3 +171,24 @@ All twelve public Windows/Linux x64/ARM64 downloads were downloaded again and pa
 Windows installers remain unsigned. Intel/Apple Silicon Mac native validation passed, but Developer ID signing, notarization, stapling and formal readiness remain unverified without Apple credentials; Mac bundles are excluded from Release. Physical permissions, power, DPI, actual older-version upgrade/network/trust and ticket 08/parent acceptance remain open.
 
 The English README is now a concise project landing page with badges, features, current download links and collapsible real previews. Detailed build/packaging instructions moved to [development.md](development.md); this later documentation does not change the release source or bytes.
+
+## 2026-10-14: v0.1.11 countdown and timer companion draft
+
+Immutable source `af95946991389b05cd930a9b9e4ec8ad629e13ca`, annotated tag object `64a26aef7a1f4ac9ce1fe60801dd9a33c3939664`. [Main native verification](https://github.com/Liuzkai/FocusOn/actions/runs/38548799446) and [tagged build/draft](https://github.com/Liuzkai/FocusOn/actions/runs/38549545926) Success. All six native targets each pass 197 tests (152 core/platform+45UI, zero failed/skipped), real countdown/companion/residency/exit checks and source/architecture/runtime/package verification. Both Windows x64/ARM64 installers pass install, installed-app save/exit, reinstall, uninstall and data/preference preservation.
+
+[Draft and downloads](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-6cc6551e254de0992d3b) includes twelve Windows/Linux x64/ARM64 installer/archive/checksum assets, uploaded then downloaded and SHA256-verified. Every previous release/asset/tag, public/latest v0.1.10 and original MIT/third-party notice is unchanged. No old package or tag was replaced. This version stays a draft; later documentation and release descriptions do not change the tagged package source.
+
+Countdown adds25/5/15 minute presets and custom 1–1440 minutes, optional title, pause/resume/stop, exact boundary completion and an additive target table. Reads cannot extend history past the target; final history/completion commits atomically and a failed write retains the trusted checkpoint. A 1s application-owned loop finishes tasks while resident/on other pages, with no automatic work/break transition or forced activation. Stopwatches, usage totals, sleep/restart/deletion and existing records are retained. A saved optional companion shows remaining/elapsed time and true countdown progress, opens without taking focus, supports click-to-restore/drag and per-task hide, reuses one window, and is disposed during exit/update/migration. The existing tray/menu entry shows time/progress details; no Windows11 toolbar is injected.
+
+Actual isolated Linux X11 checks exercise no-tray fallback, native progress rendering/companion lifecycle, physical pointer drag/restore/close, synthetic60% screenshot and real App Statistics-page completion with exactly60 seconds stored. Early CI exposed first-scene timing in non-activating headless pointer tests; the final source uses a transparent hit surface, window-level pointer routing and an explicit renderer tick while preserving all assertions. Failed early sources9717a11/6357eda were never tagged or uploaded. Details: [timers.md](timers.md).
+
+Windows packages remain unsigned. Both Mac native builds/tests/app/companion checks pass, but signing receipts remain ad-hoc-validation, credentialsConfigured=false, notarized=false, stapled=false and formalReady=false. Mac packages are excluded from Release and remain seven-day Actions validation artifacts. Physical taskbar/menu, multi-monitor/DPI, permission/power/old-version upgrade/network and Wayland placement/always-on-top acceptance remains pending with08/parent specification.
+
+| Asset | Bytes | SHA256 |
+| --- | ---: | --- |
+| FocusOn-linux-arm64.tar.gz | 45260130 | `19ad85b8fedafa7a79b5f1775bbc43169c05780995b7cd4efde6f01e70eacb7e` |
+| FocusOn-linux-x64.tar.gz | 47899208 | `5e2d6acad91a46743c084e4a4b2a67a0c4764c6ef1d37766bdf540c95889d426` |
+| FocusOn-win-arm64-Setup.exe | 33219492 | `1d3317d99bcedbc148cc04b76ab9fdf7dc3172bc50262763f8b1b7bc85a823fe` |
+| FocusOn-win-arm64.zip | 47325663 | `c4d88a7772d28258887d2bf639ba35c8f61bf59469a2e7c80a4c34cbb8d35911` |
+| FocusOn-win-x64-Setup.exe | 36174678 | `6f995742fd04518460690fbe6f81d58960d630b715adfa71cabd6176a27c37c6` |
+| FocusOn-win-x64.zip | 49720862 | `76e4e2e2c2cf2c0e79b5c35f45a86edca0df6c1b2d7ba09ba4498ae902e731ca` |
