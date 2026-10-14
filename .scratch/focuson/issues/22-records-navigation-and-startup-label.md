@@ -4,7 +4,7 @@
 
 **Blocked by:** 21 (closed)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -17,3 +17,5 @@
 - 2026-10-14: User requests Records/记录 and startup option. Existing v0.1.7 already has a saved login-to-tray checkbox wired to platform registration; clarify its label and actual sign-in behavior rather than creating a machine-wide service or a duplicate preference. No backend/data/registration schema change is needed.
 
 - 2026-10-14: Navigation and date/accessibility/list-refresh feedback now Records/记录; Settings checkbox reads Start at login/开机启动 with sign-in/background/window-fallback and immediate-saving guidance. Existing registration enable/disable/save rollback/isolation behavior retained. Local124 core/platform +36 UI regressions and18 publication guards pass. Real native synthetic Linux UI verifies both names in both languages, visibly enabled normal-mode startup control and off/on preference persistence with restoration; its injected callbacks never alter system startup. Updated native screenshots/English README/usage. No new tests mirroring the wording change. Six-native-target v0.1.8 draft pending; actual sign-in/device acceptance remains08.
+
+- 2026-10-14: Reviewed/committed source `a8791ee1c85296152fad009e6e90535ae382186c`, immutable tag object `7d4e5769b56651696b8388431cb9200789008c93`; https://github.com/Liuzkai/FocusOn/actions/runs/38507488287 Success, six targets each160 tests and native/package checks, both Win installer lifecycle checks pass. https://github.com/Liuzkai/FocusOn/releases/tag/untagged-1db24c6c1255826cdf26 has12 uploaded/downloaded SHA256-verified assets. Native two-language Records/startup visibility/off-on preference restoration screenshots checked; real sign-in acceptance remains08. All older releases/assets/tags/notices and public/latest v0.1.5 preserved; Mac ad-hoc/no credentials/notary/staple, excluded and physical trust still pending. Engineering closed; documentation is later than source tag.
