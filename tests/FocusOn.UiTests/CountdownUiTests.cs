@@ -12,7 +12,13 @@ namespace FocusOn.UiTests;
 public sealed class CountdownUiTests
 {
     private static DayView View(TitleTimerState? timer=null)=>new(new(2026,10,14),DateTimeOffset.UtcNow.AddHours(-1),DateTimeOffset.UtcNow,[],[],"正在记录",null,timer);
-    private static void Pump(Window w){w.UpdateLayout();Dispatcher.UIThread.RunJobs();w.UpdateLayout();Dispatcher.UIThread.RunJobs();}
+    private static void Pump(Window w)
+    {
+        w.UpdateLayout(); Dispatcher.UIThread.RunJobs(); w.UpdateLayout();
+        // A non-activating window may not have committed its first scene yet.
+        // Pointer checks require an actual render tick, not only measured bounds.
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs();
+    }
     private static void Click(Window w,string name)=>w.FindControl<Button>(name)!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
     [AvaloniaFact]
     public async Task Countdown_presets_custom_duration_and_saved_state_share_existing_timer_controls_in_both_languages()
