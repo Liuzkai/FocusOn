@@ -228,3 +228,7 @@ On physical devices, check all eight options, a real midnight transition and DST
 ## v0.1.6 statistics
 
 On physical Windows/macOS/Linux desktops, compare multi-day and single-day periods against known isolated records, including a real midnight/DST transition and a previously deleted day. Confirm partial-duration conservation, empty dates, 24:00 and zero/future periods. Navigate away/back while recording and an independent timer run; preserve review selection/viewport and exit from either page. Check real pointer/keyboard chart details, narrow windows, DPI/trackpad/high contrast and saved English/Chinese. Automated SQLite/UI and native Linux synthetic previews are separate evidence; these device and Mac trust items remain pending.
+
+## v0.1.7 Settings and installation device acceptance
+
+Native six-target tests and actual Win x64/ARM64 installer lifecycle checks pass (docs/releases.md). Still pending: physical Windows display/DPI/SmartScreen for a GitHub-downloaded unsigned Setup.exe; upgrade from the original WPF v0.1.0; login startup on the user's actual desktop/session; folder chooser/network or removable-location availability/failure; downloaded update installation from a newer explicitly published release (drafts cannot be checked); Mac Accessibility/power and Developer ID/notary/staple credentials. Check both Light/Dark/Chinese/English and high contrast on the actual device. These are not implied by isolated runner checks; ticket08/parent remains open.

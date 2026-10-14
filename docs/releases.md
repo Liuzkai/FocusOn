@@ -111,3 +111,25 @@ Local148 tests and native Linux synthetic-record mouse/keyboard checks pass: sev
 All previous Release metadata/assets and remote tag objects/commits remain intact; the published v0.1.5 still uses c0938e7 and its original eight download digests. MIT and third-party notice bytes unchanged. v0.1.6 stays a draft; public/latest v0.1.5 is not rebuilt or replaced.
 
 Native Intel/Apple Silicon macOS tests, foreground/.app startup/Quit and package checks pass, but signing receipts are ad-hoc-validation, credentialsConfigured=false, notarized=false, stapled=false, formalReady=false. No Developer ID/notarization/stapling success is claimed and no Mac bundle is attached to Release. Actions Mac validation expires after seven days. Securely configure the existing Apple Secrets described in docs/macos.md; no private material belongs in chat/repo/logs. Physical Windows/macOS/Linux permissions, power, DPI/trackpad and actual desktop acceptance remain pending with ticket 08; parent specification stays open.
+
+## 2026-10-14: v0.1.7 settings, themes, installation and updates draft
+
+Immutable source `9760d1af0ffd9065572045cf26654668d0cabb54`, annotated `v0.1.7` object `a8416ef0c4031855d81915be183cdebab13a3c18`. [Native main verification](https://github.com/Liuzkai/FocusOn/actions/runs/38502933413) and [tagged build/draft](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655) Success. All six standard runners each pass160 regressions (124 core/platform +36UI, zero failed/skipped), native Settings/theme/About/residency/exit, architecture/runtime/icon/package verification. Windows x64/ARM64 also pass actual per-user install, installed executable startup/save/exit, same-version reinstall, uninstall and unchanged synthetic SQLite/preferences checks. Inno6.5.4 comes from its official versioned URL with pinned SHA256; generated installers are unsigned.
+
+[Draft and downloads](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8) has12 verified Windows/Linux attachments (four portable archives, two Windows Setup.exe, six SHA256 files). Every asset was downloaded again by the release workflow and compared to the built bytes. Source reached main and passed all six native validations before the immutable tag was created.
+
+| Asset | Bytes | SHA256 |
+| --- | ---: | --- |
+| FocusOn-linux-arm64.tar.gz | 45234599 | `8235293211a1d936eaf105df63ce517ee166032c46df97b723eedc86f2295d0b` |
+| FocusOn-linux-x64.tar.gz | 47862922 | `9f2df68eae95e8f49ce18c71777faa476f5bd7409953a72852f02d81a7ee4679` |
+| FocusOn-win-arm64-Setup.exe | 33206165 | `4021a1d4cae0850f9c51ff6e3b7caecac30069ee6276a050be527bf4ac943dda` |
+| FocusOn-win-arm64.zip | 47300948 | `bef30e358d25a2ca51e93fe3aabb441328524c8edc41ae432c332aa2e8dcdba8` |
+| FocusOn-win-x64-Setup.exe | 36163169 | `656e43ea4de26478e25d72a5c3a7964da1f60d15fc57b1a6c6c57b94f98839ca` |
+| FocusOn-win-x64.zip | 49696146 | `f6fab5e45e0d32f724285e134f34e2744c66df31861207d56ef511fbb8fe6478` |
+
+
+Settings moves saved English/Chinese out of the header, adds saved Light/Dark, high-contrast priority, managed login startup, open-folder and explicit copy/verify/restart data relocation. About is last with actual assembly version/process architecture/GitHub. Original data is kept, destination must be empty/distinct/exclusive, SQLite Backup includes WAL and integrity_check gates the atomic default pointer; isolated modes never modify production pointer/startup. Real isolated Linux UI timer/save/migration/restart preserved every original SQLite table/row and settings. Update checks are explicit, stable-public only and upload no records; Windows validates exact official URLs/architecture/size/SHA256 before save/exit/Setup, Linux/macOS use manual replacement. A draft is intentionally unavailable to the updater.
+
+All older Release metadata/asset digests and v0.1.0–v0.1.6 tag objects/commits are preserved. Public/latest remains v0.1.5 source c0938e7 with all eight original assets; v0.1.6 remains its original statistics draft. Original MIT and existing third-party notice bytes are unchanged; the upstream Inno license is added. Main README/delivery records are later documentation, not a tag rewrite or package rebuild.
+
+Mac Intel/Apple Silicon builds/tests/.app checks succeed, but both signing receipts report ad-hoc-validation, credentialsConfigured=false, notarized=false, stapled=false, formalReady=false. Mac bundles are excluded from Release and remain seven-day Actions validation artifacts. Securely configure the seven existing Apple Secrets in [Mac instructions](macos.md) for Developer ID/notary/staple; no signing or notarization success is claimed. Windows installers likewise have no Authenticode signature. Physical desktop/permission/power/DPI, old WPF-to-installer upgrades and downloaded-from-GitHub SmartScreen behavior remain pending with08/parent acceptance.

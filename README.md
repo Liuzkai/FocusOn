@@ -55,7 +55,7 @@ Windows x64/ARM64 **Setup.exe** packages install per user with Start menu/option
 
 **Check for updates** is explicit and contacts only GitHub's public stable releases without uploading records. Drafts/prereleases and versions no newer than the installed build are ignored. Windows validates the exact OS/architecture asset, official URL, size and SHA256 before saving/exiting and launching Setup. Linux/macOS use the matching official download and manual replacement. Nothing is silently downloaded or installed. A development build ahead of the latest public release correctly reports no newer stable version.
 
-v0.1.7 is being prepared as a new draft through the existing six-native-target workflow. v0.1.5 remains public/latest and v0.1.6 remains its original statistics draft. Existing tags, attachments and notices are preserved; unsigned Mac validation bundles are excluded from Release.
+The **[v0.1.7 draft](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-b45cf62abc599a74a3f8)** is verified from source `9760d1a` through the [six-native-target build](https://github.com/Liuzkai/FocusOn/actions/runs/38503521655). All six targets pass160 tests each; native Windows x64/ARM64 install, installed-app save/exit, reinstall and uninstall checks pass. Twelve archive/installer/checksum assets are uploaded and downloaded with SHA256 verification. v0.1.5 remains public/latest and v0.1.6 remains its original statistics draft. Existing tags, attachments and notices are preserved; unsigned Mac validation bundles are excluded from Release.
 
 ## Features
 
