@@ -1,6 +1,6 @@
 # FocusOn 开发交接与持续记录
 
-更新日期：2026-10-14。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`6147493` / `v0.1.10`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
+更新日期：2026-10-15。原始整理基线：`main` / `f02d28e`；最新公开 GitHub Release 构建源：`af95946` / `v0.1.11`（历史 `v0.1.0` 保留），记录范围/标题计时实现源：`c8cbd8a`。本文帮助后续开发快速接续已确认的设计与实现；项目工作约定入口仍是 [AGENTS.md](AGENTS.md)。
 
 ## 1. 来源与阅读顺序
 
@@ -127,7 +127,9 @@ $focusOnQaData = Join-Path $env:LOCALAPPDATA 'FocusOn-QA\data'
 
 ## 7. 当前进度与接续事项
 
-**最新 27 票（2026-10-14，工程关闭）：**倒计时25/5/15分钟与自定义1–1440分钟、单任务暂停/继续/停止、目标跨重启保存、真实到期截断/完成原子提交；应用级1秒循环不依赖主窗口/页面。原计时/软件汇总/删除语义保留。用户选择剩余/已用时间+进度与点击恢复；现有托盘/菜单更新详情与图标，可拖动不激活的小窗，保存总开关，×仅隐藏当前任务，不注入Windows11任务栏。修正窗口级指针事件、无条件命中背景和非激活窗口测试首帧提交，保留全部点击/拖动断言。不可变源 `af95946991389b05cd930a9b9e4ec8ad629e13ca` / v0.1.11对象 `64a26aef7a1f4ac9ce1fe60801dd9a33c3939664`；[main验证](https://github.com/Liuzkai/FocusOn/actions/runs/38548799446) 与 [标签构建](https://github.com/Liuzkai/FocusOn/actions/runs/38549545926) Success，六目标各197测试（152核心/平台+45UI）、原生/包/Windows两安装器生命周期通过。[v0.1.11草稿](https://github.com/Liuzkai/FocusOn/releases/tag/untagged-6cc6551e254de0992d3b) 12附件上传下载SHA验证；v0.1.10公开源/附件与全部旧标签/许可保持。真实Linux X11/无托盘检查、真实App统计页后台60秒精确保存/单窗口恢复/鼠标拖动/关闭小窗不停止与合成预览通过。Mac两目标仅ad-hoc验证，未Developer ID/公证/staple，附件排除；临时Actions产物7天。Wayland定位/置顶、实机多屏/DPI/菜单/电源/网络与08/父规格仍开放；未来默认草稿。详见27票、ADR0010与 [timers.md](docs/timers.md)。
+**最新 28 票（2026-10-15，工程关闭）：**用户明确“发布release”，已将 [v0.1.11](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.11) 正式公开/latest。包源码仍为 `af95946991389b05cd930a9b9e4ec8ad629e13ca`，不可变标签对象 `64a26aef7a1f4ac9ce1fe60801dd9a33c3939664`；原标签构建38549545926六目标各197测试、原生/包/Windows安装器检查通过。首次发布38668363060因GitHub临时untagged草稿名安全停止；维护提交 `2ff98eed955565e55eb56c0025ace148515c8207` 按明确草稿ID412592911和批准源码/附件识别，临时草稿无ref也保留其不存在状态；27项发布保护通过，公开版本缺ref/并发改ref/403仍阻止。重试 [38668806947](https://github.com/Liuzkai/FocusOn/actions/runs/38668806947) Success；独立复查12公开下载SHA/大小、6校验文件、4源码清单/latest和所有历史发布/标签/许可通过，没有重建/替换包或改写标签。README/当前说明同步，临时诊断分支已删除。Windows仍未签名；Mac两架构仅原生ad-hoc验证，未Developer ID/公证/staple且无正式附件。实机/网络/信任与08/父规格仍开放；未来版本默认草稿。发布维护提交不是包源码。
+
+**27 票实现（2026-10-14，工程关闭）：**倒计时25/5/15分钟与自定义1–1440分钟、单任务暂停/继续/停止、目标跨重启保存、真实到期截断/完成原子提交；应用级1秒循环不依赖主窗口/页面。原计时/软件汇总/删除语义保留。用户选择剩余/已用时间+进度与点击恢复；现有托盘/菜单更新详情与图标，可拖动不激活的小窗，保存总开关，×仅隐藏当前任务，不注入Windows11任务栏。修正窗口级指针事件、无条件命中背景和非激活窗口测试首帧提交，保留全部点击/拖动断言。不可变源 `af95946991389b05cd930a9b9e4ec8ad629e13ca` / v0.1.11对象 `64a26aef7a1f4ac9ce1fe60801dd9a33c3939664`；[main验证](https://github.com/Liuzkai/FocusOn/actions/runs/38548799446) 与 [标签构建](https://github.com/Liuzkai/FocusOn/actions/runs/38549545926) Success，六目标各197测试（152核心/平台+45UI）、原生/包/Windows两安装器生命周期通过。[v0.1.11草稿](https://github.com/Liuzkai/FocusOn/releases/tag/v0.1.11) 12附件上传下载SHA验证；v0.1.10公开源/附件与全部旧标签/许可保持。真实Linux X11/无托盘检查、真实App统计页后台60秒精确保存/单窗口恢复/鼠标拖动/关闭小窗不停止与合成预览通过。Mac两目标仅ad-hoc验证，未Developer ID/公证/staple，附件排除；临时Actions产物7天。Wayland定位/置顶、实机多屏/DPI/菜单/电源/网络与08/父规格仍开放；未来默认草稿。详见27票、ADR0010与 [timers.md](docs/timers.md)。
 
 **最新 26 票（2026-10-14，工程关闭）：**用户明确回复“正式发布”，已将原 v0.1.10 草稿公开设为 latest。[发布核验](https://github.com/Liuzkai/FocusOn/actions/runs/38528627579) Success；授权维护提交 `c1934cd72d9ed08bcee6a6b548d549b045c3ba64`，包源仍 `614749315efc25b0da7e6bebeb62a358a4bcb846`，原标签对象 `53bd8d6d6264fb1e0bce6a42cd935494d42139d3` 和 12 个附件均未改变。六目标各 184 测试的既有原生构建通过后才发布；本云环境再次下载全部公开附件，大小/SHA256、六份包校验文件/四份归档源码清单及 latest 跳转均通过。全部历史 Release/标签/附件/MIT/第三方许可保留。按用户要求精简英文 README 为徽章、功能、下载、折叠预览和文档入口，约 2675→714 词；详细开发说明移入 [development.md](docs/development.md)，引用及 diff 检查通过。仅改文档，不重建包或改写标签；未来新版本仍默认草稿。Windows 安装器未签名，Mac 无 Developer ID/公证/staple，未附正式包；08/实机/网络/信任与父规格仍开放。详见 26 票。
 
