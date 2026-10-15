@@ -11,7 +11,12 @@ namespace FocusOn.UiTests;
 
 public sealed class CountdownUiTests
 {
-    private static DayView View(TitleTimerState? timer=null)=>new(new(2026,10,14),DateTimeOffset.UtcNow.AddHours(-1),DateTimeOffset.UtcNow,[],[],"正在记录",null,timer);
+    private static DayView View(DateOnly date,TitleTimerState? timer=null)
+    {
+        // The reader must return the requested day, including across midnight.
+        var (start,end)=DailyProjection.Bounds(date,TimeZoneInfo.Local);
+        return new(date,start,end,[],[],"正在记录",null,timer);
+    }
     private static void Pump(Window w)
     {
         w.UpdateLayout(); Dispatcher.UIThread.RunJobs(); w.UpdateLayout();
@@ -24,7 +29,7 @@ public sealed class CountdownUiTests
     public async Task Countdown_presets_custom_duration_and_saved_state_share_existing_timer_controls_in_both_languages()
     {
         Localizer.SetLanguage("en");TitleTimerState? state=null;TimeSpan? requested=null;
-        var w=new MainWindow(_=>Task.FromResult(View(state)),_=>Task.CompletedTask,(action,_)=>
+        var w=new MainWindow(date=>Task.FromResult(View(date,state)),_=>Task.CompletedTask,(action,_)=>
         {state=action==TimerAction.Stop?null:state! with{IsRunning=action==TimerAction.Resume};return Task.CompletedTask;},
         startCountdown:(title,duration)=>{requested=duration;state=new(title!,TimeSpan.Zero,true,duration,Id:7);return Task.CompletedTask;});
         try
@@ -50,7 +55,7 @@ public sealed class CountdownUiTests
     {
         Localizer.SetLanguage("zh-CN");
         var completed=new TitleTimerState("Old task",TimeSpan.FromMinutes(25),false,TimeSpan.FromMinutes(25),true,8);
-        var w=new MainWindow(_=>Task.FromResult(View(completed)),_=>Task.CompletedTask,(_,_)=>Task.CompletedTask);
+        var w=new MainWindow(date=>Task.FromResult(View(date,completed)),_=>Task.CompletedTask,(_,_)=>Task.CompletedTask);
         try
         {
             w.Show();await w.StartRefreshAsync();Assert.False(w.FindControl<TextBox>("TimerTitleBox")!.IsReadOnly);
@@ -100,7 +105,7 @@ public sealed class CountdownUiTests
     [AvaloniaFact]
     public void Saved_widget_switch_changes_preference_without_modifying_timer_state()
     {
-        var saved=new AppPreferences();var w=new MainWindow(_=>Task.FromResult(View()),_=>Task.CompletedTask,(_,_)=>Task.CompletedTask);
+        var saved=new AppPreferences();var w=new MainWindow(date=>Task.FromResult(View(date)),_=>Task.CompletedTask,(_,_)=>Task.CompletedTask);
         try
         {
             w.ConfigureSettings(Path.GetTempPath(),true,saved,next=>saved=next,_=>Task.CompletedTask,_=>Task.CompletedTask);w.Show();Click(w,"SettingsPageButton");
