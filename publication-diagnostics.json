@@ -1,4 +1,134 @@
 {
+  "releaseRefs": [
+    {
+      "id": 412318333,
+      "tag_name": "v0.1.8",
+      "draft": true,
+      "target_commitish": "a8791ee1c85296152fad009e6e90535ae382186c",
+      "tagObject": {
+        "sha": "7d4e5769b56651696b8388431cb9200789008c93",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/7d4e5769b56651696b8388431cb9200789008c93"
+      }
+    },
+    {
+      "id": 412296491,
+      "tag_name": "v0.1.7",
+      "draft": true,
+      "target_commitish": "9760d1af0ffd9065572045cf26654668d0cabb54",
+      "tagObject": {
+        "sha": "a8416ef0c4031855d81915be183cdebab13a3c18",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/a8416ef0c4031855d81915be183cdebab13a3c18"
+      }
+    },
+    {
+      "id": 412592911,
+      "tag_name": "untagged-6cc6551e254de0992d3b",
+      "draft": true,
+      "target_commitish": "af95946991389b05cd930a9b9e4ec8ad629e13ca",
+      "error": "GitHub HTTP 404: Not Found"
+    },
+    {
+      "id": 411520435,
+      "tag_name": "v0.1.6",
+      "draft": true,
+      "target_commitish": "161c21f5b48e96701d812b2d80cf918b75acde56",
+      "tagObject": {
+        "sha": "d11531a73290673fcd583a3cb328adc2e6dae6e1",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/d11531a73290673fcd583a3cb328adc2e6dae6e1"
+      }
+    },
+    {
+      "id": 410623015,
+      "tag_name": "v0.1.4",
+      "draft": true,
+      "target_commitish": "eafc2053e5377dfe52af00013e4d5975c75d2893",
+      "tagObject": {
+        "sha": "ef5ef6c9593bf3d54a42b62e5813bcdb8e7217cc",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/ef5ef6c9593bf3d54a42b62e5813bcdb8e7217cc"
+      }
+    },
+    {
+      "id": 410552288,
+      "tag_name": "v0.1.3",
+      "draft": true,
+      "target_commitish": "9c6afdb9febf4793764985bca8b9f91ca53fcf40",
+      "tagObject": {
+        "sha": "392df6cf21700528ebb8dbc86391fac96711401e",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/392df6cf21700528ebb8dbc86391fac96711401e"
+      }
+    },
+    {
+      "id": 410496457,
+      "tag_name": "v0.1.2",
+      "draft": true,
+      "target_commitish": "8f25193fa09ec7672c197a80c4679eb0d4d5df44",
+      "tagObject": {
+        "sha": "e94fea71d40af65058f10f917a8b99b52b370203",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/e94fea71d40af65058f10f917a8b99b52b370203"
+      }
+    },
+    {
+      "id": 412436147,
+      "tag_name": "v0.1.10",
+      "draft": false,
+      "target_commitish": "614749315efc25b0da7e6bebeb62a358a4bcb846",
+      "tagObject": {
+        "sha": "53bd8d6d6264fb1e0bce6a42cd935494d42139d3",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/53bd8d6d6264fb1e0bce6a42cd935494d42139d3"
+      }
+    },
+    {
+      "id": 412339597,
+      "tag_name": "v0.1.9",
+      "draft": false,
+      "target_commitish": "e3a9cff1e930e8b6070218694b0a1f33130eabe4",
+      "tagObject": {
+        "sha": "19ee76f0f83e9d388c734aabc9adce90ee42793d",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/19ee76f0f83e9d388c734aabc9adce90ee42793d"
+      }
+    },
+    {
+      "id": 411236093,
+      "tag_name": "v0.1.5",
+      "draft": false,
+      "target_commitish": "c0938e72afc53a063fc26e0ecc399e8d37b4e398",
+      "tagObject": {
+        "sha": "36e83a964f4801aa0d47183ec9a9bc3d399d898d",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/36e83a964f4801aa0d47183ec9a9bc3d399d898d"
+      }
+    },
+    {
+      "id": 410419367,
+      "tag_name": "v0.1.1",
+      "draft": false,
+      "target_commitish": "45ad974fc3f86c9721b78da560361a77d1e0809a",
+      "tagObject": {
+        "sha": "9075548f6299c7ad78697d97803fb4bc1bd6ac79",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/9075548f6299c7ad78697d97803fb4bc1bd6ac79"
+      }
+    },
+    {
+      "id": 410109763,
+      "tag_name": "v0.1.0",
+      "draft": false,
+      "target_commitish": "main",
+      "tagObject": {
+        "sha": "3065301857ba551e3147495a8d17dd447da92115",
+        "type": "tag",
+        "url": "https://api.github.com/repos/Liuzkai/FocusOn/git/tags/3065301857ba551e3147495a8d17dd447da92115"
+      }
+    }
+  ],
   "git/ref/tags/v0.1.11": {
     "visible": true,
     "summary": {}
