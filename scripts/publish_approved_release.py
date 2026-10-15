@@ -7,6 +7,7 @@ import re
 import subprocess
 import tarfile
 import tempfile
+import urllib.error
 import zipfile
 from github_api import api, error_summary
 
@@ -32,6 +33,12 @@ def tag_commit(name):
     return reference['sha']
 
 def find(name):
+    if name == tag and 'releaseId' in approval:
+        assert type(approval['releaseId']) is int and approval['releaseId'] > 0
+        release = api(f'repos/{repo}/releases/{approval["releaseId"]}')
+        assert release['tag_name'] == name or (release['draft'] and
+            re.fullmatch(r'untagged-[0-9a-f]+', release['tag_name'])), 'Approved release has a different version'
+        return release
     for page in range(1, 11):
         releases = api(f'repos/{repo}/releases?per_page=100&page={page}')
         for release in releases:
@@ -50,8 +57,16 @@ def all_releases():
     raise RuntimeError('Release pagination limit reached')
 
 def historical_snapshot(release):
+    try:
+        tag_object = api(f'repos/{repo}/git/ref/tags/{release["tag_name"]}')['object']
+    except urllib.error.HTTPError as error:
+        # A saved GitHub draft need not have created its tag yet. Preserve that
+        # absence too; public releases and all other API failures remain strict.
+        if error.code != 404 or release.get('draft') is not True:
+            raise
+        tag_object = None
     return {**{k: release.get(k) for k in ['tag_name', 'target_commitish', 'name', 'body', 'draft', 'prerelease']},
-            'assets': snapshot(release), 'tagObject': api(f'repos/{repo}/git/ref/tags/{release["tag_name"]}')['object']}
+            'assets': snapshot(release), 'tagObject': tag_object}
 
 def check_history(older):
     for release_id, before_release in older.items():
@@ -61,13 +76,13 @@ try:
     assert tag_commit(tag) == source, 'Immutable tag no longer matches the approved package source'
     historical = find('v0.1.0')
     historical_assets, historical_tag = snapshot(historical), tag_commit('v0.1.0')
-    older = {release['id']: historical_snapshot(release) for release in all_releases() if release['tag_name'] != tag}
+    release = find(tag)
+    older = {item['id']: historical_snapshot(item) for item in all_releases() if item['id'] != release['id']}
     run = api(f'repos/{repo}/actions/runs/{approval["buildRunId"]}')
     assert run['head_sha'] == source and run['status'] == 'completed' and run['conclusion'] == 'success', 'Native release validation did not succeed at this source'
     jobs = api(f'repos/{repo}/actions/runs/{approval["buildRunId"]}/jobs?per_page=100')['jobs']
     expected_jobs = {'build / Native ' + rid for rid in ['win-x64', 'win-arm64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64']}
     assert expected_jobs <= {j['name'] for j in jobs if j['status'] == 'completed' and j['conclusion'] == 'success'}, 'Missing successful native targets'
-    release = find(tag)
     assert release['target_commitish'] == source, 'Draft source differs from the approved immutable tag'
     expected = {a['name']: a for a in approval['assets']}
     names = {f'FocusOn-{rid}{extension}{checksum}' for rid, extension in [('win-x64', '.zip'), ('win-arm64', '.zip'), ('linux-x64', '.tar.gz'), ('linux-arm64', '.tar.gz')] for checksum in ['', '.sha256']}
@@ -78,7 +93,15 @@ try:
     for asset in release['assets']:
         assert all(asset[k] == expected[asset['name']][k] for k in ['size', 'digest']), 'Existing attachment differs from the verified draft'
     with tempfile.TemporaryDirectory(prefix='focuson-publication-check-') as temporary:
-        subprocess.run(['gh', 'release', 'download', tag, '--repo', repo, '--dir', temporary], check=True)
+        if release['tag_name'] == tag:
+            subprocess.run(['gh', 'release', 'download', tag, '--repo', repo, '--dir', temporary], check=True)
+        else:
+            # The temporary draft alias has no immutable ref. Download its exact
+            # existing asset IDs rather than resolving an unrelated tag/name.
+            for asset in release['assets']:
+                with (pathlib.Path(temporary) / asset['name']).open('wb') as stream:
+                    subprocess.run(['gh', 'api', f'repos/{repo}/releases/assets/{asset["id"]}',
+                        '--header', 'Accept: application/octet-stream'], stdout=stream, check=True)
         for name, asset in expected.items():
             path = pathlib.Path(temporary) / name
             with path.open('rb') as stream: digest = 'sha256:' + hashlib.file_digest(stream, 'sha256').hexdigest()
@@ -106,13 +129,14 @@ try:
         body = (release.get('body') or '').replace('This release stays a draft.',
             'Published on explicit user approval after verification of the existing attachments.')
         body += f'''\n\n## Publication\n\nPublished the existing Windows/Linux x64 and ARM64 archives without rebuilding or replacing attachments. Source `{source}` matches immutable tag `{tag}`. All approved downloads, SHA256 files, manifests and the successful six-target native build were rechecked before publication. Daily records remain compatible; archives retain MIT and third-party notices.\n\nmacOS is excluded: current bundles are ad-hoc validation only, without Developer ID signing, notarization or stapling. Physical desktop permissions, power and DPI acceptance remains pending. See docs/macos.md for securely configuring Apple Secrets.\n\nVerified build: {result['buildRunUrl']}\nAll earlier releases and tags are preserved.\n'''
-        api(f'repos/{repo}/releases/{release["id"]}', 'PATCH', {'draft': False, 'prerelease': False, 'make_latest': 'true', 'body': body})
+        api(f'repos/{repo}/releases/{release["id"]}', 'PATCH', {'tag_name': tag, 'target_commitish': source,
+            'draft': False, 'prerelease': False, 'make_latest': 'true', 'body': body})
     published = api(f'repos/{repo}/releases/{release["id"]}')
     assert not published['draft'] and not published['prerelease'] and published['published_at']
     assert published['tag_name'] == tag and published['target_commitish'] == source and snapshot(published) == before
     assert snapshot(api(f'repos/{repo}/releases/{historical["id"]}')) == historical_assets and tag_commit('v0.1.0') == historical_tag
     check_history(older)
-    result.update(status='published', releaseUrl=published['html_url'], publishedAt=published['published_at'],
+    result.update(status='published', releaseId=published['id'], releaseUrl=published['html_url'], publishedAt=published['published_at'],
                   assets=[{k: a[k] for k in ['name', 'size', 'digest', 'browser_download_url']} for a in published['assets']],
                   preservedReleases=list(older.values()))
     print('Published and verified: ' + published['html_url'])

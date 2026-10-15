@@ -65,5 +65,10 @@
       "size": 86,
       "digest": "sha256:e66a15b55e0724f8215a3f85e06b7664b1a2072c0e705723a9ba0506d1b59296"
     }
-  ]
+  ],
+  "releaseId": 412592911,
+  "publicationRetry": {
+    "previousRunId": 38668363060,
+    "reason": "GitHub returned the approved draft under temporary tag_name untagged-6cc6551e254de0992d3b. Bind by existing release ID plus unchanged approved source/tag/assets, not by ambiguous name. No rebuild or tag replacement."
+  }
 }
