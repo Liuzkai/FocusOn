@@ -1,0 +1,51 @@
+{
+  "git/ref/tags/v0.1.11": {
+    "visible": true,
+    "summary": {}
+  },
+  "actions/runs/38549545926": {
+    "visible": true,
+    "summary": {
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "af95946991389b05cd930a9b9e4ec8ad629e13ca"
+    }
+  },
+  "actions/runs/38549545926/jobs?per_page=100": {
+    "visible": true,
+    "summary": {
+      "total_count": 10
+    }
+  },
+  "traceback": [
+    "2026-10-15T01:56:55.5217983Z Traceback (most recent call last):",
+    "2026-10-15T01:56:55.5218793Z   File \"/home/runner/work/FocusOn/FocusOn/scripts/publish_approved_release.py\", line 64, in <module>",
+    "2026-10-15T01:56:55.5219653Z     older = {release['id']: historical_snapshot(release) for release in all_releases() if release['tag_name'] != tag}",
+    "2026-10-15T01:56:55.5220266Z                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5220909Z   File \"/home/runner/work/FocusOn/FocusOn/scripts/publish_approved_release.py\", line 54, in historical_snapshot",
+    "2026-10-15T01:56:55.5221922Z     'assets': snapshot(release), 'tagObject': api(f'repos/{repo}/git/ref/tags/{release[\"tag_name\"]}')['object']}",
+    "2026-10-15T01:56:55.5222735Z                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5223770Z   File \"/home/runner/work/FocusOn/FocusOn/scripts/github_api.py\", line 12, in api",
+    "2026-10-15T01:56:55.5224388Z     with urllib.request.urlopen(request, timeout=60) as response:",
+    "2026-10-15T01:56:55.5224864Z          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5225298Z   File \"/usr/lib/python3.12/urllib/request.py\", line 215, in urlopen",
+    "2026-10-15T01:56:55.5263208Z     return opener.open(url, data, timeout)",
+    "2026-10-15T01:56:55.5263558Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5263874Z   File \"/usr/lib/python3.12/urllib/request.py\", line 521, in open",
+    "2026-10-15T01:56:55.5264309Z     response = meth(req, response)",
+    "2026-10-15T01:56:55.5264722Z                ^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5265031Z   File \"/usr/lib/python3.12/urllib/request.py\", line 630, in http_response",
+    "2026-10-15T01:56:55.5265945Z     response = self.parent.error(",
+    "2026-10-15T01:56:55.5266207Z                ^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5266491Z   File \"/usr/lib/python3.12/urllib/request.py\", line 559, in error",
+    "2026-10-15T01:56:55.5267306Z     return self._call_chain(*args)",
+    "2026-10-15T01:56:55.5267630Z            ^^^^^^^^^^^^^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5267917Z   File \"/usr/lib/python3.12/urllib/request.py\", line 492, in _call_chain",
+    "2026-10-15T01:56:55.5268687Z     result = func(*args)",
+    "2026-10-15T01:56:55.5268937Z              ^^^^^^^^^^^",
+    "2026-10-15T01:56:55.5269213Z   File \"/usr/lib/python3.12/urllib/request.py\", line 639, in http_error_default",
+    "2026-10-15T01:56:55.5270085Z     raise HTTPError(req.full_url, code, msg, hdrs, fp)",
+    "2026-10-15T01:56:55.5270530Z urllib.error.HTTPError: HTTP Error 404: Not Found",
+    "2026-10-15T01:56:55.5435676Z ##[error]Process completed with exit code 1."
+  ]
+}
