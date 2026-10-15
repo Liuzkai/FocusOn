@@ -4,7 +4,7 @@
 
 **Blocked by:** 27 (closed)
 
-**Status:** ready-for-agent
+**Status:** closed
 
 ## Acceptance criteria
 
@@ -24,3 +24,5 @@
 - Post-publication maintenance CI38668363049/38668806884 exposed two existing countdown UI assertions after the real date advanced. The fixture always returned2026-10-14 even when MainWindow requested2026-10-15, so ReviewProjection correctly rejected that day's data and timer snapshot. Original tagged main/release builds really did pass197 tests per target on14October; binaries remain unchanged. Reopened this maintenance ticket to return the actual requested date and valid local-day bounds in the synthetic reader, retaining every original countdown/completion/pointer assertion. No application fix or replacement Release is needed. Local reproduction and corrected six-target CI follow.
 
 - Local2026-10-15 reproduction of the unchanged test class:2 failed /3 passed, matching the native maintenance CI failures. Review confirms only the synthetic day-reader contract was wrong, not runtime date or countdown persistence. The correction returns the requested date/local bounds and keeps all assertions intact; original public artifacts remain af95946.
+
+- Maintenance CI completion: test-only fix `5be29761ef8408adfc58d5c95bb1a637b9da8457` reviewed/committed, local197 PASS and [native38669311948](https://github.com/Liuzkai/FocusOn/actions/runs/38669311948) Success. All six targets each197 tests plus native desktop/package checks and both Windows installer lifecycles PASS. No assertion removed; all publicaf95946 assets/tag and older releases remain unchanged. Subsequent validation artifacts are seven-day main outputs, never Release replacements. Ticket closed again after this follow-up verification;08/parent and Mac trust remain open.
